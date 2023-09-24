@@ -15,16 +15,18 @@ class TileItem extends StatelessWidget {
     this.leadingText = '',
     required this.isLeadingImage,
     this.onTap,
+    this.enabled = true,
   });
 
   final double sizeImage;
   final String title, subtitle, trailing, leadingText;
-  final bool isLeadingImage;
+  final bool isLeadingImage, enabled;
   final Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      enabled: enabled,
       onLongPress: () {},
       onTap: onTap,
       minVerticalPadding: 24,

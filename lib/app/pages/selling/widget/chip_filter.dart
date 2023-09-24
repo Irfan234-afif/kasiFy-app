@@ -35,25 +35,6 @@ class _ListChipFilterState extends State<ListChipFilter> {
       ),
       child: Row(
         children: [
-          const Padding(
-            padding: EdgeInsets.only(
-              left: kDeffaultPadding,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  TablerIcons.filter,
-                ),
-                Text(
-                  'Filter',
-                ),
-              ],
-            ),
-          ),
-          const VerticalDivider(
-            color: kPrimaryColor,
-            thickness: 0.5,
-          ),
           Expanded(
             child: BlocBuilder<CategoryBloc, CategoryState>(
               builder: (context, state) {
@@ -82,6 +63,28 @@ class _ListChipFilterState extends State<ListChipFilter> {
                     return const SizedBox();
                 }
               },
+            ),
+          ),
+          SizedBox(
+            height: 38,
+            child: const VerticalDivider(
+              color: kPrimaryColor,
+              thickness: 0.5,
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.only(
+              right: 0,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  TablerIcons.filter,
+                ),
+                Text(
+                  'Filter',
+                ),
+              ],
             ),
           ),
         ],

@@ -34,6 +34,27 @@ class ItemModel {
     this.category,
   });
 
+  ItemModel copyWith({
+    int? id,
+    String? name,
+    int? codeProduct,
+    int? stock,
+    String? description,
+    String? basicPrice,
+    String? sellingPrice,
+    CategoryItem? category,
+  }) =>
+      ItemModel(
+        id: id ?? this.id,
+        basicPrice: basicPrice ?? this.basicPrice,
+        category: category ?? this.category,
+        codeProduct: codeProduct ?? this.codeProduct,
+        description: description ?? this.description,
+        name: name ?? this.name,
+        sellingPrice: sellingPrice ?? this.sellingPrice,
+        stock: stock ?? this.stock,
+      );
+
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
         id: json["id"] is int ? json['id'] : int.parse(json['id']),
         name: json["name"],

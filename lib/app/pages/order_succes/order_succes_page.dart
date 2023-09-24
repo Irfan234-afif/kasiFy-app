@@ -26,6 +26,7 @@ class OrderSuccesPage extends StatelessWidget {
           padding: const EdgeInsets.all(kDeffaultPadding),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               SizedBox(
                 width: 130,
@@ -49,27 +50,35 @@ class OrderSuccesPage extends StatelessWidget {
                 style: textTheme.titleMedium,
               ),
               const SizedBox(
-                height: kDeffaultPadding,
+                height: kDeffaultPadding * 2,
               ),
-              Row(
-                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Total',
-                    style: textTheme.titleMedium,
-                  ),
-                  const SizedBox(
-                    width: kSmallPadding,
-                  ),
-                  const Expanded(child: Divider()),
-                  const SizedBox(
-                    width: kSmallPadding,
-                  ),
-                  Text(
-                    currencyFormat(data.totalPrice!),
-                    style: textTheme.titleMedium,
-                  ),
-                ],
+              Align(
+                alignment: Alignment.center,
+                child: Column(
+                  // mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Total :',
+                      style: textTheme.titleMedium!.copyWith(
+                        fontSize: 20,
+                      ),
+                    ),
+                    // const SizedBox(
+                    //   width: kSmallPadding,
+                    // ),
+                    // const Expanded(child: Divider()),
+                    // const SizedBox(
+                    //   width: kSmallPadding,
+                    // ),
+                    Text(
+                      currencyFormat(data.totalPrice!),
+                      style: textTheme.titleMedium!.copyWith(
+                        fontSize: 20,
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(
                 height: kDeffaultPadding * 2,

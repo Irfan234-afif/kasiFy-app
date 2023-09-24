@@ -225,6 +225,9 @@ class _StockPageState extends State<StockPage> {
   }
 
   ListView _buildListItem(Size size, List<ItemModel> itemModel) {
+    itemModel.sort(
+      (a, b) => a.name!.compareTo(b.name!),
+    );
     const double sizeImageItem = 50;
     return ListView.builder(
       padding: EdgeInsets.only(top: kDeffaultPadding, bottom: size.height * .1),
@@ -235,47 +238,13 @@ class _StockPageState extends State<StockPage> {
         leadingText = takeLetterIdentity(item.name!);
         return TileItem(
           onTap: () {
-            // showDialog(
-            //   context: context,
-            //   builder: (context) {
-            //     return AlertDialog(
-            //       content: Column(
-            //         mainAxisSize: MainAxisSize.min,
-            //         children: [
-            //           ListTile(
-            //             onTap: () {},
-            //             leading: Icon(TablerIcons.edit),
-            //             title: Text(
-            //               'Edit',
-            //             ),
-            //             trailing: Icon(
-            //               Icons.arrow_forward_ios_rounded,
-            //               size: 12,
-            //             ),
-            //           ),
-            //           ListTile(
-            //             onTap: () {},
-            //             leading: Icon(TablerIcons.trash_x),
-            //             title: Text(
-            //               'Remove',
-            //             ),
-            //             trailing: Icon(
-            //               Icons.arrow_forward_ios_rounded,
-            //               size: 12,
-            //             ),
-            //           ),
-            //         ],
-            //       ),
-            //     );
-            //   },
-            // );
             context.goNamed(Routes.detailItem, extra: item);
           },
           isLeadingImage: false,
           leadingText: leadingText,
           sizeImage: sizeImageItem,
           title: item.name!,
-          subtitle: 'Category : ${item.category!.categoryName}',
+          subtitle: 'Stock : ${item.stock}',
           trailing: currencyFormat(item.sellingPrice!),
         );
       },

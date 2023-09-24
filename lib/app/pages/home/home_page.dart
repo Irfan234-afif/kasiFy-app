@@ -5,10 +5,8 @@ import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
 import 'package:kasir_app/app/bloc/scaffold_key/home_scaffold_key_cubit.dart';
-import 'package:kasir_app/app/pages/insight/insight_page.dart';
-import 'package:kasir_app/app/pages/management/managament_page.dart';
+import 'package:kasir_app/app/model/user_model.dart';
 import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
-import 'package:kasir_app/app/pages/selling/selling_page.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/util/global_function.dart';
@@ -29,17 +27,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  late UserModel userModel;
   late String token;
-
-  List<Widget> listPage = [
-    const SellingPage(),
-    const ManagementPage(),
-    const InsightPage(),
-  ];
 
   @override
   void initState() {
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    userModel = context.read<AuthRepository>().userModel;
+    token = userModel.token ?? '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     super.initState();
   }
@@ -88,7 +82,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Center(
                           child: Text(
-                            'StyleTech Boutique',
+                            userModel.meta?.shopName ?? 'Shop name not found',
                             style: textTheme.titleLarge!.copyWith(color: Colors.white),
                           ),
                         ),
@@ -343,20 +337,21 @@ class _HomePageState extends State<HomePage> {
   }
 
   Drawer _buildDrawer() {
+    final textTheme = Theme.of(context).textTheme;
     return Drawer(
       child: ListView(
         padding: const EdgeInsets.symmetric(
           horizontal: kDeffaultPadding,
         ),
         children: [
-          const DrawerHeader(
+          DrawerHeader(
             child: Column(
               children: [
                 Expanded(
                   child: SizedBox.expand(
                     child: CircleAvatar(
                       child: Icon(
-                        TablerIcons.user,
+                        TablerIcons.building_store,
                         size: 45,
                       ),
                     ),
@@ -365,9 +360,10 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 8,
                 ),
-                Text('StyleTech Boutique'
-                    // userModel.meta?.name ?? 'Nama belum di atur',
-                    ),
+                Text(
+                  userModel.meta?.shopName ?? '',
+                  style: textTheme.titleLarge,
+                ),
               ],
             ),
           ),
@@ -383,7 +379,7 @@ class _HomePageState extends State<HomePage> {
 
                   onTap = () {
                     context.read<IndexBloc>().add(IndexChangeEvent(index));
-                    context.read<HomeScaffoldKeyCubit>().drawerOff();
+                    // context.read<HomeScaffoldKeyCubit>().drawerOff();
                   };
 
                   switch (index) {
@@ -392,6 +388,9 @@ class _HomePageState extends State<HomePage> {
                       break;
                     case 1:
                       title = 'Setting';
+                      onTap = () {
+                        context.goNamed(Routes.setting);
+                      };
                       break;
                     case 2:
                       title = 'LogOut';

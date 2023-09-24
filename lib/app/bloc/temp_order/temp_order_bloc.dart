@@ -24,20 +24,30 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
     });
     on<TempOrderUpdateEvent>((event, emit) {
       OrderModel orderModel = state.orderModel!;
-      var index = orderModel.items!.indexWhere((element) => element.id == event.item.id);
+      // var index = orderModel.items!.indexWhere((element) => element.id == event.item.id);
       // var itemFind = orderModel.items!.singleWhere((element) => element.id == event.item.id);
-      orderModel.items![index].copyWith(
-        detail: event.item.detail,
-        basicPrice: event.item.basicPrice,
-        sellingPrice: event.item.sellingPrice,
-        quantity: event.item.quantity,
+      // orderModel.items![index].copyWith(
+      //   detail: event.item.detail,
+      //   basicPrice: event.item.basicPrice,
+      //   sellingPrice: event.item.sellingPrice,
+      //   quantity: event.item.quantity,
+      // );
+      orderModel.copyWith(
+        id: event.orderModel.id,
+        items: event.orderModel.items,
+        name: event.orderModel.name,
+        orderAt: event.orderModel.orderAt,
+        totalPrice: event.orderModel.totalPrice,
       );
 
       emit(TempOrderisOrderState(orderModel: orderModel));
     });
     on<TempOrderEmptyEvent>((event, emit) {
       emit(
-        TempOrderEmptyState(orderModel: OrderModel(items: [])),
+        TempOrderEmptyState(
+            orderModel: OrderModel(
+          items: [],
+        )),
       );
     });
     on<TempOrderDeleteEvent>((event, emit) {

@@ -13,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/pages/order_succes/order_succes_page.dart';
 import 'package:kasir_app/app/pages/selling/selling_page.dart';
 import 'package:kasir_app/app/pages/stock/stock_page.dart';
+import 'package:kasir_app/app/pages/setting/setting_page.dart';
 
 import '../pages/home/home_page.dart';
 import '../repository/auth_repository.dart';
@@ -84,6 +85,11 @@ final routerConfig = GoRouter(
           path: 'economy',
           name: Routes.economy,
           builder: (_, __) => const EconomyPage(),
+        ),
+        GoRoute(
+          path: 'setting',
+          name: Routes.setting,
+          builder: (context, state) => SettingPage(),
         ),
       ],
     ),

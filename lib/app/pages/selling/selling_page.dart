@@ -1,3 +1,4 @@
+import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
@@ -168,6 +169,8 @@ class _SellingPageState extends State<SellingPage> {
                   ),
                   IconButton(
                     onPressed: () {
+                      GetStorage box = GetStorage();
+                      box.remove('textOrder');
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

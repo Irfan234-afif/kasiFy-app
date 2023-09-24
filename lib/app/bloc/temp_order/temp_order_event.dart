@@ -10,9 +10,9 @@ class TempOrderAddEvent extends TempOrderEvent {
 }
 
 class TempOrderUpdateEvent extends TempOrderEvent {
-  final ItemOrder item;
+  final OrderModel orderModel;
 
-  TempOrderUpdateEvent({required this.item});
+  TempOrderUpdateEvent({required this.orderModel});
 }
 
 class TempOrderDeleteEvent extends TempOrderEvent {

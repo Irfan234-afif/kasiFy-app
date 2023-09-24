@@ -9,6 +9,7 @@ import 'package:kasir_app/app/model/item_model.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
+import 'package:kasir_app/app/util/dialog_collection.dart';
 import 'package:kasir_app/app/util/util.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
@@ -81,6 +82,24 @@ class _AddItemPageState extends State<AddItemPage> {
     descC.text = data.description!;
   }
 
+  void _onSave() {
+    final basicPrice = basicPriceC.text.replaceAll('.', '');
+    final sellingPrice = sellingPriceC.text.replaceAll('.', '');
+    final category = categoryModel.firstWhere((element) => element.name == categoryC.text);
+    final itemModel = ItemModel(
+      name: nameC.text,
+      description: descC.text,
+      basicPrice: basicPrice,
+      sellingPrice: sellingPrice,
+      stock: int.parse(stockC.text),
+      codeProduct: int.parse(codeProductC.text),
+      category: CategoryItem(
+        categoryId: category.id,
+      ),
+    );
+    context.read<ItemBloc>().add(ItemAddEvent(token, itemModel: itemModel));
+  }
+
   @override
   Widget build(BuildContext context) {
     categoryModel = context.watch<CategoryBloc>().state.categoryModel ?? [];
@@ -123,6 +142,7 @@ class _AddItemPageState extends State<AddItemPage> {
               const SizedBox(
                 height: kSmallPadding,
               ),
+              // Stock and code product
               Row(
                 children: [
                   Expanded(
@@ -157,6 +177,7 @@ class _AddItemPageState extends State<AddItemPage> {
               const SizedBox(
                 height: kSmallPadding,
               ),
+              // Auto generate code product
               CheckboxListTile(
                 value: autoGenerateCode,
                 splashRadius: 0,
@@ -176,6 +197,7 @@ class _AddItemPageState extends State<AddItemPage> {
               const SizedBox(
                 height: kSmallPadding,
               ),
+              // Price
               Row(
                 children: [
                   Expanded(
@@ -300,26 +322,27 @@ class _AddItemPageState extends State<AddItemPage> {
               ),
               // Button Save
               ElevatedButton(
-                onPressed: () {
-                  final basicPrice = basicPriceC.text.replaceAll('.', '');
-                  final sellingPrice = sellingPriceC.text.replaceAll('.', '');
-                  final category =
-                      categoryModel.firstWhere((element) => element.name == categoryC.text);
-                  final itemModel = ItemModel(
-                    name: nameC.text,
-                    description: descC.text,
-                    basicPrice: basicPrice,
-                    sellingPrice: sellingPrice,
-                    stock: int.parse(stockC.text),
-                    codeProduct: int.parse(codeProductC.text),
-                    category: CategoryItem(
-                      categoryId: category.id,
-                    ),
-                  );
-                  context.read<ItemBloc>().add(ItemAddEvent(token, itemModel: itemModel));
-                },
-                child: const Text(
-                  'Save',
+                onPressed: _onSave,
+                child: BlocConsumer<ItemBloc, ItemState>(
+                  listenWhen: (previous, current) => previous is ItemLoadingState,
+                  listener: (context, state) {
+                    if (state is ItemLoadedState) {
+                      context.pop();
+                      DialogCollection.snakBarSuccesAddItem(context);
+                    }
+                  },
+                  builder: (context, state) {
+                    return state is ItemLoadingState
+                        ? SizedBox(
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            'Save',
+                          );
+                  },
                 ),
               ),
             ],

@@ -63,17 +63,18 @@ class OrderRepository {
   }
 
   Future<Response> addOrder(String token, OrderModel orderModel) async {
-    Response res = await dio.post(
-      'order/store',
-      options: Options(
-        headers: _headers(token),
-      ),
-      data: orderModel.toJsonPost(),
-    );
-    print(res.statusMessage);
-    print(res.data);
+    print(orderModel.totalPrice);
+    // Response res = await dio.post(
+    //   'order/store',
+    //   options: Options(
+    //     headers: _headers(token),
+    //   ),
+    //   data: orderModel.toJsonPost(),
+    // );
+    // print(res.statusMessage);
+    // print(res.data);
 
-    return res;
+    return Response(requestOptions: RequestOptions());
   }
 
   Map<String, dynamic> _headers(String token) {

@@ -41,12 +41,15 @@ class DialogCollection {
       'Hijau',
     ];
     int? selectedChip;
+    int stock = item.stock! - 1; // -1 because initial qty this 1
     await showDialog(
       context: context,
       builder: (context) {
+        print(item.sellingPrice);
         return StatefulBuilder(builder: (context, setState) {
           var quantity = int.parse(qtyC.text);
           var totalPrice = double.parse(item.sellingPrice!) * quantity;
+
           final identityName = takeLetterIdentity(item.name!);
           return AlertDialog(
             // padd
@@ -86,6 +89,7 @@ class DialogCollection {
                   textAlign: TextAlign.center,
                 ),
                 const Divider(),
+
                 // Jumlah pesanan
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -99,9 +103,10 @@ class DialogCollection {
                         GestureDetector(
                           onTap: () {
                             setState(() {
-                              if (qtyC.text != '0') {
+                              if (qtyC.text != '1') {
                                 var currentQty = int.parse(qtyC.text);
                                 qtyC.text = (currentQty - 1).toString();
+                                stock += 1;
                               }
                             });
                           },
@@ -126,11 +131,12 @@ class DialogCollection {
                             controller: qtyC,
                             textAlign: TextAlign.center,
                             style: textTheme.titleMedium,
+                            enabled: false,
                             inputFormatters: [
                               FilteringTextInputFormatter.digitsOnly,
                             ],
                             decoration: const InputDecoration(
-                              enabledBorder: OutlineInputBorder(
+                              border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                               ),
                               focusedBorder: OutlineInputBorder(
@@ -141,10 +147,13 @@ class DialogCollection {
                         ),
                         GestureDetector(
                           onTap: () {
-                            setState(() {
-                              var currentQty = int.parse(qtyC.text);
-                              qtyC.text = (currentQty + 1).toString();
-                            });
+                            if (stock != 0) {
+                              setState(() {
+                                stock -= 1;
+                                var currentQty = int.parse(qtyC.text);
+                                qtyC.text = (currentQty + 1).toString();
+                              });
+                            }
                           },
                           child: Container(
                             padding: const EdgeInsets.all(kSmallPadding),
@@ -165,8 +174,17 @@ class DialogCollection {
                     ),
                   ],
                 ),
+                // widget on stock empty
+                if (stock == 0)
+                  Text(
+                    'Stock is empty',
+                    style: TextStyle(color: Colors.red),
+                  ),
                 Text(
-                  'Total harga : ${currencyFormat(totalPrice.toString())}',
+                  'Total amoount : ${currencyFormat(totalPrice.toString())}',
+                ),
+                Text(
+                  'Stock : $stock',
                 ),
                 SizedBox(
                   height: 8,
@@ -243,9 +261,12 @@ class DialogCollection {
                       //   items: [],
                       // );
                       item.sellingPrice = totalPrice.toString();
+                      final ItemModel newData = item.copyWith(
+                        sellingPrice: totalPrice.toString(),
+                      );
                       // item.description = noteC.text;
                       // _orderOn(item);
-                      onSubmit?.call(item, int.parse(qtyC.text), noteC.text);
+                      onSubmit?.call(newData, int.parse(qtyC.text), noteC.text);
                     }
                   },
                   child: Text(
@@ -779,7 +800,7 @@ class DialogCollection {
     final GlobalKey<FormState> nameFormKey = GlobalKey<FormState>();
     final OrderBloc orderBloc = context.read<OrderBloc>();
     GetStorage box = GetStorage();
-    nameC.text = box.read('textOrder') ?? '';
+    nameC.text = orderModel.name ?? '';
 
     showModalBottomSheet(
       enableDrag: true,
@@ -841,8 +862,9 @@ class DialogCollection {
                                   onSubmit: (item) {
                                     // print(item.detail);
                                     context.read<TempOrderBloc>().add(
-                                          TempOrderUpdateEvent(item: item),
-                                        );
+                                        // TempOrderUpdateEvent(item: item),
+
+                                        TempOrderUpdateEvent(orderModel: orderModel..items = item));
                                   },
                                   onDelete: (id) {
                                     _orderDelete(context, id);
@@ -887,7 +909,9 @@ class DialogCollection {
                         autofocus: true,
                         style: themeData.textTheme.titleSmall,
                         onChanged: (value) {
-                          box.write('textOrder', value);
+                          // box.write('textOrder', value);
+                          context.read<TempOrderBloc>().add(
+                              TempOrderUpdateEvent(orderModel: orderModel.copyWith(name: value)));
                         },
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -1013,6 +1037,8 @@ class DialogCollection {
                 ),
                 onPressed: () {
                   if (orderBloc.state is! OrderLoadingState) {
+                    box.remove('textOrder');
+                    context.pop();
                     context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                   }
                 },
@@ -1070,6 +1096,23 @@ class DialogCollection {
           ),
         );
       },
+    );
+  }
+
+  static void snakBarSuccesAddItem(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Colors.green,
+        content: Row(
+          children: [
+            Icon(
+              TablerIcons.check,
+              color: Colors.white,
+            ),
+            Text('Succes add item'),
+          ],
+        ),
+      ),
     );
   }
 

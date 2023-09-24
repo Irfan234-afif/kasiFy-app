@@ -311,6 +311,9 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   }
 
   ListView _buildMobileItem(Size size, List<ItemModel> data) {
+    data.sort(
+      (a, b) => a.name!.compareTo(b.name!),
+    );
     return ListView.builder(
       shrinkWrap: true,
       padding: const EdgeInsets.only(top: kSmallPadding),
@@ -321,6 +324,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         final sizeImageItem = size.height * 0.073;
         ItemModel item = data[index];
         String leadingText = takeLetterIdentity(item.name!);
+        final bool enabled = item.stock != 0;
         return TileItem(
           onTap: () {
             DialogCollection.dialogItem(
@@ -352,6 +356,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
               },
             );
           },
+          enabled: enabled,
           sizeImage: sizeImageItem,
           leadingText: leadingText,
           title: item.name!,
