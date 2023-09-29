@@ -28,6 +28,12 @@ class ItemEditLocalEvent extends ItemEvent {
   ItemEditLocalEvent({required this.itemModel});
 }
 
+class ItemEditLocalEvent extends ItemEvent {
+  final ItemModel itemModel;
+
+  ItemEditLocalEvent({required this.itemModel});
+}
+
 final class ItemDeleteEvent extends ItemEvent {
   final String email;
   final ItemModel itemModel;
