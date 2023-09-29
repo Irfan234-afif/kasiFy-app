@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:get_storage/get_storage.dart';
+import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,7 +22,7 @@ class DialogCollection {
 
   static void dialogItem(
     BuildContext context,
-    ItemModel item, {
+    final ItemModel item, {
     Function(ItemModel item, int quantity, String note)? onSubmit,
   }) async {
     final mediaQuery = MediaQuery.of(context);
@@ -40,12 +40,12 @@ class DialogCollection {
       'Putih',
       'Hijau',
     ];
+
     int? selectedChip;
     int stock = item.stock! - 1; // -1 because initial qty this 1
     await showDialog(
       context: context,
       builder: (context) {
-        print(item.sellingPrice);
         return StatefulBuilder(builder: (context, setState) {
           var quantity = int.parse(qtyC.text);
           var totalPrice = double.parse(item.sellingPrice!) * quantity;
@@ -257,15 +257,12 @@ class DialogCollection {
                   onPressed: () {
                     if (noteFormKey.currentState!.validate()) {
                       context.pop();
-                      // OrderModel(
-                      //   items: [],
-                      // );
-                      item.sellingPrice = totalPrice.toString();
                       final ItemModel newData = item.copyWith(
                         sellingPrice: totalPrice.toString(),
                       );
-                      // item.description = noteC.text;
-                      // _orderOn(item);
+                      item.stock = stock;
+                      // save stock item in getStorage to keep watch when order is cancel
+                      // GetStorage().write(key, value)
                       onSubmit?.call(newData, int.parse(qtyC.text), noteC.text);
                     }
                   },
@@ -790,7 +787,7 @@ class DialogCollection {
 
   static void bottomSheetOrder(
     BuildContext context,
-    OrderModel orderModel, {
+    OrderModel orderModel1, {
     Function(OrderModel orderModel)? onConfirm,
   }) {
     final mediaQuery = MediaQuery.of(context);
@@ -799,9 +796,9 @@ class DialogCollection {
     final TextEditingController noteC = TextEditingController();
     final GlobalKey<FormState> nameFormKey = GlobalKey<FormState>();
     final OrderBloc orderBloc = context.read<OrderBloc>();
-    GetStorage box = GetStorage();
-    nameC.text = orderModel.name ?? '';
-
+    // GetStorage box = GetStorage();
+    // nameC.text = orderModel.name ?? '';
+    nameC.text = context.read<TempOrderBloc>().state.orderModel?.name ?? '';
     showModalBottomSheet(
       enableDrag: true,
       isScrollControlled: true,
@@ -811,289 +808,311 @@ class DialogCollection {
       ),
       context: context,
       builder: (context) {
-        return Container(
-          padding: const EdgeInsets.symmetric(
-            vertical: kDeffaultPadding + 10,
-            horizontal: kDeffaultPadding + 10,
-          ),
-          // height: mediaQuery.size.height * .7,
-          child: Column(
-            children: [
-              Expanded(
-                child: ListView(
-                  shrinkWrap: true,
+        return BlocBuilder<TempOrderBloc, TempOrderState>(
+          builder: (context, state) {
+            final orderModel = state.orderModel!;
+            return Container(
+              padding: const EdgeInsets.symmetric(
+                vertical: kDeffaultPadding + 10,
+                horizontal: kDeffaultPadding + 10,
+              ),
+              // height: mediaQuery.size.height * .7,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView(
+                      shrinkWrap: true,
 
-                  // crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      // crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Order summary",
-                          style: themeData.textTheme.titleLarge,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Order summary",
+                              style: themeData.textTheme.titleLarge,
+                            ),
+                            GestureDetector(
+                              onTap: () {},
+                              behavior: HitTestBehavior.translucent,
+                              child: Text(
+                                'Add items',
+                                style: themeData.textTheme.titleMedium!.copyWith(
+                                  color: Colors.blue,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        GestureDetector(
-                          onTap: () {},
-                          behavior: HitTestBehavior.translucent,
-                          child: Text(
-                            'Add items',
-                            style: themeData.textTheme.titleMedium!.copyWith(
-                              color: Colors.blue,
-                              fontSize: 14,
+                        ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: orderModel.items?.length,
+                          itemBuilder: (context, index) {
+                            var data = orderModel.items![index];
+                            return Column(
+                              children: [
+                                TileItemOrder(
+                                  data: data,
+                                  onTap: () {
+                                    DialogCollection.bottomSheetEditItem(
+                                      context,
+                                      data,
+                                      onSubmit: (item) {
+                                        // print(item.detail);
+                                        var whereItem = orderModel.items!
+                                            .indexWhere((element) => element.id == item.id);
+                                        context.read<TempOrderBloc>().add(
+                                            // TempOrderUpdateEvent(item: item),
+                                            TempOrderUpdateEvent(
+                                                orderModel: orderModel..items![whereItem] = item));
+                                      },
+                                      onDelete: (id) {
+                                        _orderDelete(context, id);
+                                      },
+                                    );
+                                  },
+                                ),
+                                const Divider(),
+                              ],
+                            );
+                          },
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Subtotal",
+                              style: themeData.textTheme.labelMedium!.copyWith(
+                                color: Colors.black87,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              currencyFormat(orderModel.totalPrice ?? ''),
+                              style: themeData.textTheme.labelMedium!.copyWith(
+                                color: Colors.black87,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: mediaQuery.size.height * .02,
+                        ),
+                        const Text(
+                          'Pesanan atas nama',
+                        ),
+                        Form(
+                          key: nameFormKey,
+                          child: TextFormField(
+                            controller: nameC,
+                            autofocus: true,
+                            style: themeData.textTheme.titleSmall,
+                            onChanged: (value) {
+                              // box.write('textOrder', value);
+                              context.read<TempOrderBloc>().add(TempOrderUpdateEvent(
+                                  orderModel: orderModel.copyWith(name: value)));
+                              // print(orderm)
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Isi nama';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              hintText: 'Atas nama..',
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderSide: const BorderSide(
+                                  color: Colors.black26,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const Divider(),
+                        const Text(
+                          'Tambahkan catatan',
+                        ),
+                        TextField(
+                          controller: noteC,
+                          style: themeData.textTheme.titleSmall,
+                          maxLines: null,
+                          decoration: InputDecoration(
+                            hintText: 'Note..',
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(kSmallRadius),
+                              borderSide: const BorderSide(
+                                color: Colors.black26,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(kSmallRadius),
+                              borderSide: const BorderSide(
+                                color: Colors.black26,
+                              ),
                             ),
                           ),
                         ),
                       ],
                     ),
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: orderModel.items?.length,
-                      itemBuilder: (context, index) {
-                        var data = orderModel.items![index];
-                        return Column(
-                          children: [
-                            TileItemOrder(
-                              data: data,
-                              onTap: () {
-                                DialogCollection.bottomSheetEditItem(
-                                  context,
-                                  data,
-                                  onSubmit: (item) {
-                                    // print(item.detail);
-                                    context.read<TempOrderBloc>().add(
-                                        // TempOrderUpdateEvent(item: item),
-
-                                        TempOrderUpdateEvent(orderModel: orderModel..items = item));
-                                  },
-                                  onDelete: (id) {
-                                    _orderDelete(context, id);
-                                  },
-                                );
-                              },
+                  ),
+                  ElevatedButton(
+                    style: themeData.elevatedButtonTheme.style!.copyWith(
+                      padding: const MaterialStatePropertyAll(
+                        EdgeInsets.symmetric(vertical: kDeffaultPadding),
+                      ),
+                      backgroundColor: const MaterialStatePropertyAll(Colors.green),
+                      minimumSize: const MaterialStatePropertyAll(
+                        Size(double.infinity, 0),
+                      ),
+                    ),
+                    onPressed: () async {
+                      if (nameFormKey.currentState!.validate()) {
+                        if (orderBloc.state is! OrderLoadingState) {
+                          orderModel.name = nameC.text;
+                          bool flag =
+                              await confirmDialog(context, titleText: 'Pesanan akan di proses?');
+                          if (flag) {
+                            // print(orderModel.toJsonPost());
+                            // box.remove('textOrder');
+                            onConfirm?.call(orderModel);
+                          }
+                        }
+                      }
+                    },
+                    child: BlocConsumer<OrderBloc, OrderState>(
+                      listener: (context, state) {
+                        // Lanjutan dari onTap elevated button
+                        if (state is OrderLoadedState) {
+                          context.pop(); // back from bottomSheet
+                          context
+                              .read<TempOrderBloc>()
+                              .add(TempOrderEmptyEvent()); // clearing TempOder
+                          nameC.clear();
+                          noteC.clear();
+                        } else if (state is OrderErrorState) {
+                          _errorDialog(context);
+                        }
+                      },
+                      builder: (context, state) {
+                        if (state is OrderLoadingState || state is OrderAddingState) {
+                          return const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
                             ),
-                            const Divider(),
+                          );
+                        }
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              TablerIcons.truck_delivery,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(
+                              width: 8,
+                            ),
+                            Text(
+                              'Order',
+                              style: themeData.textTheme.labelLarge,
+                            ),
                           ],
                         );
                       },
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Subtotal",
-                          style: themeData.textTheme.labelMedium!.copyWith(
-                            color: Colors.black87,
-                            fontSize: 16,
-                          ),
-                        ),
-                        Text(
-                          currencyFormat(orderModel.totalPrice ?? ''),
-                          style: themeData.textTheme.labelMedium!.copyWith(
-                            color: Colors.black87,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(
-                      height: mediaQuery.size.height * .02,
-                    ),
-                    const Text(
-                      'Pesanan atas nama',
-                    ),
-                    Form(
-                      key: nameFormKey,
-                      child: TextFormField(
-                        controller: nameC,
-                        autofocus: true,
-                        style: themeData.textTheme.titleSmall,
-                        onChanged: (value) {
-                          // box.write('textOrder', value);
-                          context.read<TempOrderBloc>().add(
-                              TempOrderUpdateEvent(orderModel: orderModel.copyWith(name: value)));
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Isi nama';
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          hintText: 'Atas nama..',
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(kSmallRadius),
-                            borderSide: const BorderSide(
-                              color: Colors.black26,
-                            ),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(kSmallRadius),
-                            borderSide: const BorderSide(
-                              color: Colors.black26,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const Divider(),
-                    const Text(
-                      'Tambahkan catatan',
-                    ),
-                    TextField(
-                      controller: noteC,
-                      style: themeData.textTheme.titleSmall,
-                      maxLines: null,
-                      decoration: InputDecoration(
-                        hintText: 'Note..',
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(kSmallRadius),
-                          borderSide: const BorderSide(
-                            color: Colors.black26,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(kSmallRadius),
-                          borderSide: const BorderSide(
-                            color: Colors.black26,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              ElevatedButton(
-                style: themeData.elevatedButtonTheme.style!.copyWith(
-                  padding: const MaterialStatePropertyAll(
-                    EdgeInsets.symmetric(vertical: kDeffaultPadding),
                   ),
-                  backgroundColor: const MaterialStatePropertyAll(Colors.green),
-                  minimumSize: const MaterialStatePropertyAll(
-                    Size(double.infinity, 0),
+                  const SizedBox(
+                    height: kSmallPadding,
                   ),
-                ),
-                onPressed: () async {
-                  if (nameFormKey.currentState!.validate()) {
-                    if (orderBloc.state is! OrderLoadingState) {
-                      orderModel.name = nameC.text;
-                      bool flag =
-                          await confirmDialog(context, titleText: 'Pesanan akan di proses?');
-                      if (flag) {
-                        // print(orderModel.toJsonPost());
-                        box.remove('textOrder');
-                        onConfirm?.call(orderModel);
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                    ),
+                    onPressed: () {
+                      if (orderBloc.state is! OrderLoadingState) {
+                        // restoreStock Item
+                        List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
+                        orderModel.items!.forEach((itemOrder) {
+                          var sameItem =
+                              itemModel.singleWhere((element) => element.id == itemOrder.id);
+                          var restoreStockItem = sameItem.copyWith(
+                            stock: sameItem.originalStock,
+                          );
+                          context
+                              .read<ItemBloc>()
+                              .add(ItemEditLocalEvent(itemModel: restoreStockItem));
+                        });
+                        context.pop();
+                        // TODO : when pop TempOrder preliminaries empty cause error
+                        context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                       }
-                    }
-                  }
-                },
-                child: BlocConsumer<OrderBloc, OrderState>(
-                  listener: (context, state) {
-                    // Lanjutan dari onTap elevated button
-                    if (state is OrderLoadedState) {
-                      context.pop(); // back from bottomSheet
-                      context.read<TempOrderBloc>().add(TempOrderEmptyEvent()); // clearing TempOder
-                      nameC.clear();
-                      noteC.clear();
-                    } else if (state is OrderErrorState) {
-                      _errorDialog(context);
-                    }
-                  },
-                  builder: (context, state) {
-                    if (state is OrderLoadingState || state is OrderAddingState) {
-                      return const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                        ),
-                      );
-                    }
-                    return Row(
+                    },
+                    child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Icon(
-                          TablerIcons.truck_delivery,
+                          TablerIcons.eraser,
                           color: Colors.white,
                         ),
                         const SizedBox(
                           width: 8,
                         ),
                         Text(
-                          'Order',
-                          style: themeData.textTheme.labelLarge,
+                          'Delete all',
+                          style: themeData.textTheme.labelLarge!.copyWith(
+                            color: Colors.white,
+                          ),
                         ),
                       ],
-                    );
-                  },
-                ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: kSmallPadding,
+                  ),
+                  OutlinedButton(
+                    style: themeData.outlinedButtonTheme.style,
+                    onPressed: () {
+                      if (orderBloc.state is! OrderLoadingState) {
+                        context.pop();
+                      }
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black,
+                          size: 20,
+                        ),
+                        const SizedBox(
+                          width: kSmallPadding,
+                        ),
+                        Text(
+                          'Kembali',
+                          style: themeData.textTheme.labelLarge!.copyWith(
+                            color: Colors.black,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(
-                height: kSmallPadding,
-              ),
-              OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-                onPressed: () {
-                  if (orderBloc.state is! OrderLoadingState) {
-                    box.remove('textOrder');
-                    context.pop();
-                    context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      TablerIcons.eraser,
-                      color: Colors.white,
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Text(
-                      'Delete all',
-                      style: themeData.textTheme.labelLarge!.copyWith(
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: kSmallPadding,
-              ),
-              OutlinedButton(
-                style: themeData.outlinedButtonTheme.style,
-                onPressed: () {
-                  if (orderBloc.state is! OrderLoadingState) {
-                    context.pop();
-                  }
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      color: Colors.black,
-                      size: 20,
-                    ),
-                    const SizedBox(
-                      width: kSmallPadding,
-                    ),
-                    Text(
-                      'Kembali',
-                      style: themeData.textTheme.labelLarge!.copyWith(
-                        color: Colors.black,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            );
+          },
         );
       },
     );

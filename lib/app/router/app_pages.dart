@@ -22,14 +22,14 @@ part 'app_route.dart';
 // import 'app_route.dart';
 
 final routerConfig = GoRouter(
-  redirect: (context, state) {
-    var userModel = context.read<AuthRepository>().userModel;
-    if (userModel.token == null) {
-      return '/login';
-    } else {
-      return null;
-    }
-  },
+  // redirect: (context, state) {
+  //   var userModel = context.read<AuthRepository>().userModel;
+  //   if (userModel.token == null) {
+  //     return '/login';
+  //   } else {
+  //     return null;
+  //   }
+  // },
   initialLocation: '/',
   routes: [
     GoRoute(

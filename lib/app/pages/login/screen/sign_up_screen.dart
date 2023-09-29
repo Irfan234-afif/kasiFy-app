@@ -91,7 +91,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     listener: (context, state) {
                       if (state is AuthLogOutState) {
                         // Resumming function _onSignUp
-                        final String token = context.read<AuthRepository>().userModel.token!;
+                        String token = '';
                         context.read<ItemBloc>().add(ItemInitialEvent(token));
                         context.read<OrderBloc>().add(OrderGetEvent(token: token));
                         context.read<CategoryBloc>().add(CategoryGetEvent(token));

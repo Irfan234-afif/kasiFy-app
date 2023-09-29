@@ -25,7 +25,7 @@ class _CategoryPageState extends State<CategoryPage> {
   void initState() {
     newCategoryC = TextEditingController();
     formkey = GlobalKey<FormState>();
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    token = '';
     super.initState();
   }
 

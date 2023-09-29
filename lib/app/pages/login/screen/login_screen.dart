@@ -87,7 +87,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     listener: (context, state) {
                       if (state is AuthLoggedInState) {
                         // Resumming function _onLogin
-                        final String token = context.read<AuthRepository>().userModel.token!;
+                        String token = '';
                         context.read<ItemBloc>().add(ItemInitialEvent(token));
                         context.read<OrderBloc>().add(OrderGetEvent(token: token));
                         context.read<CategoryBloc>().add(CategoryGetEvent(token));

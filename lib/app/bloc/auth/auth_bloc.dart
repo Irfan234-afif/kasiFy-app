@@ -39,40 +39,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthErrorState(e.toString()));
       }
     });
-    on<AuthSignInEvent>((event, emit) async {
-      emit(AuthLoadingState());
-      try {
-        await _authRepository.signIn(
-          email: event.email,
-          password: event.password,
-        );
-        emit(AuthLoggedInState());
-        routerConfig.pushReplacementNamed(Routes.home);
-      } on DioException catch (e) {
-        print(e.response);
-        emit(AuthErrorState(e.response.toString()));
-      } catch (e) {
-        print('eror mboh');
-        print(e);
-        emit(AuthErrorState(e.toString()));
-      }
-    });
-    on<AuthSignOutEvent>((event, emit) async {
-      emit(AuthLoadingState());
-      try {
-        await _authRepository.signOut(event.token);
-        _authRepository.userModel = UserModel();
-        routerConfig.pushReplacementNamed(Routes.login);
-        emit(AuthLogOutState());
-      } on DioException catch (e) {
-        print('error dio');
-        print(e.response);
-        emit(AuthErrorState(e.response.toString()));
-      } catch (e) {
-        print('error mboh');
-        print(e);
-        emit(AuthErrorState(e.toString()));
-      }
-    });
+    // on<AuthSignInEvent>((event, emit) async {
+    //   emit(AuthLoadingState());
+    //   try {
+    //     await _authRepository.signIn(
+    //       email: event.email,
+    //       password: event.password,
+    //     );
+    //     emit(AuthLoggedInState());
+    //     routerConfig.pushReplacementNamed(Routes.home);
+    //   } on DioException catch (e) {
+    //     print(e.response);
+    //     emit(AuthErrorState(e.response.toString()));
+    //   } catch (e) {
+    //     print('eror mboh');
+    //     print(e);
+    //     emit(AuthErrorState(e.toString()));
+    //   }
+    // });
+    // on<AuthSignOutEvent>((event, emit) async {
+    //   emit(AuthLoadingState());
+    //   try {
+    //     await _authRepository.signOut(event.token);
+    //     _authRepository.userModel = UserModel();
+    //     routerConfig.pushReplacementNamed(Routes.login);
+    //     emit(AuthLogOutState());
+    //   } on DioException catch (e) {
+    //     print('error dio');
+    //     print(e.response);
+    //     emit(AuthErrorState(e.response.toString()));
+    //   } catch (e) {
+    //     print('error mboh');
+    //     print(e);
+    //     emit(AuthErrorState(e.toString()));
+    //   }
+    // });
   }
 }

@@ -26,7 +26,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   void initState() {
     searchCubit = BlocProvider.of<SearchCubit>(context);
     orderBloc = context.read<OrderBloc>();
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    token = '';
     super.initState();
   }
 

@@ -41,7 +41,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     nameFormKey = GlobalKey<FormState>();
 
     orderBloc = context.read<OrderBloc>();
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    token = '';
     super.initState();
   }
 
@@ -98,7 +98,12 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
   }
 
   void _orderUpdate(ItemOrder item) {
-    context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
+    // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
+    int indexItem = widget.orderModel.items!.indexWhere((element) => element.id == item.id);
+    // print(item.detail);
+    context.read<TempOrderBloc>().add(
+          TempOrderUpdateEvent(orderModel: widget.orderModel..items![indexItem] = item),
+        );
   }
 
   void _onAccept(ItemModel data) {
@@ -219,9 +224,13 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                         context,
                                         data,
                                         onSubmit: (item) {
+                                          int indexItem = orderModel.items!
+                                              .indexWhere((element) => element.id == item.id);
                                           // print(item.detail);
                                           context.read<TempOrderBloc>().add(
-                                                TempOrderUpdateEvent(item: item),
+                                                TempOrderUpdateEvent(
+                                                    orderModel: orderModel
+                                                      ..items![indexItem] = item),
                                               );
                                         },
                                         onDelete: (id) {

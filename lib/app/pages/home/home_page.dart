@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
-import 'package:kasir_app/app/bloc/scaffold_key/home_scaffold_key_cubit.dart';
 import 'package:kasir_app/app/model/user_model.dart';
 import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
@@ -33,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     userModel = context.read<AuthRepository>().userModel;
-    token = userModel.token ?? '';
+    // token = userModel.token ?? '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     super.initState();
   }
@@ -82,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Center(
                           child: Text(
-                            userModel.meta?.shopName ?? 'Shop name not found',
+                            userModel.shopName ?? 'Shop name not found',
                             style: textTheme.titleLarge!.copyWith(color: Colors.white),
                           ),
                         ),
@@ -361,7 +360,7 @@ class _HomePageState extends State<HomePage> {
                   height: 8,
                 ),
                 Text(
-                  userModel.meta?.shopName ?? '',
+                  userModel.shopName ?? '',
                   style: textTheme.titleLarge,
                 ),
               ],

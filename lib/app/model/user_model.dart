@@ -9,57 +9,48 @@ UserModel userModelFromJson(String str) => UserModel.fromJson(json.decode(str));
 String userModelToJson(UserModel data) => json.encode(data.toJson());
 
 class UserModel {
-  Meta? meta;
-  String? token;
-
-  UserModel({
-    this.meta,
-    this.token,
-  });
-
-  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
-        meta: json["meta"] == null ? null : Meta.fromJson(json["meta"]),
-        token: json["token"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "meta": meta?.toJson(),
-        "token": token,
-      };
-}
-
-class Meta {
-  int? id;
   String? name;
   String? shopName;
   String? email;
   DateTime? createdAt;
-  DateTime? updatedAt;
+  DateTime? lastSignIn;
 
-  Meta({
-    this.id,
+  UserModel({
     this.name,
     this.shopName,
     this.email,
     this.createdAt,
-    this.updatedAt,
+    this.lastSignIn,
   });
 
-  factory Meta.fromJson(Map<String, dynamic> json) => Meta(
-        id: json["id"],
+  UserModel copyWith({
+    String? name,
+    String? shopName,
+    String? email,
+    DateTime? createdAt,
+    DateTime? lastSignIn,
+  }) =>
+      UserModel(
+        name: name ?? this.name,
+        shopName: shopName ?? this.shopName,
+        email: email ?? this.email,
+        createdAt: createdAt ?? this.createdAt,
+        lastSignIn: lastSignIn ?? this.lastSignIn,
+      );
+
+  factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         name: json["name"],
         shopName: json["shop_name"],
         email: json["email"],
-        createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-        updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
+        createdAt: json["created_at"],
+        lastSignIn: json["last_sign_in"],
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "name": name,
         "shop_name": shopName,
         "email": email,
-        "created_at": createdAt?.toIso8601String(),
-        "updated_at": updatedAt?.toIso8601String(),
+        "created_at": createdAt,
+        "lastSignIn": lastSignIn,
       };
 }

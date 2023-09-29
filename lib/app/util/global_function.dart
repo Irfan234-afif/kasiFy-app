@@ -8,7 +8,7 @@ import 'package:kasir_app/app/repository/auth_repository.dart';
 
 class GlobalFunction {
   static void refresh(BuildContext context) {
-    String token = context.read<AuthRepository>().userModel.token ?? '';
+    String token = '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     context.read<ItemBloc>().add(ItemInitialEvent(token));
     context.read<OrderBloc>().add(OrderGetEvent(token: token));

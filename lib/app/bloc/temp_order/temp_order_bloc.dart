@@ -32,7 +32,7 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
       //   sellingPrice: event.item.sellingPrice,
       //   quantity: event.item.quantity,
       // );
-      orderModel.copyWith(
+      final newData = orderModel.copyWith(
         id: event.orderModel.id,
         items: event.orderModel.items,
         name: event.orderModel.name,
@@ -40,7 +40,9 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
         totalPrice: event.orderModel.totalPrice,
       );
 
-      emit(TempOrderisOrderState(orderModel: orderModel));
+      // print(orderModel.name);
+
+      emit(TempOrderisOrderState(orderModel: newData));
     });
     on<TempOrderEmptyEvent>((event, emit) {
       emit(

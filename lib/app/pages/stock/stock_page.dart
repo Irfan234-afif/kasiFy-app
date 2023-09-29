@@ -34,7 +34,7 @@ class _StockPageState extends State<StockPage> {
   void initState() {
     groupValue = 0;
     searchC = TextEditingController();
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    token = '';
     super.initState();
   }
 

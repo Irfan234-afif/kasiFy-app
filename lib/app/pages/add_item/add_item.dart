@@ -49,7 +49,7 @@ class _AddItemPageState extends State<AddItemPage> {
     descC = TextEditingController();
     formKey = GlobalKey<FormState>();
 
-    token = context.read<AuthRepository>().userModel.token ?? '';
+    token = '';
     if (widget.arg != null) {
       initialize(widget.arg!);
       autoGenerateCode = false;

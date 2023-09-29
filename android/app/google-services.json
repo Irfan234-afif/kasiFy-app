@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "956026494450",
+    "project_id": "kasify-e13de",
+    "storage_bucket": "kasify-e13de.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:956026494450:android:d24c358015f9be95dedf6b",
+        "android_client_info": {
+          "package_name": "com.example.kasir_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCSDa0IuyvDJoRTZCuL_m-i3dcrQnPbjck"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
