@@ -9,7 +9,6 @@ import 'package:kasir_app/app/bloc/search/search_cubit.dart';
 import 'package:kasir_app/app/bloc/temp_order/temp_order_bloc.dart';
 import 'package:kasir_app/app/bloc/theme/theme_cubit.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
-import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/constant.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';

@@ -49,9 +49,10 @@ class TileItemOrder extends StatelessWidget {
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            data.detail ?? '',
-          ),
+          if (data.detail != null && data.detail!.isNotEmpty)
+            Text(
+              data.detail ?? '',
+            ),
           const Padding(
             padding: EdgeInsets.only(top: 8, bottom: 8, right: 8),
             child: Text(

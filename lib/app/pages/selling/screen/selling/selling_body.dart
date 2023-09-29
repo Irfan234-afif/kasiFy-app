@@ -85,8 +85,13 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         );
   }
 
-  void _orderUpdate(ItemOrder item) {
-    context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
+  void _orderUpdate({required OrderModel orderModel, required ItemOrder item}) {
+    // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
+    int indexItem = orderModel.items!.indexWhere((element) => element.id == item.id);
+    // print(item.detail);
+    context.read<TempOrderBloc>().add(
+          TempOrderUpdateEvent(orderModel: orderModel..items![indexItem] = item),
+        );
   }
 
   @override
@@ -273,28 +278,29 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
                 context,
                 item,
                 onSubmit: (item, quantity, note) {
-                  var dataAll = context.read<TempOrderBloc>().state.orderModel;
-                  var checkData = dataAll?.items?.indexWhere(
-                    (element) => element.id == item.id,
-                  );
-                  if (checkData == null || checkData == -1) {
-                    //-1 adalah data yang sama tidak di temukan
-                    _orderOn(
-                      quantity: quantity,
-                      itemModel: item,
-                      note: note,
-                    );
-                  } else {
-                    var dataItem = dataAll!.items![checkData];
-                    var qty = dataItem.quantity! + quantity;
-                    var price =
-                        double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
-                    var detail = '${dataItem.detail!}, $note';
-                    dataItem.quantity = qty;
-                    dataItem.sellingPrice = price.toString();
-                    dataItem.detail = detail;
-                    _orderUpdate(dataItem);
-                  }
+                  // var dataAll = context.read<TempOrderBloc>().state.orderModel;
+                  // var checkData = dataAll?.items?.indexWhere(
+                  //   (element) => element.id == item.id,
+                  // );
+                  // // when item is added in order
+                  // if (checkData == null || checkData == -1) {
+                  //   //-1 adalah data yang sama tidak di temukan
+                  //   _orderOn(
+                  //     quantity: quantity,
+                  //     itemModel: item,
+                  //     note: note,
+                  //   );
+                  // } else {
+                  //   var dataItem = dataAll!.items![checkData];
+                  //   var qty = dataItem.quantity! + quantity;
+                  //   var price =
+                  //       double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
+                  //   var detail = '${dataItem.detail!}, $note';
+                  //   dataItem.quantity = qty;
+                  //   dataItem.sellingPrice = price.toString();
+                  //   dataItem.detail = detail;
+                  //   _orderUpdate(item: dataItem, orderModel: dataAll);
+                  // }
                 },
               );
             },
@@ -310,114 +316,75 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
     );
   }
 
-  ListView _buildMobileItem(Size size, List<ItemModel> data) {
+  Widget _buildMobileItem(Size size, List<ItemModel> data) {
     data.sort(
       (a, b) => a.name!.compareTo(b.name!),
     );
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: const EdgeInsets.only(top: kSmallPadding),
-      scrollDirection: Axis.vertical,
-      physics: const ClampingScrollPhysics(),
-      itemCount: data.length,
-      itemBuilder: (context, index) {
-        final sizeImageItem = size.height * 0.073;
-        ItemModel item = data[index];
-        String leadingText = takeLetterIdentity(item.name!);
-        final bool enabled = item.stock != 0;
-        return TileItem(
-          onTap: () {
-            DialogCollection.dialogItem(
-              context,
-              item,
-              onSubmit: (item, quantity, note) {
-                var dataAll = context.read<TempOrderBloc>().state.orderModel;
-                var checkData = dataAll?.items?.indexWhere(
-                  (element) => element.id == item.id,
+    return BlocBuilder<TempOrderBloc, TempOrderState>(
+      builder: (context, state) {
+        // if(state is TempOrderisOrderState){
+
+        // }
+        return ListView.builder(
+          shrinkWrap: true,
+          padding: const EdgeInsets.only(top: kSmallPadding),
+          scrollDirection: Axis.vertical,
+          physics: const ClampingScrollPhysics(),
+          itemCount: data.length,
+          itemBuilder: (context, index) {
+            final sizeImageItem = size.height * 0.073;
+            ItemModel item = data[index];
+            // // check item stock equal to temporder
+            // List<ItemOrder> itemOrder = context.read<TempOrderBloc>().state.orderModel?.items ?? [];
+            // var indexCheckItem = itemOrder.indexWhere((element) => element.id == item.id);
+            // if (indexCheckItem != -1) {
+            //   item.stock = item.stock! - itemOrder[indexCheckItem].quantity!;
+            // }
+
+            String leadingText = takeLetterIdentity(item.name!);
+            final bool enabled = item.stock != 0;
+
+            return TileItem(
+              onTap: () {
+                DialogCollection.dialogItem(
+                  context,
+                  item,
+                  onSubmit: (item, quantity, note) {
+                    var dataAll = context.read<TempOrderBloc>().state.orderModel;
+                    var checkData = dataAll?.items?.indexWhere(
+                      (element) => element.id == item.id,
+                    );
+                    if (checkData == null || checkData == -1) {
+                      //-1 adalah data yang sama tidak di temukan
+                      _orderOn(
+                        quantity: quantity,
+                        itemModel: item,
+                        note: note,
+                      );
+                    } else {
+                      var dataItem = dataAll!.items![checkData];
+                      var qty = dataItem.quantity! + quantity;
+                      var price =
+                          double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
+                      var detail = '${dataItem.detail!}, $note';
+                      dataItem.quantity = qty;
+                      dataItem.sellingPrice = price.toString();
+                      dataItem.detail = detail;
+                      _orderUpdate(item: dataItem, orderModel: dataAll);
+                    }
+                  },
                 );
-                if (checkData == null || checkData == -1) {
-                  //-1 adalah data yang sama tidak di temukan
-                  _orderOn(
-                    quantity: quantity,
-                    itemModel: item,
-                    note: note,
-                  );
-                } else {
-                  var dataItem = dataAll!.items![checkData];
-                  var qty = dataItem.quantity! + quantity;
-                  var price =
-                      double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
-                  var detail = '${dataItem.detail!}, $note';
-                  dataItem.quantity = qty;
-                  dataItem.sellingPrice = price.toString();
-                  dataItem.detail = detail;
-                  _orderUpdate(dataItem);
-                }
               },
+              enabled: enabled,
+              sizeImage: sizeImageItem,
+              leadingText: leadingText,
+              title: item.name!,
+              subtitle: item.description!,
+              trailing: currencyFormat(item.sellingPrice!),
+              isLeadingImage: false,
             );
           },
-          enabled: enabled,
-          sizeImage: sizeImageItem,
-          leadingText: leadingText,
-          title: item.name!,
-          subtitle: item.description!,
-          trailing: currencyFormat(item.sellingPrice!),
-          isLeadingImage: false,
         );
-        // return ListTile(
-        //   minVerticalPadding: 24,
-        //   contentPadding: EdgeInsets.zero,
-        //   onTap: () {
-        //     DialogCollection.dialogItem(
-        //       context,
-        //       item,
-        //       onSubmit: (item, quantity, note) {
-        //         var dataAll = context.read<TempOrderBloc>().state.orderModel;
-        //         var checkData = dataAll?.items?.indexWhere(
-        //           (element) => element.id == item.id,
-        //         );
-        //         print(checkData);
-        //         if (checkData == null || checkData == -1) {
-        //           //-1 adalah data yang sama tidak di temukan
-        //           _orderOn(
-        //             quantity: quantity,
-        //             itemModel: item,
-        //             note: note,
-        //           );
-        //         } else {
-        //           var dataItem = dataAll!.items![checkData];
-        //           var qty = dataItem.quantity! + quantity;
-        //           var price = double.parse(dataItem.price!) + double.parse(item.price!);
-        //           var detail = '${dataItem.detail!}, $note';
-        //           dataItem.quantity = qty;
-        //           dataItem.price = price.toString();
-        //           dataItem.detail = detail;
-        //           _orderUpdate(dataItem);
-        //         }
-        //       },
-        //     );
-        //   },
-        //   leading: SizedBox(
-        //     height: sizeImageItem,
-        //     width: sizeImageItem,
-        //     child: CircleAvatar(
-        //       backgroundColor: kCircleAvatarBackground,
-        //       child: Image.asset(
-        //         'assets/images/drink-${Random().nextInt(4) + 1}.png',
-        //         fit: BoxFit.contain,
-        //       ),
-        //     ),
-        //   ),
-        //   title: Text(
-        //     item.name!,
-        //   ),
-        //   subtitle: Text(
-        //     item.description!,
-        //   ),
-        //   trailing: Text(
-        //     simpleCurrencyFormat(item.price!),
-        //   ),
-        // );
       },
     );
   }

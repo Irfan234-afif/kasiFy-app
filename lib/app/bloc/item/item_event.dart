@@ -23,6 +23,12 @@ class ItemEditEvent extends ItemEvent {
   ItemEditEvent(this.token, {required this.itemModel});
 }
 
+class ItemEditLocalEvent extends ItemEvent {
+  final ItemModel itemModel;
+
+  ItemEditLocalEvent({required this.itemModel});
+}
+
 final class ItemDeleteEvent extends ItemEvent {
   final String token;
   final ItemModel itemModel;

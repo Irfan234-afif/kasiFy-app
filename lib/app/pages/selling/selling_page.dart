@@ -1,5 +1,5 @@
-import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/bloc/search/search_cubit.dart';
@@ -169,8 +169,17 @@ class _SellingPageState extends State<SellingPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      GetStorage box = GetStorage();
-                      box.remove('textOrder');
+                      List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
+                      orderModel.items!.forEach((itemOrder) {
+                        var sameItem =
+                            itemModel.singleWhere((element) => element.id == itemOrder.id);
+                        var restoreStockItem = sameItem.copyWith(
+                          stock: sameItem.originalStock,
+                        );
+                        context
+                            .read<ItemBloc>()
+                            .add(ItemEditLocalEvent(itemModel: restoreStockItem));
+                      });
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

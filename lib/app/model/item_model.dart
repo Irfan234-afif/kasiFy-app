@@ -18,6 +18,7 @@ class ItemModel {
   String? name;
   int? codeProduct;
   int? stock;
+  int? originalStock;
   String? description;
   String? basicPrice;
   String? sellingPrice;
@@ -28,6 +29,7 @@ class ItemModel {
     this.name,
     this.codeProduct,
     this.stock,
+    this.originalStock,
     this.description,
     this.basicPrice,
     this.sellingPrice,
@@ -39,6 +41,7 @@ class ItemModel {
     String? name,
     int? codeProduct,
     int? stock,
+    int? originalStock,
     String? description,
     String? basicPrice,
     String? sellingPrice,
@@ -53,6 +56,7 @@ class ItemModel {
         name: name ?? this.name,
         sellingPrice: sellingPrice ?? this.sellingPrice,
         stock: stock ?? this.stock,
+        originalStock: originalStock ?? this.originalStock,
       );
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
@@ -61,6 +65,11 @@ class ItemModel {
         codeProduct:
             json["code_product"] is int ? json['code_product'] : int.parse(json['code_product']),
         stock: json['stock'] == null
+            ? 0
+            : json["stock"] is int
+                ? json["stock"]
+                : int.parse(json["stock"]),
+        originalStock: json['stock'] == null
             ? 0
             : json["stock"] is int
                 ? json["stock"]
@@ -79,6 +88,7 @@ class ItemModel {
         "name": name,
         "code_product": codeProduct,
         "stock": stock,
+        "original_stock": originalStock,
         "description": description,
         "basic_price": basicPrice,
         "selling_price": sellingPrice,

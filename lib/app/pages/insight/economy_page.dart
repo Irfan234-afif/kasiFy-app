@@ -97,34 +97,34 @@ class _EconomyPageState extends State<EconomyPage> {
                 default:
               }
 
-              /// Sorting data
-              for (var element in salesModel) {
-                final dateNow = DateTime.now();
-                switch (indexFilter) {
-                  case 0:
-                    sortedData.add(element);
-                    break;
-                  case 1:
-                    if (element.createdAt!.year == dateNow.year) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  case 2:
-                    if (element.createdAt!.year == dateNow.year &&
-                        element.createdAt!.month == dateNow.month) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  case 3:
-                    if (element.createdAt!.year == dateNow.year &&
-                        element.createdAt!.month == dateNow.month &&
-                        element.createdAt!.day == dateNow.day) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  default:
-                }
-              }
+              // /// Sorting data
+              // for (var element in salesModel) {
+              //   final dateNow = DateTime.now();
+              //   switch (indexFilter) {
+              //     case 0:
+              //       sortedData.add(element);
+              //       break;
+              //     case 1:
+              //       if (element.createdAt!.year == dateNow.year) {
+              //         sortedData.add(element);
+              //       }
+              //       break;
+              //     case 2:
+              //       if (element.createdAt!.year == dateNow.year &&
+              //           element.createdAt!.month == dateNow.month) {
+              //         sortedData.add(element);
+              //       }
+              //       break;
+              //     case 3:
+              //       if (element.createdAt!.year == dateNow.year &&
+              //           element.createdAt!.month == dateNow.month &&
+              //           element.createdAt!.day == dateNow.day) {
+              //         sortedData.add(element);
+              //       }
+              //       break;
+              //     default:
+              //   }
+              // }
 
               /// Sort table data
               for (var element in sortedData) {

@@ -5,7 +5,6 @@ import 'package:kasir_app/app/bloc/category/category_bloc.dart';
 import 'package:kasir_app/app/bloc/index/index_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
-import 'package:kasir_app/app/bloc/scaffold_key/home_scaffold_key_cubit.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
