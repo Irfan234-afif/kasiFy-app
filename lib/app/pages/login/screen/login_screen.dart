@@ -87,11 +87,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     listener: (context, state) {
                       if (state is AuthLoggedInState) {
                         // Resumming function _onLogin
-                        String token = '';
-                        context.read<ItemBloc>().add(ItemInitialEvent(token));
-                        context.read<OrderBloc>().add(OrderGetEvent(token: token));
-                        context.read<CategoryBloc>().add(CategoryGetEvent(token));
-                        context.read<SalesBloc>().add(SalesGetEvent(token));
+                        String email =
+                            context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+                        context.read<ItemBloc>().add(ItemGetEvent(email));
+                        context.read<OrderBloc>().add(OrderGetEvent(email: email));
+                        context.read<CategoryBloc>().add(CategoryGetEvent(email));
+                        context.read<SalesBloc>().add(SalesGetEvent(email));
                       }
                     },
                     builder: (context, state) {

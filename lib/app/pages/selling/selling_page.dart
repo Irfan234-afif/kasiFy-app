@@ -33,7 +33,7 @@ class _SellingPageState extends State<SellingPage> {
   late GlobalKey<FormState> nameFormKey;
   late bool isOrder;
   late OrderBloc orderBloc;
-  late String token;
+  late String email;
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _SellingPageState extends State<SellingPage> {
     noteC = TextEditingController();
     nameFormKey = GlobalKey<FormState>();
     isOrder = false;
-    token = '';
+    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     orderBloc = context.read<OrderBloc>();
     super.initState();
   }
@@ -110,7 +110,7 @@ class _SellingPageState extends State<SellingPage> {
           listener: (context, state) {
             // lanjutan ontap button
             if (state is OrderLoadedState) {
-              context.read<SalesBloc>().add(SalesGetEvent(token));
+              context.read<SalesBloc>().add(SalesGetEvent(email));
               context.goNamed(Routes.orderSucces, extra: state.orderModel!.first);
             }
           },
@@ -124,7 +124,7 @@ class _SellingPageState extends State<SellingPage> {
                   orderBloc.add(
                     OrderAddEvent(
                       orderModel: orderModel,
-                      token: token,
+                      email: email,
                     ),
                   );
                   // final nexStep = await orderBloc.;
@@ -170,16 +170,16 @@ class _SellingPageState extends State<SellingPage> {
                   IconButton(
                     onPressed: () {
                       List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
-                      orderModel.items!.forEach((itemOrder) {
+                      for (var itemOrder in orderModel.items!) {
                         var sameItem =
-                            itemModel.singleWhere((element) => element.id == itemOrder.id);
+                            itemModel.singleWhere((element) => element.name == itemOrder.name);
                         var restoreStockItem = sameItem.copyWith(
                           stock: sameItem.originalStock,
                         );
                         context
                             .read<ItemBloc>()
                             .add(ItemEditLocalEvent(itemModel: restoreStockItem));
-                      });
+                      }
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

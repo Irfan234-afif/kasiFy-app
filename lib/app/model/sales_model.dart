@@ -14,7 +14,6 @@ String salesModelToJson(List<SalesModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class SalesModel {
-  int? id;
   int? orderCount;
   String? revenue;
   String? profit;
@@ -22,7 +21,6 @@ class SalesModel {
   OrderSales? order;
 
   SalesModel({
-    this.id,
     this.orderCount,
     this.revenue,
     this.profit,
@@ -31,7 +29,6 @@ class SalesModel {
   });
 
   SalesModel copyWith({
-    int? id,
     int? orderCount,
     String? revenue,
     String? profit,
@@ -39,7 +36,6 @@ class SalesModel {
     OrderSales? order,
   }) =>
       SalesModel(
-        id: id ?? this.id,
         orderCount: orderCount ?? this.orderCount,
         revenue: revenue ?? this.revenue,
         profit: profit ?? this.profit,
@@ -48,7 +44,6 @@ class SalesModel {
       );
 
   factory SalesModel.fromJson(Map<String, dynamic> json) => SalesModel(
-        id: json["id"],
         orderCount: json["order_count"],
         revenue: json["revenue"],
         profit: json["profit"],
@@ -57,7 +52,6 @@ class SalesModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "order_count": orderCount,
         "revenue": revenue,
         "profit": profit,
@@ -67,40 +61,34 @@ class SalesModel {
 }
 
 class OrderSales {
-  int? orderId;
   String? totalPrice;
   DateTime? orderAt;
   int? itemCount;
 
   OrderSales({
-    this.orderId,
     this.totalPrice,
     this.orderAt,
     this.itemCount,
   });
 
   OrderSales copyWith({
-    int? orderId,
     String? totalPrice,
     DateTime? orderAt,
     int? itemCount,
   }) =>
       OrderSales(
-        orderId: orderId ?? this.orderId,
         totalPrice: totalPrice ?? this.totalPrice,
         orderAt: orderAt ?? this.orderAt,
         itemCount: itemCount ?? this.itemCount,
       );
 
   factory OrderSales.fromJson(Map<String, dynamic> json) => OrderSales(
-        orderId: json["order_id"],
         totalPrice: json["total_price"],
         orderAt: json["order_at"] == null ? null : DateTime.parse(json["order_at"]),
         itemCount: json["item_count"],
       );
 
   Map<String, dynamic> toJson() => {
-        "order_id": orderId,
         "total_price": totalPrice,
         "order_at": orderAt?.toIso8601String(),
         "item_count": itemCount,

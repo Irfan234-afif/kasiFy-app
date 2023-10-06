@@ -32,7 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     userModel = context.read<AuthRepository>().userModel;
-    // token = userModel.token ?? '';
+    token = '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     super.initState();
   }
@@ -63,7 +63,7 @@ class _HomePageState extends State<HomePage> {
                     int revenue = 0;
                     String parseRevenue = '0';
                     int orderCount = 0;
-                    if (salesModel!.isNotEmpty) {
+                    if (salesModel?.isNotEmpty ?? false) {
                       final dataToday = state.salesModel!
                           .where((element) =>
                               ymdFormat(element.createdAt!) == ymdFormat(DateTime.now()))

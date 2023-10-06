@@ -16,8 +16,8 @@ class TempOrderUpdateEvent extends TempOrderEvent {
 }
 
 class TempOrderDeleteEvent extends TempOrderEvent {
-  final int id;
-  TempOrderDeleteEvent({required this.id});
+  final String name;
+  TempOrderDeleteEvent({required this.name});
 }
 
 class TempOrderEmptyEvent extends TempOrderEvent {}

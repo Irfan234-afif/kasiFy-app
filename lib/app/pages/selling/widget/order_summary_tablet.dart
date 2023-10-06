@@ -32,7 +32,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
   late GlobalKey<FormState> nameFormKey;
 
   late OrderBloc orderBloc;
-  late String token;
+  late String email;
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     nameFormKey = GlobalKey<FormState>();
 
     orderBloc = context.read<OrderBloc>();
-    token = '';
+    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     super.initState();
   }
 
@@ -62,11 +62,11 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     return true;
   }
 
-  void _orderAdd(OrderModel orderModel, String token) {
+  void _orderAdd(OrderModel orderModel, String email) {
     orderBloc.add(
       OrderAddEvent(
         orderModel: orderModel,
-        token: token,
+        email: email,
       ),
     );
   }
@@ -85,7 +85,6 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                 ItemOrder(
                   detail: note ?? '',
                   name: itemModel!.name,
-                  id: itemModel.id,
                   sellingPrice: itemModel.sellingPrice,
                   quantity: quantity,
                 ),
@@ -93,13 +92,13 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
         );
   }
 
-  void _orderDelete(int id) {
-    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(id: id));
+  void _orderDelete(String name) {
+    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
   }
 
   void _orderUpdate(ItemOrder item) {
     // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem = widget.orderModel.items!.indexWhere((element) => element.id == item.id);
+    int indexItem = widget.orderModel.items!.indexWhere((element) => element.name == item.name);
     // print(item.detail);
     context.read<TempOrderBloc>().add(
           TempOrderUpdateEvent(orderModel: widget.orderModel..items![indexItem] = item),
@@ -113,7 +112,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
       data,
       onSubmit: (item, quantity, note) {
         var checkData = dataAll.items?.indexWhere(
-          (element) => element.id == item.id,
+          (element) => element.name == item.name,
         );
         if (checkData == null || checkData == -1) {
           //-1 adalah data yang sama tidak di temukan
@@ -225,7 +224,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                         data,
                                         onSubmit: (item) {
                                           int indexItem = orderModel.items!
-                                              .indexWhere((element) => element.id == item.id);
+                                              .indexWhere((element) => element.name == item.name);
                                           // print(item.detail);
                                           context.read<TempOrderBloc>().add(
                                                 TempOrderUpdateEvent(
@@ -233,8 +232,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                                       ..items![indexItem] = item),
                                               );
                                         },
-                                        onDelete: (id) {
-                                          _orderDelete(id);
+                                        onDelete: (name) {
+                                          _orderDelete(name);
                                         },
                                       );
                                     },
@@ -361,7 +360,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                       titleText: 'Pesanan akan di proses?');
                                   if (flag) {
                                     // print(orderModel.toJsonPost());
-                                    _orderAdd(orderModel, token);
+                                    _orderAdd(orderModel, email);
                                   }
                                 }
                               }

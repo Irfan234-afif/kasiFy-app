@@ -4,13 +4,13 @@ part of 'sales_bloc.dart';
 sealed class SalesEvent {}
 
 final class SalesGetTodayEvent extends SalesEvent {
-  final String token;
-  SalesGetTodayEvent(this.token);
+  final String email;
+  SalesGetTodayEvent(this.email);
 }
 
 final class SalesGetEvent extends SalesEvent {
-  final String token;
-  SalesGetEvent(this.token);
+  final String email;
+  SalesGetEvent(this.email);
 }
 
 // final class SalesAddEvent extends SalesEvent {

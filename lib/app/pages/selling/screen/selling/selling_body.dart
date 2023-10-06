@@ -77,7 +77,6 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
                 ItemOrder(
                   detail: note ?? '',
                   name: itemModel!.name,
-                  id: itemModel.id,
                   sellingPrice: itemModel.sellingPrice,
                   quantity: quantity,
                 ),
@@ -87,7 +86,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
 
   void _orderUpdate({required OrderModel orderModel, required ItemOrder item}) {
     // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem = orderModel.items!.indexWhere((element) => element.id == item.id);
+    int indexItem = orderModel.items!.indexWhere((element) => element.name == item.name);
     // print(item.detail);
     context.read<TempOrderBloc>().add(
           TempOrderUpdateEvent(orderModel: orderModel..items![indexItem] = item),
@@ -352,7 +351,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
                   onSubmit: (item, quantity, note) {
                     var dataAll = context.read<TempOrderBloc>().state.orderModel;
                     var checkData = dataAll?.items?.indexWhere(
-                      (element) => element.id == item.id,
+                      (element) => element.name == item.name,
                     );
                     if (checkData == null || checkData == -1) {
                       //-1 adalah data yang sama tidak di temukan

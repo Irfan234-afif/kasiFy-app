@@ -1,7 +1,9 @@
 // import 'package:intl/intl.dart';
 
+import 'dart:io';
 import 'dart:math';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 String simpleCurrencyFormat(String data) {
@@ -91,4 +93,8 @@ String takeLetterIdentity(String str) {
   }
 
   return hasil;
+}
+
+DateTime parseTime(dynamic date) {
+  return Platform.isIOS ? (date as Timestamp).toDate() : (date as DateTime);
 }

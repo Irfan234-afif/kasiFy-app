@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -36,7 +37,7 @@ class _AddItemPageState extends State<AddItemPage> {
   late List<CategoryModel> categoryModel;
 
   late bool autoGenerateCode;
-  late String token;
+  late String email;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _AddItemPageState extends State<AddItemPage> {
     descC = TextEditingController();
     formKey = GlobalKey<FormState>();
 
-    token = '';
+    email = FirebaseAuth.instance.currentUser?.email ?? '';
     if (widget.arg != null) {
       initialize(widget.arg!);
       autoGenerateCode = false;
@@ -94,10 +95,10 @@ class _AddItemPageState extends State<AddItemPage> {
       stock: int.parse(stockC.text),
       codeProduct: int.parse(codeProductC.text),
       category: CategoryItem(
-        categoryId: category.id,
+        categoryName: category.name,
       ),
     );
-    context.read<ItemBloc>().add(ItemAddEvent(token, itemModel: itemModel));
+    context.read<ItemBloc>().add(ItemAddEvent(email, itemModel: itemModel));
   }
 
   @override
@@ -327,8 +328,8 @@ class _AddItemPageState extends State<AddItemPage> {
                   listenWhen: (previous, current) => previous is ItemLoadingState,
                   listener: (context, state) {
                     if (state is ItemLoadedState) {
-                      context.pop();
-                      DialogCollection.snakBarSuccesAddItem(context);
+                      // context.pop();
+                      // DialogCollection.snakBarSuccesAddItem(context);
                     }
                   },
                   builder: (context, state) {

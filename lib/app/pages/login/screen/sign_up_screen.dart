@@ -91,10 +91,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     listener: (context, state) {
                       if (state is AuthLogOutState) {
                         // Resumming function _onSignUp
-                        String token = '';
-                        context.read<ItemBloc>().add(ItemInitialEvent(token));
-                        context.read<OrderBloc>().add(OrderGetEvent(token: token));
-                        context.read<CategoryBloc>().add(CategoryGetEvent(token));
+                        String email =
+                            context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+                        context.read<ItemBloc>().add(ItemGetEvent(email));
+                        context.read<OrderBloc>().add(OrderGetEvent(email: email));
+                        context.read<CategoryBloc>().add(CategoryGetEvent(email));
                       }
                     },
                     builder: (context, state) {

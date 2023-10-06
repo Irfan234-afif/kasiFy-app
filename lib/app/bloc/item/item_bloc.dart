@@ -12,17 +12,18 @@ part 'item_state.dart';
 class ItemBloc extends Bloc<ItemEvent, ItemState> {
   final ItemRepository _itemRepository = ItemRepository();
   ItemBloc() : super(const ItemInitial(itemModel: [])) {
-    on<ItemInitialEvent>((event, emit) async {
+    on<ItemGetEvent>((event, emit) async {
       emit(ItemLoadingState());
       try {
-        var res = await _itemRepository.getItem(event.token);
-        var itemModel = itemModelFromList(res.data['data'] ?? [])
+        var res = await _itemRepository.getItem(event.email);
+        print(res);
+        var itemModel = itemModelFromList(res)
           ..sort(
             (a, b) {
               return a.category!.categoryName!.compareTo(b.category!.categoryName!);
             },
           );
-        print(itemModel);
+        // print(itemModel);
         emit(ItemLoadedState(itemModel: itemModel));
       } on DioException catch (e) {
         //
@@ -40,12 +41,13 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         //
         emit(ItemLoadingState());
         final res = await _itemRepository.addItem(
-          event.token,
+          event.email,
           itemModel: event.itemModel,
         );
+        print(res);
         //
-        print(res.data['data']);
-        final parse = ItemModel.fromJson(res.data['data']);
+        // print(res.data['data']);
+        final parse = res.copyWith();
         //
         final addingData = data..add(parse);
         final newData = addingData
@@ -71,9 +73,9 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
       try {
         //
         emit(ItemLoadingState());
-        await _itemRepository.deleteItem(event.token, event.itemModel.id.toString());
-        final newData = data..removeWhere((element) => element.id == event.itemModel.id);
-        emit(ItemLoadedState(itemModel: newData));
+        await _itemRepository.deleteItem(event.email, event.itemModel.name.toString());
+        // final newData = data..removeWhere((element) => element.id == event.itemModel.id);
+        // emit(ItemLoadedState(itemModel: newData));
       } on DioException catch (e) {
         //
         print('error dio');
@@ -86,29 +88,29 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     on<ItemEmptyEvent>((event, emit) {
       emit(const ItemEmptyState(itemModel: []));
     });
-    on<ItemEditLocalEvent>((event, emit) {
-      List<ItemModel> data = List.from(state.itemModel ?? []);
-      int indexWhere = data.indexWhere((element) => element.id == event.itemModel.id);
-      if (indexWhere != -1) {
-        var sameItem = data[indexWhere];
-        ItemModel newData = sameItem.copyWith(
-          basicPrice: event.itemModel.basicPrice,
-          category: event.itemModel.category,
-          codeProduct: event.itemModel.codeProduct,
-          stock: event.itemModel.stock,
-          originalStock: event.itemModel.originalStock,
-          description: event.itemModel.description,
-          name: event.itemModel.name,
-          sellingPrice: event.itemModel.sellingPrice,
-        );
-        data.removeAt(indexWhere);
-        final insertData = data..insert(indexWhere, newData);
-        final sortingData = insertData
-          ..sort(
-            (a, b) => a.name!.compareTo(b.name!),
-          );
-        emit(ItemLoadedState(itemModel: sortingData));
-      }
-    });
+    // on<ItemEditLocalEvent>((event, emit) {
+    //   List<ItemModel> data = List.from(state.itemModel ?? []);
+    //   int indexWhere = data.indexWhere((element) => element.id == event.itemModel.id);
+    //   if (indexWhere != -1) {
+    //     var sameItem = data[indexWhere];
+    //     ItemModel newData = sameItem.copyWith(
+    //       basicPrice: event.itemModel.basicPrice,
+    //       category: event.itemModel.category,
+    //       codeProduct: event.itemModel.codeProduct,
+    //       stock: event.itemModel.stock,
+    //       originalStock: event.itemModel.originalStock,
+    //       description: event.itemModel.description,
+    //       name: event.itemModel.name,
+    //       sellingPrice: event.itemModel.sellingPrice,
+    //     );
+    //     data.removeAt(indexWhere);
+    //     final insertData = data..insert(indexWhere, newData);
+    //     final sortingData = insertData
+    //       ..sort(
+    //         (a, b) => a.name!.compareTo(b.name!),
+    //       );
+    //     emit(ItemLoadedState(itemModel: sortingData));
+    //   }
+    // });
   }
 }

@@ -478,7 +478,7 @@ class DialogCollection {
     BuildContext context,
     ItemOrder item, {
     Function(ItemOrder item)? onSubmit,
-    Function(int id)? onDelete,
+    Function(String name)? onDelete,
   }) async {
     final mediaQuery = MediaQuery.of(context);
     final size = mediaQuery.size;
@@ -752,7 +752,7 @@ class DialogCollection {
                         ),
                       ),
                       onPressed: () {
-                        onDelete?.call(item.id!);
+                        onDelete?.call(item.name!);
                       },
                       child: Text(
                         'Delete',
@@ -862,7 +862,7 @@ class DialogCollection {
                                       onSubmit: (item) {
                                         // print(item.detail);
                                         var whereItem = orderModel.items!
-                                            .indexWhere((element) => element.id == item.id);
+                                            .indexWhere((element) => element.name == item.name);
                                         context.read<TempOrderBloc>().add(
                                             // TempOrderUpdateEvent(item: item),
                                             TempOrderUpdateEvent(
@@ -1046,7 +1046,7 @@ class DialogCollection {
                         List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
                         orderModel.items!.forEach((itemOrder) {
                           var sameItem =
-                              itemModel.singleWhere((element) => element.id == itemOrder.id);
+                              itemModel.singleWhere((element) => element.name == itemOrder.name);
                           var restoreStockItem = sameItem.copyWith(
                             stock: sameItem.originalStock,
                           );
@@ -1055,7 +1055,6 @@ class DialogCollection {
                               .add(ItemEditLocalEvent(itemModel: restoreStockItem));
                         });
                         context.pop();
-                        // TODO : when pop TempOrder preliminaries empty cause error
                         context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                       }
                     },
@@ -1244,7 +1243,7 @@ class DialogCollection {
     );
   }
 
-  static void _orderDelete(BuildContext context, int id) {
-    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(id: id));
+  static void _orderDelete(BuildContext context, String name) {
+    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
   }
 }

@@ -181,7 +181,7 @@ class _TrafficPageState extends State<TrafficPage> {
     // sort item rank
     for (var dataOrder in sortedData) {
       for (var item in dataOrder.items!) {
-        int indexCheckItem = newDataItemOrder.indexWhere((newItem) => newItem.id == item.id);
+        int indexCheckItem = newDataItemOrder.indexWhere((newItem) => newItem.name == item.name);
         if (indexCheckItem == -1) {
           // print('oi');
           newDataItemOrder.add(item);

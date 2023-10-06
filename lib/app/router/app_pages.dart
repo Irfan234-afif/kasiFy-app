@@ -1,4 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kasir_app/app/bloc/category/category_bloc.dart';
+import 'package:kasir_app/app/bloc/item/item_bloc.dart';
+import 'package:kasir_app/app/bloc/order/order_bloc.dart';
+import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/model/item_model.dart';
 import 'package:kasir_app/app/model/order_model.dart';
 import 'package:kasir_app/app/pages/add_item/add_item.dart';
@@ -22,14 +26,20 @@ part 'app_route.dart';
 // import 'app_route.dart';
 
 final routerConfig = GoRouter(
-  // redirect: (context, state) {
-  //   var userModel = context.read<AuthRepository>().userModel;
-  //   if (userModel.token == null) {
-  //     return '/login';
-  //   } else {
-  //     return null;
-  //   }
-  // },
+  redirect: (context, state) {
+    final credential = context.read<AuthRepository>().firebaseAuth.currentUser;
+    if (credential == null) {
+      return '/login';
+    } else {
+      final String email = credential.email!;
+      // print(email);
+      context.read<ItemBloc>().add(ItemGetEvent(email));
+      context.read<CategoryBloc>().add(CategoryGetEvent(email));
+      context.read<OrderBloc>().add(OrderGetEvent(email: email));
+      context.read<SalesBloc>().add(SalesGetEvent(email));
+      return null;
+    }
+  },
   initialLocation: '/',
   routes: [
     GoRoute(

@@ -14,7 +14,6 @@ String itemModelToJson(List<ItemModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ItemModel {
-  int? id;
   String? name;
   int? codeProduct;
   int? stock;
@@ -25,7 +24,6 @@ class ItemModel {
   CategoryItem? category;
 
   ItemModel({
-    this.id,
     this.name,
     this.codeProduct,
     this.stock,
@@ -37,7 +35,6 @@ class ItemModel {
   });
 
   ItemModel copyWith({
-    int? id,
     String? name,
     int? codeProduct,
     int? stock,
@@ -48,7 +45,6 @@ class ItemModel {
     CategoryItem? category,
   }) =>
       ItemModel(
-        id: id ?? this.id,
         basicPrice: basicPrice ?? this.basicPrice,
         category: category ?? this.category,
         codeProduct: codeProduct ?? this.codeProduct,
@@ -60,7 +56,6 @@ class ItemModel {
       );
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
-        id: json["id"] is int ? json['id'] : int.parse(json['id']),
         name: json["name"],
         codeProduct:
             json["code_product"] is int ? json['code_product'] : int.parse(json['code_product']),
@@ -84,7 +79,6 @@ class ItemModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "name": name,
         "code_product": codeProduct,
         "stock": stock,
@@ -101,26 +95,21 @@ class ItemModel {
         "description": description,
         "basic_price": double.parse(basicPrice ?? ''),
         "selling_price": double.parse(sellingPrice ?? ''),
-        "category_id": category?.categoryId,
       };
 }
 
 class CategoryItem {
-  int? categoryId;
   String? categoryName;
 
   CategoryItem({
-    this.categoryId,
     this.categoryName,
   });
 
   factory CategoryItem.fromJson(Map<String, dynamic> json) => CategoryItem(
-        categoryId: json["category_id"],
         categoryName: json["category_name"],
       );
 
   Map<String, dynamic> toJson() => {
-        "category_id": categoryId,
         "category_name": categoryName,
       };
 }

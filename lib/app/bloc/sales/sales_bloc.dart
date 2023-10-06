@@ -15,17 +15,17 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
     on<SalesGetEvent>((event, emit) async {
       emit(SalesLoadingState());
       try {
-        final res = await _salesRepository.getSales(event.token);
+        final res = await _salesRepository.getSales(event.email);
         // creating data
-        List<SalesModel> salesModel = [];
-        if (res.statusCode != 404) {
-          // creating data
-          salesModel = salesModelFromList(res.data['data']);
-        }
-        // sorting by created_at
-        salesModel.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
+        // List<SalesModel> salesModel = [];
+        // if (res.statusCode != 404) {
+        //   // creating data
+        //   salesModel = salesModelFromList(res.data['data']);
+        // }
+        // // sorting by created_at
+        res?.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
         // emit
-        emit(SalesLoadedState(salesModel: salesModel));
+        emit(SalesLoadedState(salesModel: res));
       } on DioException catch (e) {
         if (e.response != null) {
           if (e.response!.statusMessage == 'Unauthenticated') {
@@ -43,29 +43,29 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
         emit(const SalesErrorState('Terjadi Kesalahan'));
       }
     });
-    on<SalesGetTodayEvent>((event, emit) async {
-      emit(SalesLoadingState());
-      try {
-        final res = await _salesRepository.getTodaySales(event.token);
-        List<SalesModel> salesModel = [];
-        if (res.statusCode != 404) {
-          // creating data
-          salesModel.add(SalesModel.fromJson(res.data['data']));
-        }
-        // emit
-        emit(SalesLoadedState(salesModel: salesModel));
-      } on DioException catch (e) {
-        if (e.response != null) {
-          if (e.response!.statusMessage == 'Unauthenticated') {
-            emit(SalesErrorState(e.response!.statusMessage!));
-          }
-        } else {
-          emit(const SalesErrorState('Terjadi kesalahan'));
-        }
-      } catch (e) {
-        print(e);
-        emit(const SalesErrorState('Terjadi Kesalahan'));
-      }
-    });
+    // on<SalesGetTodayEvent>((event, emit) async {
+    //   emit(SalesLoadingState());
+    //   try {
+    //     final res = await _salesRepository.getTodaySales(event.email);
+    //     List<SalesModel> salesModel = [];
+    //     if (res.statusCode != 404) {
+    //       // creating data
+    //       salesModel.add(SalesModel.fromJson(res.data['data']));
+    //     }
+    //     // emit
+    //     emit(SalesLoadedState(salesModel: salesModel));
+    //   } on DioException catch (e) {
+    //     if (e.response != null) {
+    //       if (e.response!.statusMessage == 'Unauthenticated') {
+    //         emit(SalesErrorState(e.response!.statusMessage!));
+    //       }
+    //     } else {
+    //       emit(const SalesErrorState('Terjadi kesalahan'));
+    //     }
+    //   } catch (e) {
+    //     print(e);
+    //     emit(const SalesErrorState('Terjadi Kesalahan'));
+    //   }
+    // });
   }
 }

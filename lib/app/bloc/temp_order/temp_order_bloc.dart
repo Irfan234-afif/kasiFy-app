@@ -33,7 +33,6 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
       //   quantity: event.item.quantity,
       // );
       final newData = orderModel.copyWith(
-        id: event.orderModel.id,
         items: event.orderModel.items,
         name: event.orderModel.name,
         orderAt: event.orderModel.orderAt,
@@ -54,8 +53,8 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
     });
     on<TempOrderDeleteEvent>((event, emit) {
       OrderModel orderModel = state.orderModel!;
-      var id = event.id;
-      orderModel.items!.removeWhere((element) => element.id == id);
+      var name = event.name;
+      orderModel.items!.removeWhere((element) => element.name == name);
       emit(TempOrderisOrderState(orderModel: orderModel));
     });
   }

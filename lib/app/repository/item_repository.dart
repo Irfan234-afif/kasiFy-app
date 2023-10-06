@@ -1,77 +1,45 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kasir_app/app/model/item_model.dart';
-import 'package:kasir_app/app/util/constant.dart';
-import 'package:dio/dio.dart';
 
 class ItemRepository {
-  ItemModel itemModel = ItemModel();
+  final usersFirestore = FirebaseFirestore.instance.collection('users');
 
-  Dio get dio => _dio();
+  Future<List<ItemModel>> getItem(String email) async {
+    List<ItemModel> data = [];
+    final getDataItem = await usersFirestore.doc(email).collection('items').get();
 
-  Dio _dio() {
-    const defaultTimeout = Duration(seconds: 5);
-    final options = BaseOptions(
-      baseUrl: urlApi,
-      sendTimeout: defaultTimeout,
-      connectTimeout: defaultTimeout,
-      receiveTimeout: defaultTimeout,
-      contentType: 'application/json',
-      validateStatus: (status) {
-        if (status == null) {
-          return false;
-        }
-        return status <= 201;
-      },
-    );
+    for (var element in getDataItem.docs) {
+      data.add(ItemModel.fromJson(element.data()));
+    }
 
-    var dio = Dio(options);
-
-    return dio;
+    return data;
   }
 
-  Future<Response> getItem(String token) async {
-    Response res = await dio.get(
-      'item/get',
-      options: Options(headers: _headers(token)),
-    );
-    // var itemModel = itemModelFromList(res.data['data']);
-    // print(itemModel);
-    return res;
-  }
-
-  Future<Response> addItem(
-    String token, {
+  Future<ItemModel> addItem(
+    String email, {
     required ItemModel itemModel,
   }) async {
-    var data = itemModel.postToJson();
-    final res = await dio.post(
-      'item/store',
-      options: Options(
-        headers: _headers(token),
-      ),
-      data: data,
-    );
-    return res;
+    final itemFirestore =
+        FirebaseFirestore.instance.collection('users').doc(email).collection('items').withConverter(
+              fromFirestore: (snapshot, options) => ItemModel.fromJson(snapshot.data()!),
+              toFirestore: (value, options) => value.toJson(),
+            );
+
+    final addToFirestore = await itemFirestore.add(itemModel);
+
+    final getNewData = await addToFirestore.get().then((value) => value.data());
+
+    return getNewData!;
   }
 
-  Future<Response> deleteItem(String token, String id) async {
-    final data = {
-      'item_id': id,
-    };
-    final Response res = await dio.post(
-      'item/delete',
-      data: data,
-      options: Options(
-        headers: _headers(token),
-      ),
-    );
-
-    return res;
-  }
-
-  Map<String, dynamic> _headers(String token) {
-    return {
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+  Future<void> deleteItem(String email, String itemName) async {
+    final itemFirestore = usersFirestore.doc(email).collection('items').withConverter(
+          fromFirestore: (snapshot, options) => ItemModel.fromJson(snapshot.data()!),
+          toFirestore: (value, options) => value.toJson(),
+        );
+    final itemWhere = await itemFirestore.where('name', isEqualTo: itemName).get();
+    for (var element in itemWhere.docs) {
+      await usersFirestore.doc(email).collection('items').doc(element.id).delete();
+    }
   }
 }

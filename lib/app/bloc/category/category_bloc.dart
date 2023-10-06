@@ -16,9 +16,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryGetEvent>((event, emit) async {
       try {
         emit(CategoryLoadingState());
-        final Response res = await _categoryRepository.getCategory(event.token);
-        final categoryModel = categoryModelFromList(res.data['data']);
-        emit(CategoryLoadedState(categoryModel: categoryModel));
+        final res = await _categoryRepository.getCategory(event.token);
+        print(res);
+        // final categoryModel = categoryModelFromList(res.data['data']);
+        // emit(CategoryLoadedState(categoryModel: categoryModel));
       } on DioException catch (e) {
         print('Dio error');
         print(e.response);
@@ -32,14 +33,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       try {
         emit(CategoryLoadingState());
         final res = await _categoryRepository.addCategory(event.token, event.categoryModel.name!);
-        print(res.statusCode);
-        // parse
-        final categoryFromRes = CategoryModel.fromJson(res.data['data']);
-        print(categoryFromRes.toJson());
-        // add data
-        final newData = data..add(categoryFromRes);
-        // emit state
-        emit(CategoryLoadedState(categoryModel: newData));
+        // print(res.statusCode);
+        // // parse
+        // final categoryFromRes = CategoryModel.fromJson(res.data['data']);
+        // print(categoryFromRes.toJson());
+        // // add data
+        // final newData = data..add(categoryFromRes);
+        // // emit state
+        // emit(CategoryLoadedState(categoryModel: newData));
       } on DioException catch (e) {
         print('error dio');
         print(e.response);
@@ -54,11 +55,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       try {
         emit(CategoryLoadingState());
         // deleting data in server
-        await _categoryRepository.deleteCategory(event.token, event.categoryModel.id.toString());
+        await _categoryRepository.deleteCategory(event.token, event.categoryModel.name.toString());
         // deleting data in model
-        final newData = data..removeWhere((element) => element.id == event.categoryModel.id);
-        // change state
-        emit(CategoryLoadedState(categoryModel: newData));
+        // final newData = data..removeWhere((element) => element.id == event.categoryModel.id);
+        // // change state
+        // emit(CategoryLoadedState(categoryModel: newData));
       } on DioException catch (e) {
         print('error dio');
         print(e.response);

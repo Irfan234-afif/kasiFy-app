@@ -1,70 +1,51 @@
-import 'package:dio/dio.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:kasir_app/app/model/category_model.dart';
 
-import '../util/constant.dart';
-
 class CategoryRepository {
-  CategoryModel categoryModel = CategoryModel();
+  final usersCollection = FirebaseFirestore.instance.collection('users');
 
-  Dio get dio => _dio();
+  Future<List<CategoryModel>> getCategory(String email) async {
+    List<CategoryModel> data = [];
 
-  Dio _dio() {
-    const defaultTimeout = Duration(seconds: 5);
-    final options = BaseOptions(
-      baseUrl: urlApi,
-      sendTimeout: defaultTimeout,
-      connectTimeout: defaultTimeout,
-      receiveTimeout: defaultTimeout,
-      contentType: 'application/json',
-      validateStatus: (status) {
-        if (status == null) {
-          return false;
-        }
-        return status <= 201;
-      },
-    );
+    final getDataCategory = await usersCollection.doc(email).collection('categories').get();
 
-    var dio = Dio(options);
+    for (var element in getDataCategory.docs) {
+      data.add(CategoryModel.fromJson(element.data()));
+    }
 
-    return dio;
+    return data;
   }
 
-  Future<Response> getCategory(String token) async {
-    final Response res = await dio.get(
-      'category/get',
-      options: Options(
-        headers: _headers(token),
-      ),
+  Future<CategoryModel?> addCategory(String email, String nameCategory) async {
+    final parseToModel = CategoryModel(
+      createdAt: DateTime.now(),
+      name: nameCategory,
+      updatedAt: DateTime.now(),
     );
-    return res;
+
+    final categoryFirestore = usersCollection.doc(email).collection('categories').withConverter(
+          fromFirestore: (snapshot, options) => CategoryModel.fromJson(snapshot.data()!),
+          toFirestore: (value, options) => value.toJson(),
+        );
+
+    final addToFirestore = await categoryFirestore.add(parseToModel);
+
+    final getNewData = await addToFirestore.get().then((value) => value.data());
+
+    return getNewData;
   }
 
-  Future<Response> addCategory(String token, String nameCategory) async {
-    final data = {
-      'name': nameCategory,
-    };
-    final Response res = await dio.post(
-      'category/store',
-      data: data,
-      options: Options(
-        headers: _headers(token),
-      ),
-    );
-    return res;
-  }
+  Future<void> deleteCategory(String email, String nameCategory) async {
+    final categoryFirestore = usersCollection.doc(email).collection('categories').withConverter(
+          fromFirestore: (snapshot, options) => CategoryModel.fromJson(snapshot.data()!),
+          toFirestore: (value, options) => value.toJson(),
+        );
+    final whereData = await categoryFirestore.where('name', isEqualTo: nameCategory).get();
 
-  Future<Response> deleteCategory(String token, String id) async {
-    final data = {
-      'category_id': id,
-    };
-    final Response res = await dio.post(
-      'category/delete',
-      data: data,
-      options: Options(
-        headers: _headers(token),
-      ),
-    );
-    return res;
+    for (var element in whereData.docs) {
+      await usersCollection.doc(email).collection('categories').doc(element.id).delete();
+    }
   }
 
   Map<String, dynamic> _headers(String token) {

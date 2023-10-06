@@ -87,56 +87,17 @@ class _MyAppState extends State<MyApp> {
       create: (context) => AuthRepository(),
       child: MultiBlocProvider(
         providers: [
-          BlocProvider(
-            create: (context) => ThemeCubit(),
-          ),
-          BlocProvider(
-            create: (context) => AuthBloc(
-              context.read<AuthRepository>(),
-            ),
-          ),
-          BlocProvider(
-            create: (context) => ItemBloc()
-              ..add(
-                ItemInitialEvent(
-                  '',
-                ),
-              ),
-          ),
-          BlocProvider(
-            create: (context) => TempOrderBloc(),
-          ),
-          BlocProvider(
-            create: (context) => OrderBloc()
-              ..add(
-                OrderGetEvent(
-                  token: '',
-                ),
-              ),
-          ),
-          BlocProvider(
-            create: (context) => IndexBloc(),
-          ),
-          BlocProvider(
-            create: (context) => DraggableItemCubit(),
-          ),
-          BlocProvider(
-            create: (context) => HomeScaffoldKeyCubit(),
-          ),
-          BlocProvider(
-            create: (context) => CategoryBloc()
-              ..add(
-                CategoryGetEvent(
-                  '',
-                ),
-              ),
-          ),
-          BlocProvider(
-            create: (context) => SearchCubit(),
-          ),
-          BlocProvider(
-            create: (context) => SalesBloc(),
-          ),
+          BlocProvider(create: (context) => ThemeCubit()),
+          BlocProvider(create: (context) => AuthBloc(context.read<AuthRepository>())),
+          BlocProvider(create: (context) => ItemBloc()),
+          BlocProvider(create: (context) => TempOrderBloc()),
+          BlocProvider(create: (context) => OrderBloc()),
+          BlocProvider(create: (context) => IndexBloc()),
+          BlocProvider(create: (context) => DraggableItemCubit()),
+          BlocProvider(create: (context) => HomeScaffoldKeyCubit()),
+          BlocProvider(create: (context) => CategoryBloc()),
+          BlocProvider(create: (context) => SearchCubit()),
+          BlocProvider(create: (context) => SalesBloc()),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(
           // listener: (context, state) {

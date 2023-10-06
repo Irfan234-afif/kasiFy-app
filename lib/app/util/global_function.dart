@@ -8,10 +8,10 @@ import 'package:kasir_app/app/repository/auth_repository.dart';
 
 class GlobalFunction {
   static void refresh(BuildContext context) {
-    String token = '';
+    String token = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
-    context.read<ItemBloc>().add(ItemInitialEvent(token));
-    context.read<OrderBloc>().add(OrderGetEvent(token: token));
+    context.read<ItemBloc>().add(ItemGetEvent(token));
+    context.read<OrderBloc>().add(OrderGetEvent(email: token));
     context.read<CategoryBloc>().add(CategoryGetEvent(token));
   }
 }

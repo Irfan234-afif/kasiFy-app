@@ -27,16 +27,13 @@ class ListOrder {
 }
 
 class OrderModel {
-  int? id;
   String? name;
   String? totalPrice;
-  int? userId;
+
   DateTime? orderAt;
   List<ItemOrder>? items;
 
   OrderModel({
-    this.id,
-    this.userId,
     this.name,
     this.totalPrice,
     this.orderAt,
@@ -44,8 +41,6 @@ class OrderModel {
   });
 
   OrderModel copyWith({
-    int? id,
-    int? userId,
     String? name,
     String? totalPrice,
     DateTime? doneAt,
@@ -53,8 +48,6 @@ class OrderModel {
     List<ItemOrder>? items,
   }) =>
       OrderModel(
-        id: id ?? this.id,
-        userId: userId ?? this.userId,
         name: name ?? this.name,
         totalPrice: totalPrice ?? this.totalPrice,
         orderAt: orderAt ?? this.orderAt,
@@ -62,8 +55,6 @@ class OrderModel {
       );
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
-        id: json["id"],
-        userId: json["user_id"],
         name: json["name"],
         totalPrice: json["total_price"],
         orderAt: json["order_at"] == null ? null : DateTime.parse(json["order_at"]),
@@ -73,14 +64,11 @@ class OrderModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
-        "user_id": userId,
         "name": name,
         "order_at": orderAt?.toIso8601String(),
         "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
       };
   Map<String, dynamic> toJsonPost() => {
-        "user_id": userId,
         "name": name,
         "total_price": totalPrice,
         "order_at": orderAt?.toIso8601String(),
@@ -89,7 +77,6 @@ class OrderModel {
 }
 
 class ItemOrder {
-  int? id;
   String? name;
   String? detail;
   int? quantity;
@@ -97,7 +84,6 @@ class ItemOrder {
   String? sellingPrice;
 
   ItemOrder({
-    this.id,
     this.name,
     this.detail,
     this.quantity,
@@ -106,7 +92,6 @@ class ItemOrder {
   });
 
   ItemOrder copyWith({
-    int? id,
     String? name,
     String? detail,
     int? quantity,
@@ -114,7 +99,6 @@ class ItemOrder {
     String? sellingPrice,
   }) =>
       ItemOrder(
-        id: id ?? this.id,
         name: name ?? this.name,
         detail: detail ?? this.detail,
         quantity: quantity ?? this.quantity,
@@ -123,7 +107,6 @@ class ItemOrder {
       );
 
   factory ItemOrder.fromJson(Map<String, dynamic> json) => ItemOrder(
-        id: json["id"],
         name: json["name"],
         detail: json["detail"],
         quantity: json["quantity"],
@@ -132,7 +115,6 @@ class ItemOrder {
       );
 
   Map<String, dynamic> toJson() => {
-        "id": id,
         "name": name,
         "detail": detail,
         "quantity": quantity,

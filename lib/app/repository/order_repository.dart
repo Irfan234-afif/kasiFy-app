@@ -1,80 +1,49 @@
 // ignore_for_file: avoid_print
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kasir_app/app/model/order_model.dart';
-import 'package:kasir_app/app/util/constant.dart';
-import 'package:dio/dio.dart';
 
 class OrderRepository {
-  Dio get dio => _dio();
+  final usersFirestore = FirebaseFirestore.instance.collection('users');
 
-  Dio _dio() {
-    const timeOut = Duration(seconds: 5);
-    final baseOption = BaseOptions(
-      baseUrl: urlApi,
-      sendTimeout: timeOut,
-      connectTimeout: timeOut,
-      receiveTimeout: timeOut,
-      validateStatus: (status) {
-        // if (status == null) {
-        //   return false;
-        // }
-        // return status <= 200;
-        return true;
-      },
-    );
-
-    var dio = Dio(baseOption);
-    return dio;
-  }
-
-  Future<Response> getOrder(String token) async {
-    Response res = await dio.get(
-      'order/get',
-      options: Options(headers: _headers(token)),
-    );
-    return res;
-  }
-
-  Future<List<OrderModel>?> getOrderProcces(String token) async {
-    try {
-      Response res = await dio.get(
-        'order/get?procces',
-        options: Options(headers: _headers(token)),
-      );
-      var orderModel = orderModelFromList(res.data['data']);
-      return orderModel;
-    } on DioException catch (e) {
-      print(e.response);
-      return null;
-    } catch (e) {
-      print(e);
-      return null;
+  Future<List<OrderModel>> getOrder(String email) async {
+    List<OrderModel> data = [];
+    final getDataOrder = await usersFirestore.doc(email).collection('orders').get();
+    for (var element in getDataOrder.docs) {
+      data.add(OrderModel.fromJson(element.data()));
     }
+    return data;
   }
 
-  Future<Response> getOrderToday(String token) async {
-    Response res = await dio.get(
-      'order/get?today',
-      options: Options(headers: _headers(token)),
-    );
-    print(res.statusCode);
+  Future<List<OrderModel>> getOrderToday(String email) async {
+    List<OrderModel> data = [];
 
-    return res;
+    final dateNow = DateTime.now();
+    final today = DateTime(dateNow.year, dateNow.month, dateNow.day);
+
+    final getDataOrderToday = await usersFirestore
+        .doc(email)
+        .collection('orders')
+        .where('created_at', isGreaterThanOrEqualTo: today)
+        .get();
+
+    for (var element in getDataOrderToday.docs) {
+      data.add(OrderModel.fromJson(element.data()));
+    }
+
+    return data;
   }
 
-  Future<Response> addOrder(String token, OrderModel orderModel) async {
-    print(orderModel.totalPrice);
-    // Response res = await dio.post(
-    //   'order/store',
-    //   options: Options(
-    //     headers: _headers(token),
-    //   ),
-    //   data: orderModel.toJsonPost(),
-    // );
-    // print(res.statusMessage);
-    // print(res.data);
+  Future<OrderModel> addOrder(String email, OrderModel orderModel) async {
+    final ordersFirestore = usersFirestore.doc(email).collection('orders').withConverter(
+          fromFirestore: (snapshot, options) => OrderModel.fromJson(snapshot.data()!),
+          toFirestore: (value, options) => value.toJson(),
+        );
 
-    return Response(requestOptions: RequestOptions());
+    final addToFirestore = await ordersFirestore.add(orderModel);
+
+    final getNewData = addToFirestore.get().then((value) => value.data()!);
+    return getNewData;
   }
 
   Map<String, dynamic> _headers(String token) {

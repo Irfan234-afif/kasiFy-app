@@ -15,14 +15,15 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<OrderGetTodayEvent>((event, emit) async {
       emit(OrderLoadingState());
       try {
-        var res = await _orderRepository.getOrderToday(event.token);
-        var orderModel = orderModelFromList(res.data['data'] ?? []);
-        orderModel.sort(
-          (a, b) => b.orderAt!.compareTo(a.orderAt!),
-        );
-        emit(
-          OrderLoadedState(orderModel: orderModel),
-        );
+        var res = await _orderRepository.getOrderToday(event.email);
+        print(res);
+        // var orderModel = orderModelFromList(res.data['data'] ?? []);
+        // orderModel.sort(
+        //   (a, b) => b.orderAt!.compareTo(a.orderAt!),
+        // );
+        // emit(
+        //   OrderLoadedState(orderModel: orderModel),
+        // );
       } on DioException catch (e) {
         if (kDebugMode) {
           print(e);
@@ -35,14 +36,15 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     on<OrderGetEvent>((event, emit) async {
       emit(OrderLoadingState());
       try {
-        var res = await _orderRepository.getOrder(event.token);
-        var orderModel = orderModelFromList(res.data['data'] ?? []);
-        orderModel.sort(
-          (a, b) => b.orderAt!.compareTo(a.orderAt!),
-        );
-        emit(
-          OrderLoadedState(orderModel: orderModel),
-        );
+        var res = await _orderRepository.getOrder(event.email);
+        print(res);
+        // var orderModel = orderModelFromList(res.data['data'] ?? []);
+        // orderModel.sort(
+        //   (a, b) => b.orderAt!.compareTo(a.orderAt!),
+        // );
+        // emit(
+        //   OrderLoadedState(orderModel: orderModel),
+        // );
       } on DioException catch (e) {
         print(e.response);
         emit(OrderErrorState(e.toString()));
@@ -56,14 +58,16 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         emit(OrderAddingState());
         print(event.orderModel.items![0].sellingPrice);
         var res = await _orderRepository.addOrder(
-          event.token,
+          event.email,
           event.orderModel,
         );
-        var resData = OrderModel.fromJson(res.data['data'] ?? {});
-        data.add(resData);
-        data.sort(
-          (a, b) => b.orderAt!.compareTo(a.orderAt!),
-        );
+        // var resData = OrderModel.fromJson(res.data['data'] ?? {});
+        if (res != null) {
+          data.add(res);
+          data.sort(
+            (a, b) => b.orderAt!.compareTo(a.orderAt!),
+          );
+        }
         emit(
           OrderLoadedState(orderModel: data),
         );
