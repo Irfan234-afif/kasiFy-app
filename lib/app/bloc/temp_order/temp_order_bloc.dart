@@ -33,6 +33,7 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
       //   quantity: event.item.quantity,
       // );
       final newData = orderModel.copyWith(
+        id: event.orderModel.id,
         items: event.orderModel.items,
         name: event.orderModel.name,
         orderAt: event.orderModel.orderAt,

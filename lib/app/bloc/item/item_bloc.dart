@@ -88,29 +88,29 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     on<ItemEmptyEvent>((event, emit) {
       emit(const ItemEmptyState(itemModel: []));
     });
-    // on<ItemEditLocalEvent>((event, emit) {
-    //   List<ItemModel> data = List.from(state.itemModel ?? []);
-    //   int indexWhere = data.indexWhere((element) => element.id == event.itemModel.id);
-    //   if (indexWhere != -1) {
-    //     var sameItem = data[indexWhere];
-    //     ItemModel newData = sameItem.copyWith(
-    //       basicPrice: event.itemModel.basicPrice,
-    //       category: event.itemModel.category,
-    //       codeProduct: event.itemModel.codeProduct,
-    //       stock: event.itemModel.stock,
-    //       originalStock: event.itemModel.originalStock,
-    //       description: event.itemModel.description,
-    //       name: event.itemModel.name,
-    //       sellingPrice: event.itemModel.sellingPrice,
-    //     );
-    //     data.removeAt(indexWhere);
-    //     final insertData = data..insert(indexWhere, newData);
-    //     final sortingData = insertData
-    //       ..sort(
-    //         (a, b) => a.name!.compareTo(b.name!),
-    //       );
-    //     emit(ItemLoadedState(itemModel: sortingData));
-    //   }
-    // });
+    on<ItemEditLocalEvent>((event, emit) {
+      List<ItemModel> data = List.from(state.itemModel ?? []);
+      int indexWhere = data.indexWhere((element) => element.id == event.itemModel.id);
+      if (indexWhere != -1) {
+        var sameItem = data[indexWhere];
+        ItemModel newData = sameItem.copyWith(
+          basicPrice: event.itemModel.basicPrice,
+          category: event.itemModel.category,
+          codeProduct: event.itemModel.codeProduct,
+          stock: event.itemModel.stock,
+          originalStock: event.itemModel.originalStock,
+          description: event.itemModel.description,
+          name: event.itemModel.name,
+          sellingPrice: event.itemModel.sellingPrice,
+        );
+        data.removeAt(indexWhere);
+        final insertData = data..insert(indexWhere, newData);
+        final sortingData = insertData
+          ..sort(
+            (a, b) => a.name!.compareTo(b.name!),
+          );
+        emit(ItemLoadedState(itemModel: sortingData));
+      }
+    });
   }
 }
