@@ -16,23 +16,25 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
     on<CategoryGetEvent>((event, emit) async {
       try {
         emit(CategoryLoadingState());
-        final res = await _categoryRepository.getCategory(event.token);
+        final res = await _categoryRepository.getCategory(event.email);
         print(res);
         // final categoryModel = categoryModelFromList(res.data['data']);
-        // emit(CategoryLoadedState(categoryModel: categoryModel));
+        emit(CategoryLoadedState(categoryModel: res));
       } on DioException catch (e) {
         print('Dio error');
         print(e.response);
         emit(CategoryErrorState(e.response.toString()));
       } catch (e) {
         print(e);
+        emit(CategoryErrorState(e.toString()));
       }
     });
     on<CategoryAddEvent>((event, emit) async {
       List<CategoryModel> data = List.from(state.categoryModel ?? []);
       try {
         emit(CategoryLoadingState());
-        final res = await _categoryRepository.addCategory(event.token, event.categoryModel.name!);
+        final res = await _categoryRepository.addCategory(
+            event.email, event.categoryModel.name!);
         // print(res.statusCode);
         // // parse
         // final categoryFromRes = CategoryModel.fromJson(res.data['data']);
@@ -40,7 +42,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         // // add data
         // final newData = data..add(categoryFromRes);
         // // emit state
-        // emit(CategoryLoadedState(categoryModel: newData));
+        emit(CategoryLoadedState(categoryModel: []));
       } on DioException catch (e) {
         print('error dio');
         print(e.response);
@@ -55,7 +57,8 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       try {
         emit(CategoryLoadingState());
         // deleting data in server
-        await _categoryRepository.deleteCategory(event.token, event.categoryModel.name.toString());
+        await _categoryRepository.deleteCategory(
+            event.email, event.categoryModel.name.toString());
         // deleting data in model
         // final newData = data..removeWhere((element) => element.id == event.categoryModel.id);
         // // change state

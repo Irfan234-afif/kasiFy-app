@@ -18,7 +18,8 @@ String simpleCurrencyFormat(String data) {
 
 String currencyFormat(String data) {
   var value = double.parse(data);
-  final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+  final formatter =
+      NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
   final newValue = formatter.format(value);
   return newValue;
 }
@@ -47,7 +48,9 @@ String hoursFormat(DateTime data) {
 
 bool isToday(DateTime dateTime) {
   final now = DateTime.now();
-  return dateTime.year == now.year && dateTime.month == now.month && dateTime.day == now.day;
+  return dateTime.year == now.year &&
+      dateTime.month == now.month &&
+      dateTime.day == now.day;
 }
 
 String generateCodeProduct() {
@@ -96,5 +99,6 @@ String takeLetterIdentity(String str) {
 }
 
 DateTime parseTime(dynamic date) {
-  return Platform.isIOS ? (date as Timestamp).toDate() : (date as DateTime);
+  // return Platform.isIOS ? (date as Timestamp).toDate() : (date as DateTime);
+  return date is Timestamp ? date.toDate() : date;
 }

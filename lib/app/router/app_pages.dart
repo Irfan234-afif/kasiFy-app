@@ -27,11 +27,13 @@ part 'app_route.dart';
 
 final routerConfig = GoRouter(
   redirect: (context, state) {
-    final credential = context.read<AuthRepository>().firebaseAuth.currentUser;
+    final authRepo = context.read<AuthRepository>();
+    final credential = authRepo.firebaseAuth.currentUser;
     if (credential == null) {
       return '/login';
     } else {
       final String email = credential.email!;
+      authRepo.initialize();
       // print(email);
       context.read<ItemBloc>().add(ItemGetEvent(email));
       context.read<CategoryBloc>().add(CategoryGetEvent(email));

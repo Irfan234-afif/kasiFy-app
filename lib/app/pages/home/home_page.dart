@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     userModel = context.read<AuthRepository>().userModel;
+    print(userModel.email);
     token = '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     super.initState();
@@ -66,7 +67,8 @@ class _HomePageState extends State<HomePage> {
                     if (salesModel?.isNotEmpty ?? false) {
                       final dataToday = state.salesModel!
                           .where((element) =>
-                              ymdFormat(element.createdAt!) == ymdFormat(DateTime.now()))
+                              ymdFormat(element.createdAt!) ==
+                              ymdFormat(DateTime.now()))
                           .toList();
                       // di looping agar mendapatkan sales yang hari ini
                       for (var element in dataToday) {
@@ -82,17 +84,20 @@ class _HomePageState extends State<HomePage> {
                         Center(
                           child: Text(
                             userModel.shopName ?? 'Shop name not found',
-                            style: textTheme.titleLarge!.copyWith(color: Colors.white),
+                            style: textTheme.titleLarge!
+                                .copyWith(color: Colors.white),
                           ),
                         ),
                         const Spacer(),
                         Text(
                           'Order count today : $orderCount',
-                          style: textTheme.titleSmall!.copyWith(color: Colors.white, fontSize: 12),
+                          style: textTheme.titleSmall!
+                              .copyWith(color: Colors.white, fontSize: 12),
                         ),
                         Text(
                           'Revenue today : $parseRevenue',
-                          style: textTheme.titleSmall!.copyWith(color: Colors.white, fontSize: 12),
+                          style: textTheme.titleSmall!
+                              .copyWith(color: Colors.white, fontSize: 12),
                         ),
                       ],
                     );
@@ -394,7 +399,9 @@ class _HomePageState extends State<HomePage> {
                     case 2:
                       title = 'LogOut';
                       onTap = () {
-                        context.read<AuthBloc>().add(AuthSignOutEvent(token: token));
+                        context
+                            .read<AuthBloc>()
+                            .add(AuthSignOutEvent(token: token));
                         context.read<ItemBloc>().add(ItemEmptyEvent());
                         context.read<OrderBloc>().add(OrderEmptyEvent());
                         context.read<CategoryBloc>().add(CategoryEmptyEvent());
@@ -403,7 +410,9 @@ class _HomePageState extends State<HomePage> {
                     case 3:
                       title = 'LogOut';
                       onTap = () {
-                        context.read<AuthBloc>().add(AuthSignOutEvent(token: token));
+                        context
+                            .read<AuthBloc>()
+                            .add(AuthSignOutEvent(token: token));
                         context.read<ItemBloc>().add(ItemEmptyEvent());
                         context.read<OrderBloc>().add(OrderEmptyEvent());
                         context.read<CategoryBloc>().add(CategoryEmptyEvent());

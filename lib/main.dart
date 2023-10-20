@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/draggable_item/draggable_item_cubit.dart';
@@ -60,16 +61,43 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  // use WidgetBindingObserver for listen platformBrightness
+
+  late ThemeCubit _themeCubit;
+
   @override
   void initState() {
-    // final platformBrightness = MediaQuery.of(context).platformBrightness;
-    // if (platformBrightness == Brightness.dark) {
-    //   context.read<ThemeCubit>().themeDark();
-    // } else {
-    //   context.read<ThemeCubit>().themeLight();
-    // }
+    // check theme devices first
+    WidgetsBinding.instance.addObserver(this);
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   obsWithChangeTheme(context);
+    // });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangePlatformBrightness() {
+    obsWithChangeTheme(context);
+    super.didChangePlatformBrightness();
+  }
+
+  void obsWithChangeTheme(BuildContext context) {
+    var brightness =
+        SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    if (brightness == Brightness.light &&
+        _themeCubit.state is! ThemeLightState) {
+      _themeCubit.themeLight();
+    } else if (brightness == Brightness.dark &&
+        _themeCubit.state is! ThemeDarkState) {
+      _themeCubit.themeDark();
+    }
   }
 
   @override
@@ -77,18 +105,19 @@ class _MyAppState extends State<MyApp> {
     // Detect Tablet or Mobile and rotatation
     // and save variable in isTablet and isLandscape
     final shortSide = MediaQuery.of(context).size.shortestSide;
-    final orientation = MediaQuery.of(context).orientation == Orientation.portrait;
+    final orientation =
+        MediaQuery.of(context).orientation == Orientation.portrait;
 
     final isMobile = shortSide < 600;
     isTablet = !isMobile;
     isLandscape = !orientation;
-
     return RepositoryProvider(
       create: (context) => AuthRepository(),
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => ThemeCubit()),
-          BlocProvider(create: (context) => AuthBloc(context.read<AuthRepository>())),
+          BlocProvider(
+              create: (context) => AuthBloc(context.read<AuthRepository>())),
           BlocProvider(create: (context) => ItemBloc()),
           BlocProvider(create: (context) => TempOrderBloc()),
           BlocProvider(create: (context) => OrderBloc()),
@@ -100,26 +129,12 @@ class _MyAppState extends State<MyApp> {
           BlocProvider(create: (context) => SalesBloc()),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(
-          // listener: (context, state) {
-          //   // if (platformBrightness == Brightness.dark) {
-          //   //   context.read<ThemeCubit>().themeDark();
-          //   // } else {
-          //   //   context.read<ThemeCubit>().themeLight();
-          //   // }
-          //   // if (state is ThemeDarkState) {
-          //   //   SystemChrome.setSystemUIOverlayStyle(
-          //   //     SystemUiOverlayStyle.dark,
-          //   //   );
-          //   // } else {
-          //   //   SystemChrome.setSystemUIOverlayStyle(
-          //   //     SystemUiOverlayStyle.light,
-          //   //   );
-          //   // }
-          // },
           builder: (context, state) {
+            _themeCubit = context.read<ThemeCubit>();
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               theme: state.appTheme.themeData,
+              themeMode: state.appTheme.mode,
               // themeMode: state.appTheme.mode,
               routeInformationParser: routerConfig.routeInformationParser,
               routeInformationProvider: routerConfig.routeInformationProvider,

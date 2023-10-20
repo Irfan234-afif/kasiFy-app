@@ -4,23 +4,23 @@ part of 'category_bloc.dart';
 sealed class CategoryEvent {}
 
 final class CategoryGetEvent extends CategoryEvent {
-  final String token;
+  final String email;
 
-  CategoryGetEvent(this.token);
+  CategoryGetEvent(this.email);
 }
 
 final class CategoryAddEvent extends CategoryEvent {
-  final String token;
+  final String email;
   final CategoryModel categoryModel;
 
-  CategoryAddEvent(this.token, {required this.categoryModel});
+  CategoryAddEvent(this.email, {required this.categoryModel});
 }
 
 final class CategoryDeleteEvent extends CategoryEvent {
-  final String token;
+  final String email;
   final CategoryModel categoryModel;
 
-  CategoryDeleteEvent(this.token, {required this.categoryModel});
+  CategoryDeleteEvent(this.email, {required this.categoryModel});
 }
 
 final class CategoryEmptyEvent extends CategoryEvent {}

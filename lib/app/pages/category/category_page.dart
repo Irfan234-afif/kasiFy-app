@@ -19,13 +19,13 @@ class CategoryPage extends StatefulWidget {
 class _CategoryPageState extends State<CategoryPage> {
   late TextEditingController newCategoryC;
   late GlobalKey<FormState> formkey;
-  late String token;
+  late String email;
 
   @override
   void initState() {
     newCategoryC = TextEditingController();
     formkey = GlobalKey<FormState>();
-    token = '';
+    email = context.read<AuthRepository>().userModel.email ?? '';
     super.initState();
   }
 
@@ -40,7 +40,9 @@ class _CategoryPageState extends State<CategoryPage> {
       final categoryModel = CategoryModel(
         name: newCategoryC.text,
       );
-      context.read<CategoryBloc>().add(CategoryAddEvent(token, categoryModel: categoryModel));
+      context
+          .read<CategoryBloc>()
+          .add(CategoryAddEvent(email, categoryModel: categoryModel));
     }
   }
 
@@ -55,7 +57,7 @@ class _CategoryPageState extends State<CategoryPage> {
     );
 
     if (flag) {
-      addCategory.add(CategoryDeleteEvent(token, categoryModel: category));
+      addCategory.add(CategoryDeleteEvent(email, categoryModel: category));
     }
   }
 
@@ -66,8 +68,8 @@ class _CategoryPageState extends State<CategoryPage> {
         title: const Text("Product's item category"),
       ),
       body: Padding(
-        padding:
-            const EdgeInsets.symmetric(horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
+        padding: const EdgeInsets.symmetric(
+            horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
         child: Column(
           children: [
             _buildTextFieldAddCategory(),
@@ -91,7 +93,8 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
               decoration: InputDecoration(
                 hintText: 'Input a new category',
-                contentPadding: const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(kRadiusDeffault),
                   borderSide: const BorderSide(color: Colors.black26),
@@ -140,9 +143,9 @@ class _CategoryPageState extends State<CategoryPage> {
               );
             } else if (categoryModel == null || categoryModel.isEmpty) {
               // When data not yet
-              return const SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Center(
+              return const Center(
+                child: SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
                   child: Text('Category not yet'),
                 ),
               );

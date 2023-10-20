@@ -6,10 +6,20 @@ class AuthRepository {
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
   UserModel userModel = UserModel();
-  final userFirestore = FirebaseFirestore.instance.collection('users').withConverter(
-        fromFirestore: (snapshot, options) => UserModel.fromJson(snapshot.data()!),
-        toFirestore: (value, options) => value.toJson(),
-      );
+  final userFirestore =
+      FirebaseFirestore.instance.collection('users').withConverter(
+            fromFirestore: (snapshot, options) =>
+                UserModel.fromJson(snapshot.data()!),
+            toFirestore: (value, options) => value.toJson(),
+          );
+
+  Future<void> initialize() async {
+    print('init');
+    final dataDb = await userFirestore
+        .where('email', isEqualTo: firebaseAuth.currentUser?.email)
+        .get();
+    userModel = dataDb.docs.first.data();
+  }
 
   Future<void> signUp({
     required String name,
@@ -18,7 +28,8 @@ class AuthRepository {
     required String password,
   }) async {
     final DateTime dateNow = DateTime.now();
-    await firebaseAuth.createUserWithEmailAndPassword(email: email, password: password);
+    await firebaseAuth.createUserWithEmailAndPassword(
+        email: email, password: password);
     // credential.;
     String? token = await firebaseAuth.currentUser?.getIdToken();
     final UserModel parseToModel = UserModel(
@@ -36,7 +47,8 @@ class AuthRepository {
 
   Future<void> signIn({required String email, required String password}) async {
     final dateNow = DateTime.now();
-    await firebaseAuth.signInWithEmailAndPassword(email: email, password: password);
+    await firebaseAuth.signInWithEmailAndPassword(
+        email: email, password: password);
     String? token = await firebaseAuth.currentUser?.getIdToken();
     final dataDb = await userFirestore.where('email', isEqualTo: email).get();
     await userFirestore.doc(dataDb.docs.first.id).update({
@@ -48,8 +60,9 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    final dataDB =
-        await userFirestore.where('email', isEqualTo: firebaseAuth.currentUser?.email).get();
+    final dataDB = await userFirestore
+        .where('email', isEqualTo: firebaseAuth.currentUser?.email)
+        .get();
     if (dataDB.docs.isNotEmpty) {
       await userFirestore.doc(dataDB.docs.first.id).update({
         'token': null,
