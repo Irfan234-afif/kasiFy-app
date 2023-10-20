@@ -1,16 +1,32 @@
-# kasir_app
+# KasiFy-app
 
-A new Flutter project.
+A new Chasier App Project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This app use laravel or firebase backend, using Bloc as StateManagement.
 
-A few resources to get you started if this is your first Flutter project:
+## ScreenShot
+![Screen Shot 2023-10-20 at 11 00 26](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/c7f24912-dc82-4a01-b802-3461a5deb8d4)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+![Screen Shot 2023-10-20 at 11 00 37](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/2320092c-cba1-4f72-84fb-3a68febb5dfe)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+![Screen Shot 2023-10-20 at 11 00 47](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/4fecabac-93b7-4f6e-abbe-009fceeb551a)
+
+![Screen Shot 2023-10-20 at 11 00 53](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/f3a0e96a-d10d-4d2e-a5c5-ec76e47d1554)
+
+![Screen Shot 2023-10-20 at 11 00 58](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/92da2de8-5a15-4693-80c9-174e687e1de0)
+
+![Screen Shot 2023-10-20 at 11 01 15](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/c87be13a-d92f-4205-a320-ebd61d55b95d)
+
+![Screen Shot 2023-10-20 at 11 01 25](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/56770924-bf0f-43d2-9a4a-c8cf9b229284)
+
+![Screen Shot 2023-10-20 at 11 01 47](https://github.com/Irfan234-afif/kasiFy-app/assets/69462273/43da4b68-31fc-4d0a-b084-9f4b874c7517)
+
+## Migration To Firebase
+
+Im have succes build app with laravel backend, but i want to migration to firebase.
+
+## Contact
+
+If you have any question, contact me apipiirpan@gmail.com
