@@ -6,6 +6,8 @@
 
 import 'dart:convert';
 
+import 'package:kasir_app/app/util/util.dart';
+
 List<OrderModel> orderModelFromJson(String str) =>
     List<OrderModel>.from(json.decode(str).map((x) => OrderModel.fromJson(x)));
 
@@ -56,23 +58,30 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
         name: json["name"],
-        totalPrice: json["total_price"],
-        orderAt: json["order_at"] == null ? null : DateTime.parse(json["order_at"]),
+        totalPrice: json["total_price"] is String
+            ? json["total_price"]
+            : json["total_price"].toString(),
+        orderAt: json["order_at"] == null ? null : parseTime(json["order_at"]),
         items: json["items"] == null
             ? []
-            : List<ItemOrder>.from(json["items"]!.map((x) => ItemOrder.fromJson(x))),
+            : List<ItemOrder>.from(
+                json["items"]!.map((x) => ItemOrder.fromJson(x))),
       );
 
   Map<String, dynamic> toJson() => {
         "name": name,
         "order_at": orderAt?.toIso8601String(),
-        "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
+        "items": items == null
+            ? []
+            : List<dynamic>.from(items!.map((x) => x.toJson())),
       };
   Map<String, dynamic> toJsonPost() => {
         "name": name,
-        "total_price": totalPrice,
+        "total_price": double.parse(totalPrice!),
         "order_at": orderAt?.toIso8601String(),
-        "items": items == null ? [] : List<dynamic>.from(items!.map((x) => x.toJson())),
+        "items": items == null
+            ? []
+            : List<dynamic>.from(items!.map((x) => x.toJson())),
       };
 }
 
@@ -110,15 +119,15 @@ class ItemOrder {
         name: json["name"],
         detail: json["detail"],
         quantity: json["quantity"],
-        basicPrice: json["basic_price"],
-        sellingPrice: json["selling_price"],
+        basicPrice: json["basic_price"].toString(),
+        sellingPrice: json["selling_price"].toString(),
       );
 
   Map<String, dynamic> toJson() => {
         "name": name,
         "detail": detail,
         "quantity": quantity,
-        "basic_price": basicPrice,
-        "selling_price": sellingPrice,
+        "basic_price": double.parse(basicPrice!),
+        "selling_price": double.parse(sellingPrice!),
       };
 }

@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/draggable_item/draggable_item_cubit.dart';
@@ -112,7 +113,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     isTablet = !isMobile;
     isLandscape = !orientation;
     return RepositoryProvider(
-      create: (context) => AuthRepository(),
+      create: (context) => AuthRepository()..initialize(),
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (context) => ThemeCubit()),
@@ -139,6 +140,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
               routeInformationParser: routerConfig.routeInformationParser,
               routeInformationProvider: routerConfig.routeInformationProvider,
               routerDelegate: routerConfig.routerDelegate,
+              builder: EasyLoading.init(),
               // routerConfig: routerConfig,
             );
           },

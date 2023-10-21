@@ -1,5 +1,5 @@
 import 'package:go_router/go_router.dart';
-import 'package:kasir_app/app/bloc/item/item_bloc.dart';
+
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/bloc/search/search_cubit.dart';
@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../bloc/temp_order/temp_order_bloc.dart';
+import '../../model/sales_model.dart';
 import 'widget/order_summary_tablet.dart';
 
 class SellingPage extends StatefulWidget {
@@ -42,9 +43,43 @@ class _SellingPageState extends State<SellingPage> {
     noteC = TextEditingController();
     nameFormKey = GlobalKey<FormState>();
     isOrder = false;
-    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+    email =
+        context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     orderBloc = context.read<OrderBloc>();
     super.initState();
+  }
+
+  void _addToSales(OrderModel data) {
+    double revenue = double.parse(data.totalPrice!);
+    double profit = 0;
+
+    // find profit
+    // with loop item in orderModel
+    for (ItemOrder item in data.items!) {
+      // parse String to double
+      double parseSellingPrice = double.parse(item.sellingPrice!);
+      double parseBasicPrice = double.parse(item.basicPrice!);
+      profit += parseSellingPrice - parseBasicPrice;
+    }
+
+    OrderSales orderSales = OrderSales(
+      itemCount: data.items?.length,
+      orderAt: data.orderAt,
+      totalPrice: data.totalPrice,
+    );
+    SalesModel salesModel = SalesModel(
+      createdAt: data.orderAt,
+      order: orderSales,
+      profit: profit.toString(),
+      revenue: revenue.toString(),
+    );
+
+    context.read<SalesBloc>().add(
+          SalesAddEvent(
+            email: email,
+            data: salesModel,
+          ),
+        );
   }
 
   @override
@@ -63,7 +98,8 @@ class _SellingPageState extends State<SellingPage> {
     );
   }
 
-  Widget _buildTabletLayout(Size size, MediaQueryData mediaQuery, OrderModel orderlModel) {
+  Widget _buildTabletLayout(
+      Size size, MediaQueryData mediaQuery, OrderModel orderlModel) {
     return Row(
       children: [
         Expanded(
@@ -82,8 +118,8 @@ class _SellingPageState extends State<SellingPage> {
     );
   }
 
-  Stack _buildMobileLayout(
-      Size size, MediaQueryData mediaQuery, TempOrderState state, ThemeData themeData) {
+  Stack _buildMobileLayout(Size size, MediaQueryData mediaQuery,
+      TempOrderState state, ThemeData themeData) {
     return Stack(
       children: [
         Positioned.fill(
@@ -94,13 +130,15 @@ class _SellingPageState extends State<SellingPage> {
             body: const SellingScreenBody(),
           ),
         ),
-        if (state is TempOrderisOrderState) _widgetOnOrder(size, themeData, state.orderModel!),
+        if (state is TempOrderisOrderState)
+          _widgetOnOrder(size, themeData, state.orderModel!),
       ],
     );
   }
 
   // Order On
-  Positioned _widgetOnOrder(Size size, ThemeData themeData, OrderModel orderModel) {
+  Positioned _widgetOnOrder(
+      Size size, ThemeData themeData, OrderModel orderModel) {
     final totalItem = orderModel.items?.length;
     final totalPrice = currencyFormat(orderModel.totalPrice!);
     return Positioned(
@@ -109,9 +147,14 @@ class _SellingPageState extends State<SellingPage> {
         child: BlocListener<OrderBloc, OrderState>(
           listener: (context, state) {
             // lanjutan ontap button
-            if (state is OrderLoadedState) {
-              context.read<SalesBloc>().add(SalesGetEvent(email));
-              context.goNamed(Routes.orderSucces, extra: state.orderModel!.first);
+            final salesBloc = context.read<SalesBloc>();
+            if (state is OrderLoadedState &&
+                salesBloc.state is SalesLoadedState) {
+              // context.read<SalesBloc>().add(SalesGetEvent(email));
+              context.pop(); // close bottomsheet
+              context.goNamed(Routes.orderSucces, // go succes_page
+                  extra: state.orderModel!.first);
+              context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
             }
           },
           child: GestureDetector(
@@ -120,13 +163,15 @@ class _SellingPageState extends State<SellingPage> {
               DialogCollection.bottomSheetOrder(
                 context,
                 orderModel,
-                onConfirm: (orderModel) async {
+                onConfirm: (data) async {
                   orderBloc.add(
                     OrderAddEvent(
-                      orderModel: orderModel,
+                      orderModel: data,
                       email: email,
                     ),
                   );
+
+                  _addToSales(data);
                   // final nexStep = await orderBloc.;
                 },
               );
@@ -147,10 +192,12 @@ class _SellingPageState extends State<SellingPage> {
                     child: Material(
                       color: Colors.transparent,
                       child: ListTile(
-                        titleTextStyle: themeData.textTheme.titleMedium!.copyWith(
+                        titleTextStyle:
+                            themeData.textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                         ),
-                        leadingAndTrailingTextStyle: themeData.textTheme.titleMedium!.copyWith(
+                        leadingAndTrailingTextStyle:
+                            themeData.textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                         ),
                         leading: const Icon(
@@ -169,17 +216,17 @@ class _SellingPageState extends State<SellingPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
-                      for (var itemOrder in orderModel.items!) {
-                        var sameItem =
-                            itemModel.singleWhere((element) => element.name == itemOrder.name);
-                        var restoreStockItem = sameItem.copyWith(
-                          stock: sameItem.originalStock,
-                        );
-                        context
-                            .read<ItemBloc>()
-                            .add(ItemEditLocalEvent(itemModel: restoreStockItem));
-                      }
+                      // List<ItemModel> itemModel =
+                      //     context.read<ItemBloc>().state.itemModel!;
+                      // for (var itemOrder in orderModel.items!) {
+                      //   var sameItem = itemModel.singleWhere(
+                      //       (element) => element.name == itemOrder.name);
+                      //   var restoreStockItem = sameItem.copyWith(
+                      //     stock: sameItem.originalStock,
+                      //   );
+                      //   context.read<ItemBloc>().add(
+                      //       ItemEditLocalEvent(itemModel: restoreStockItem));
+                      // }
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

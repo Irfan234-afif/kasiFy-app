@@ -1,9 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
+import 'package:kasir_app/app/bloc/theme/theme_cubit.dart';
 import 'package:kasir_app/app/model/user_model.dart';
 import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
@@ -27,14 +30,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late UserModel userModel;
-  late String token;
 
   @override
   void initState() {
     userModel = context.read<AuthRepository>().userModel;
-    print(userModel.email);
-    token = '';
-    context.read<SalesBloc>().add(SalesGetEvent(token));
     super.initState();
   }
 
@@ -42,6 +41,10 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final size = MediaQuery.sizeOf(context);
+    final themeState = context.watch<ThemeCubit>().state;
+    final textHeaderStyle = textTheme.titleMedium!.copyWith(
+      color: themeState is ThemeLightState ? kTextColor3 : Colors.white,
+    );
     return Scaffold(
       appBar: _buildAppbar(),
       drawer: _buildDrawer(),
@@ -50,7 +53,9 @@ class _HomePageState extends State<HomePage> {
           GlobalFunction.refresh(context);
         },
         child: ListView(
-          // physics: kPhysicsDeffault,
+          physics: Platform.isIOS
+              ? const ClampingScrollPhysics()
+              : const RangeMaintainingScrollPhysics(),
           children: [
             BlocBuilder<SalesBloc, SalesState>(
               builder: (context, state) {
@@ -61,7 +66,7 @@ class _HomePageState extends State<HomePage> {
                     state as SalesLoadedState;
                     final salesModel = state.salesModel;
                     // declarate variable
-                    int revenue = 0;
+                    double revenue = 0;
                     String parseRevenue = '0';
                     int orderCount = 0;
                     if (salesModel?.isNotEmpty ?? false) {
@@ -72,7 +77,7 @@ class _HomePageState extends State<HomePage> {
                           .toList();
                       // di looping agar mendapatkan sales yang hari ini
                       for (var element in dataToday) {
-                        revenue += int.parse(element.revenue!);
+                        revenue += double.parse(element.revenue!);
                       }
                       orderCount = dataToday.length;
                       //
@@ -88,16 +93,35 @@ class _HomePageState extends State<HomePage> {
                                 .copyWith(color: Colors.white),
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          'Order count today : $orderCount',
-                          style: textTheme.titleSmall!
-                              .copyWith(color: Colors.white, fontSize: 12),
-                        ),
-                        Text(
-                          'Revenue today : $parseRevenue',
-                          style: textTheme.titleSmall!
-                              .copyWith(color: Colors.white, fontSize: 12),
+                        Expanded(
+                          child: Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Order count today : $orderCount',
+                                    style: textTheme.titleSmall!.copyWith(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                  Text(
+                                    'Revenue today : $parseRevenue',
+                                    style: textTheme.titleSmall!.copyWith(
+                                        color: Colors.white, fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                              // SizedBox(
+                              //   width: 8,
+                              // ),
+                              // Expanded(
+                              //   child: Container(
+                              //     color: Colors.amber,
+                              //   ),
+                              // ),
+                            ],
+                          ),
                         ),
                       ],
                     );
@@ -119,15 +143,15 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sellingBody(textTheme),
+                  _sellingBody(textHeaderStyle),
                   const SizedBox(
                     height: kDeffaultPadding,
                   ),
-                  _managementBody(textTheme, context),
+                  _managementBody(textHeaderStyle, context),
                   const SizedBox(
                     height: kDeffaultPadding,
                   ),
-                  _insightBody(textTheme),
+                  _insightBody(textHeaderStyle),
                 ],
               ),
             ),
@@ -138,9 +162,11 @@ class _HomePageState extends State<HomePage> {
   }
 
   AppBar _buildAppbar() {
+    final themeState = context.watch<ThemeCubit>().state;
     return AppBar(
-      backgroundColor: kPrimaryColor,
-      foregroundColor: Colors.white,
+      // backgroundColor: Colors.white,
+      foregroundColor:
+          themeState is ThemeLightState ? Colors.black : Colors.white,
       surfaceTintColor: kPrimaryColor,
       centerTitle: true,
       title: const Text(
@@ -149,12 +175,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Column _sellingBody(TextTheme textTheme) {
+  Column _sellingBody(TextStyle textHeaderStyle) {
     return Column(
       children: [
         Text(
           'Selling',
-          style: textTheme.titleLarge,
+          style: textHeaderStyle,
         ),
         const Divider(),
         SizedBox(
@@ -186,12 +212,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Column _managementBody(TextTheme textTheme, BuildContext context) {
+  Column _managementBody(TextStyle textHeaderStyle, BuildContext context) {
     return Column(
       children: [
         Text(
           'Management',
-          style: textTheme.titleLarge,
+          style: textHeaderStyle,
         ),
         const Divider(),
         ListTile(
@@ -225,12 +251,12 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Column _insightBody(TextTheme textTheme) {
+  Column _insightBody(TextStyle textHeaderStyle) {
     return Column(
       children: [
         Text(
           'Insight',
-          style: textTheme.titleLarge,
+          style: textHeaderStyle,
         ),
         const Divider(),
         SizedBox(
@@ -269,8 +295,24 @@ class _HomePageState extends State<HomePage> {
         horizontal: kDeffaultPadding,
         vertical: kDeffaultPadding,
       ),
-      constraints: BoxConstraints.tight(Size.fromHeight(size.height * 0.15)),
-      decoration: const BoxDecoration(
+      margin: EdgeInsets.symmetric(
+        horizontal: kSmallPadding,
+        vertical: kSmallPadding,
+      ),
+      // constraints: BoxConstraints.tight(Size.fromHeight(size.height * 0.15)),
+      constraints: BoxConstraints(
+        minHeight: 150,
+        maxHeight: 150,
+      ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(kRadiusDeffault),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black87,
+            blurRadius: 5,
+            spreadRadius: 0.5,
+          ),
+        ],
         color: kPrimaryColor,
       ),
       child: Column(
@@ -342,6 +384,7 @@ class _HomePageState extends State<HomePage> {
 
   Drawer _buildDrawer() {
     final textTheme = Theme.of(context).textTheme;
+    final themeState = context.watch<ThemeCubit>().state;
     return Drawer(
       child: ListView(
         padding: const EdgeInsets.symmetric(
@@ -351,7 +394,7 @@ class _HomePageState extends State<HomePage> {
           DrawerHeader(
             child: Column(
               children: [
-                Expanded(
+                const Expanded(
                   child: SizedBox.expand(
                     child: CircleAvatar(
                       child: Icon(
@@ -361,12 +404,16 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 8,
                 ),
                 Text(
                   userModel.shopName ?? '',
-                  style: textTheme.titleLarge,
+                  style: textTheme.titleMedium!.copyWith(
+                    color: themeState is ThemeLightState
+                        ? kTextColor3
+                        : Colors.white,
+                  ),
                 ),
               ],
             ),
@@ -399,9 +446,7 @@ class _HomePageState extends State<HomePage> {
                     case 2:
                       title = 'LogOut';
                       onTap = () {
-                        context
-                            .read<AuthBloc>()
-                            .add(AuthSignOutEvent(token: token));
+                        context.read<AuthBloc>().add(AuthSignOutEvent());
                         context.read<ItemBloc>().add(ItemEmptyEvent());
                         context.read<OrderBloc>().add(OrderEmptyEvent());
                         context.read<CategoryBloc>().add(CategoryEmptyEvent());
@@ -410,9 +455,7 @@ class _HomePageState extends State<HomePage> {
                     case 3:
                       title = 'LogOut';
                       onTap = () {
-                        context
-                            .read<AuthBloc>()
-                            .add(AuthSignOutEvent(token: token));
+                        context.read<AuthBloc>().add(AuthSignOutEvent());
                         context.read<ItemBloc>().add(ItemEmptyEvent());
                         context.read<OrderBloc>().add(OrderEmptyEvent());
                         context.read<CategoryBloc>().add(CategoryEmptyEvent());
@@ -471,13 +514,21 @@ class _CardItemHome extends StatelessWidget {
               const SizedBox(
                 height: 12,
               ),
-              Text(
-                title,
-                style: textTheme.titleSmall!,
-                // style: textTheme.titleMedium!.copyWith(
-                //   fontSize: 16,
-                //   // fontWeight: FontWeight.w400,
-                // ),
+              BlocBuilder<ThemeCubit, ThemeState>(
+                builder: (context, themeState) {
+                  return Text(
+                    title,
+                    // style: textTheme.titleSmall,
+                    style: textTheme.titleSmall!.copyWith(
+                        color: themeState is ThemeLightState
+                            ? kTextColor3
+                            : Colors.white),
+                    // style: textTheme.titleMedium!.copyWith(
+                    //   fontSize: 16,
+                    //   // fontWeight: FontWeight.w400,
+                    // ),
+                  );
+                },
               ),
             ],
           ),

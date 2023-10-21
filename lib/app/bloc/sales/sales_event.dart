@@ -13,6 +13,12 @@ final class SalesGetEvent extends SalesEvent {
   SalesGetEvent(this.email);
 }
 
+final class SalesAddEvent extends SalesEvent {
+  final String email;
+  final SalesModel data;
+  SalesAddEvent({required this.email, required this.data});
+}
+
 // final class SalesAddEvent extends SalesEvent {
 //   final String token;
 //   final SalesModel salesModel;

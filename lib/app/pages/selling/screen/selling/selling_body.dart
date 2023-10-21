@@ -16,7 +16,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../bloc/item/item_bloc.dart';
 import '../../../../bloc/order/order_bloc.dart';
-import '../../../../repository/auth_repository.dart';
+
 import '../../../../theme/app_theme.dart';
 import '../../widget/chip_filter.dart';
 
@@ -77,6 +77,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
                 ItemOrder(
                   detail: note ?? '',
                   name: itemModel!.name,
+                  basicPrice: itemModel.basicPrice,
                   sellingPrice: itemModel.sellingPrice,
                   quantity: quantity,
                 ),
@@ -85,12 +86,53 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   }
 
   void _orderUpdate({required OrderModel orderModel, required ItemOrder item}) {
+    print(orderModel.toJson());
     // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem = orderModel.items!.indexWhere((element) => element.name == item.name);
+    int indexItem =
+        orderModel.items!.indexWhere((element) => element.name == item.name);
     // print(item.detail);
     context.read<TempOrderBloc>().add(
-          TempOrderUpdateEvent(orderModel: orderModel..items![indexItem] = item),
+          TempOrderUpdateEvent(
+              orderModel: orderModel..items![indexItem] = item),
         );
+  }
+
+  void _itemOnTap(ItemModel item) {
+    DialogCollection.dialogItem(
+      context,
+      item,
+      onSubmit: (item, quantity, note) {
+        print(item.toJson());
+        final dataAll = context
+            .read<TempOrderBloc>()
+            .state
+            .orderModel; // ambil data dari bloc
+        final checkData = dataAll?.items?.indexWhere(
+          (element) => element.name == item.name,
+        ); // cari data
+        if (checkData == null || checkData == -1) {
+          //-1 adalah data yang sama tidak di temukan
+          _orderOn(
+            quantity: quantity,
+            itemModel: item,
+            note: note,
+          );
+        } else {
+          // jika item ditemukan
+
+          var dataItem =
+              dataAll!.items![checkData]; // ambil data sesuai dari cari data
+          var qty = dataItem.quantity! + quantity;
+          var price = double.parse(dataItem.sellingPrice!) +
+              double.parse(item.sellingPrice!);
+          var detail = '${dataItem.detail!}, $note';
+          dataItem.quantity = qty;
+          dataItem.sellingPrice = price.toString();
+          dataItem.detail = detail;
+          _orderUpdate(item: dataItem, orderModel: dataAll);
+        }
+      },
+    );
   }
 
   @override
@@ -101,7 +143,17 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
       onRefresh: () async {
         GlobalFunction.refresh(context);
       },
-      child: _buildItemBloc(size),
+      child: ListView(
+        padding: const EdgeInsets.only(
+          top: kSmallPadding,
+          left: kDeffaultPadding,
+          right: kDeffaultPadding,
+        ),
+        children: [
+          const ListChipFilter(),
+          _buildItemBloc(size),
+        ],
+      ),
     );
   }
 
@@ -171,14 +223,10 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
     );
   }
 
-  ListView _buildBody(Size size, List<ItemModel> data) {
-    return ListView(
-      padding: const EdgeInsets.symmetric(vertical: kSmallPadding, horizontal: kDeffaultPadding),
-      children: [
-        const ListChipFilter(),
-        isTablet ? _buildTabletItem(size, data) : _buildMobileItem(size, data),
-      ],
-    );
+  Widget _buildBody(Size size, List<ItemModel> data) {
+    return isTablet
+        ? _buildTabletItem(size, data)
+        : _buildMobileItem(size, data);
   }
 
   Widget _buildShimmer() {
@@ -326,7 +374,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         // }
         return ListView.builder(
           shrinkWrap: true,
-          padding: const EdgeInsets.only(top: kSmallPadding),
+          // padding: const EdgeInsets.only(top: 0),
           scrollDirection: Axis.vertical,
           physics: const ClampingScrollPhysics(),
           itemCount: data.length,
@@ -344,36 +392,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
             final bool enabled = item.stock != 0;
 
             return TileItem(
-              onTap: () {
-                DialogCollection.dialogItem(
-                  context,
-                  item,
-                  onSubmit: (item, quantity, note) {
-                    var dataAll = context.read<TempOrderBloc>().state.orderModel;
-                    var checkData = dataAll?.items?.indexWhere(
-                      (element) => element.name == item.name,
-                    );
-                    if (checkData == null || checkData == -1) {
-                      //-1 adalah data yang sama tidak di temukan
-                      _orderOn(
-                        quantity: quantity,
-                        itemModel: item,
-                        note: note,
-                      );
-                    } else {
-                      var dataItem = dataAll!.items![checkData];
-                      var qty = dataItem.quantity! + quantity;
-                      var price =
-                          double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
-                      var detail = '${dataItem.detail!}, $note';
-                      dataItem.quantity = qty;
-                      dataItem.sellingPrice = price.toString();
-                      dataItem.detail = detail;
-                      _orderUpdate(item: dataItem, orderModel: dataAll);
-                    }
-                  },
-                );
-              },
+              onTap: () => _itemOnTap(item),
               enabled: enabled,
               sizeImage: sizeImageItem,
               leadingText: leadingText,

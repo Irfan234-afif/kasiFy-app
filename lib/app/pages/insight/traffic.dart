@@ -82,7 +82,7 @@ class _TrafficPageState extends State<TrafficPage> {
                       );
                       return _buildBody(
                         indexFilter,
-                        salesModel,
+                        // salesModel,
                         orderModel,
                       );
 
@@ -115,18 +115,16 @@ class _TrafficPageState extends State<TrafficPage> {
     }
   }
 
-  Widget _buildBody(int indexFilter, List<SalesModel> salesModel, List<OrderModel> orderModel) {
-    if (salesModel.isEmpty) {
-      return const Center(
-        child: Text(
-          'No data cant show',
-        ),
-      );
-    }
+  Widget _buildBody(int indexFilter, List<OrderModel> orderModel) {
+    // if (salesModel.isEmpty) {
+    //   return const Center(
+    //     child: Text(
+    //       'No data cant show',
+    //     ),
+    //   );
+    // }
     final textTheme = Theme.of(context).textTheme;
     // declarate newData sort
-    List<OrderModel> sortedData = [];
-    List<ItemOrder> newDataItemOrder = [];
 
     late String Function(DateTime) metode;
 
@@ -150,58 +148,10 @@ class _TrafficPageState extends State<TrafficPage> {
         break;
       default:
     }
-
-    for (var element in orderModel) {
-      final dateNow = DateTime.now();
-      switch (indexFilter) {
-        case 0:
-          sortedData.add(element);
-          break;
-        case 1:
-          if (element.orderAt!.year == dateNow.year) {
-            sortedData.add(element);
-          }
-          break;
-        case 2:
-          if (element.orderAt!.year == dateNow.year && element.orderAt!.month == dateNow.month) {
-            sortedData.add(element);
-          }
-          break;
-        case 3:
-          if (element.orderAt!.year == dateNow.year &&
-              element.orderAt!.month == dateNow.month &&
-              element.orderAt!.day == dateNow.day) {
-            sortedData.add(element);
-          }
-          break;
-        default:
-      }
-    }
-
-    // sort item rank
-    for (var dataOrder in sortedData) {
-      for (var item in dataOrder.items!) {
-        int indexCheckItem = newDataItemOrder.indexWhere((newItem) => newItem.name == item.name);
-        if (indexCheckItem == -1) {
-          // print('oi');
-          newDataItemOrder.add(item);
-        } else {
-          ItemOrder sameItem = newDataItemOrder[indexCheckItem];
-          var newItemData = sameItem.copyWith(
-            quantity: sameItem.quantity! + item.quantity!,
-            sellingPrice: sameItem.sellingPrice! + item.sellingPrice!,
-            basicPrice: sameItem.basicPrice! + item.basicPrice!,
-          );
-          newDataItemOrder.removeAt(indexCheckItem);
-          newDataItemOrder.insert(indexCheckItem, newItemData);
-        }
-      }
-    }
-
-    // sort data item berdasarkan quantityy
-    newDataItemOrder.sort(
-      (a, b) => b.quantity!.compareTo(a.quantity!),
-    );
+    List<OrderModel> sortedData =
+        trafficSortCalc(dataOrder: orderModel, indexFilter: indexFilter);
+    List<ItemOrder> newDataItemOrder =
+        trafficItemRankCalc(dataSorted: sortedData);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
@@ -231,7 +181,8 @@ class _TrafficPageState extends State<TrafficPage> {
         // ),
         SfCartesianChart(
           primaryXAxis: CategoryAxis(),
-          legend: const Legend(isVisible: true, position: LegendPosition.bottom),
+          legend:
+              const Legend(isVisible: true, position: LegendPosition.bottom),
           title: ChartTitle(
             text: 'Order',
             textStyle: textTheme.titleMedium,
@@ -247,7 +198,8 @@ class _TrafficPageState extends State<TrafficPage> {
               yValueMapper: (OrderModel order, index) {
                 // logic to know length per-column
                 int length = orderModel
-                    .where((element) => metode(element.orderAt!) == metode(order.orderAt!))
+                    .where((element) =>
+                        metode(element.orderAt!) == metode(order.orderAt!))
                     .length;
                 return length;
               },

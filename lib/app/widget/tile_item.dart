@@ -29,7 +29,8 @@ class TileItem extends StatelessWidget {
       enabled: enabled,
       onLongPress: () {},
       onTap: onTap,
-      minVerticalPadding: 24,
+      minVerticalPadding: 15,
+      contentPadding: EdgeInsets.symmetric(horizontal: kSmallPadding),
       leading: isLeadingImage
           ? SizedBox(
               height: sizeImage,

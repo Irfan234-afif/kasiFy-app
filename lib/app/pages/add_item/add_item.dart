@@ -2,19 +2,22 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
+
 import 'package:kasir_app/app/bloc/category/category_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/model/item_model.dart';
-import 'package:kasir_app/app/repository/auth_repository.dart';
+
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
-import 'package:kasir_app/app/util/dialog_collection.dart';
+
 import 'package:kasir_app/app/util/util.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../model/category_model.dart';
+import '../../widget/support/currency_input_formatter.dart';
+import '../../widget/support/dashed_border_painter.dart';
 
 class AddItemPage extends StatefulWidget {
   const AddItemPage({super.key, this.arg});
@@ -84,9 +87,11 @@ class _AddItemPageState extends State<AddItemPage> {
   }
 
   void _onSave() {
+    EasyLoading.show(maskType: EasyLoadingMaskType.clear);
     final basicPrice = basicPriceC.text.replaceAll('.', '');
     final sellingPrice = sellingPriceC.text.replaceAll('.', '');
-    final category = categoryModel.firstWhere((element) => element.name == categoryC.text);
+    final category =
+        categoryModel.firstWhere((element) => element.name == categoryC.text);
     final itemModel = ItemModel(
       name: nameC.text,
       description: descC.text,
@@ -150,7 +155,8 @@ class _AddItemPageState extends State<AddItemPage> {
                     flex: 1,
                     child: TextFormField(
                       controller: stockC,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                      keyboardType:
+                          const TextInputType.numberWithOptions(decimal: false),
                       inputFormatters: [
                         FilteringTextInputFormatter.digitsOnly,
                       ],
@@ -211,13 +217,15 @@ class _AddItemPageState extends State<AddItemPage> {
                         ),
                         TextFormField(
                           controller: basicPriceC,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: false),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            _CurrencyInputFormatter(),
+                            CurrencyInputFormatter(),
                           ],
                           decoration: const InputDecoration(
-                            prefixIconConstraints: BoxConstraints(minWidth: 30, minHeight: 0),
+                            prefixIconConstraints:
+                                BoxConstraints(minWidth: 30, minHeight: 0),
                             prefixIcon: Text(
                               'Rp',
                             ),
@@ -239,13 +247,15 @@ class _AddItemPageState extends State<AddItemPage> {
                         ),
                         TextFormField(
                           controller: sellingPriceC,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: false),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: false),
                           inputFormatters: [
                             FilteringTextInputFormatter.digitsOnly,
-                            _CurrencyInputFormatter(),
+                            CurrencyInputFormatter(),
                           ],
                           decoration: const InputDecoration(
-                            prefixIconConstraints: BoxConstraints(minWidth: 30, minHeight: 0),
+                            prefixIconConstraints:
+                                BoxConstraints(minWidth: 30, minHeight: 0),
                             prefixIcon: Text(
                               'Rp',
                             ),
@@ -271,7 +281,8 @@ class _AddItemPageState extends State<AddItemPage> {
                       builder: (context, stateCategory) {
                         return SearchAnchor.bar(
                           barPadding: const MaterialStatePropertyAll(
-                            EdgeInsets.symmetric(vertical: 4, horizontal: kDeffaultPadding),
+                            EdgeInsets.symmetric(
+                                vertical: 4, horizontal: kDeffaultPadding),
                           ),
                           constraints: const BoxConstraints(minHeight: 0),
                           searchController: categoryC,
@@ -279,12 +290,15 @@ class _AddItemPageState extends State<AddItemPage> {
                           barLeading: const Icon(TablerIcons.category_2),
                           viewTrailing: [
                             IconButton(
-                              onPressed: () => context.pushNamed(Routes.category),
+                              onPressed: () =>
+                                  context.pushNamed(Routes.category),
                               icon: const Icon(TablerIcons.plus),
                             ),
                           ],
-                          suggestionsBuilder: (BuildContext context, SearchController controller) {
-                            List<CategoryModel>? category = stateCategory.categoryModel ?? [];
+                          suggestionsBuilder: (BuildContext context,
+                              SearchController controller) {
+                            List<CategoryModel>? category =
+                                stateCategory.categoryModel ?? [];
                             return List<Widget>.generate(
                               category.length,
                               (int index) {
@@ -325,9 +339,18 @@ class _AddItemPageState extends State<AddItemPage> {
               ElevatedButton(
                 onPressed: _onSave,
                 child: BlocConsumer<ItemBloc, ItemState>(
-                  listenWhen: (previous, current) => previous is ItemLoadingState,
+                  listenWhen: (previous, current) =>
+                      previous is ItemLoadingState,
                   listener: (context, state) {
                     if (state is ItemLoadedState) {
+                      nameC.clear();
+                      stockC.clear();
+                      codeProductC.clear();
+                      sellingPriceC.clear();
+                      basicPriceC.clear();
+                      categoryC.clear();
+                      descC.clear();
+                      EasyLoading.dismiss();
                       // context.pop();
                       // DialogCollection.snakBarSuccesAddItem(context);
                     }
@@ -364,7 +387,7 @@ class _BoxImage extends StatelessWidget {
         height: 200,
         width: 200,
         child: CustomPaint(
-          painter: _DashedBorderPainter(
+          painter: DashedBorderPainter(
             color: Colors.black26,
             strokeWidth: 2,
             dashWidth: 8,
@@ -395,112 +418,5 @@ class _BoxImage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
-  final double dashWidth;
-  final double dashSpace;
-  final BorderRadius borderRadius;
-
-  _DashedBorderPainter({
-    required this.color,
-    required this.strokeWidth,
-    required this.dashWidth,
-    required this.dashSpace,
-    required this.borderRadius,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    double x = 0;
-
-    // Top border
-    while (x < size.width) {
-      double length = x + dashWidth;
-      if (length > size.width) {
-        length = size.width;
-      }
-      Path path = Path();
-      path.moveTo(x, 0);
-      path.lineTo(length, 0);
-      canvas.drawPath(path, paint);
-      x += dashWidth + dashSpace;
-    }
-
-    // Right border
-    double y = 0;
-    while (y < size.height) {
-      double length = y + dashWidth;
-      if (length > size.height) {
-        length = size.height;
-      }
-      Path path = Path();
-      path.moveTo(size.width, y);
-      path.lineTo(size.width, length);
-      canvas.drawPath(path, paint);
-      y += dashWidth + dashSpace;
-    }
-
-    // Bottom border
-    x = size.width;
-    while (x > 0) {
-      double length = x - dashWidth;
-      if (length < 0) {
-        length = 0;
-      }
-      Path path = Path();
-      path.moveTo(x, size.height);
-      path.lineTo(length, size.height);
-      canvas.drawPath(path, paint);
-      x -= dashWidth + dashSpace;
-    }
-
-    // Left border
-    y = size.height;
-    while (y > 0) {
-      double length = y - dashWidth;
-      if (length < 0) {
-        length = 0;
-      }
-      Path path = Path();
-      path.moveTo(0, y);
-      path.lineTo(0, length);
-      canvas.drawPath(path, paint);
-      y -= dashWidth + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
-  }
-}
-
-class _CurrencyInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    if (newValue.selection.baseOffset == 0) {
-      return newValue;
-    }
-    double value = double.parse(newValue.text);
-
-    final parse = NumberFormat.currency(
-      locale: 'id_ID',
-      decimalDigits: 0,
-      symbol: '',
-    );
-
-    String newText = parse.format(value);
-
-    return newValue.copyWith(
-        text: newText, selection: TextSelection.collapsed(offset: newText.length));
   }
 }

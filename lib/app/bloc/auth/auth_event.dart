@@ -23,8 +23,4 @@ class AuthSignInEvent extends AuthEvent {
   });
 }
 
-class AuthSignOutEvent extends AuthEvent {
-  final String token;
-
-  AuthSignOutEvent({required this.token});
-}
+class AuthSignOutEvent extends AuthEvent {}

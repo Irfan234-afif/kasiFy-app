@@ -18,12 +18,14 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   late TextEditingController newCategoryC;
+  late FocusNode categoryF;
   late GlobalKey<FormState> formkey;
   late String email;
 
   @override
   void initState() {
     newCategoryC = TextEditingController();
+    categoryF = FocusNode();
     formkey = GlobalKey<FormState>();
     email = context.read<AuthRepository>().userModel.email ?? '';
     super.initState();
@@ -37,6 +39,8 @@ class _CategoryPageState extends State<CategoryPage> {
 
   void _addCategory() {
     if (newCategoryC.text.isNotEmpty) {
+      newCategoryC.clear();
+      categoryF.unfocus();
       final categoryModel = CategoryModel(
         name: newCategoryC.text,
       );
@@ -51,9 +55,8 @@ class _CategoryPageState extends State<CategoryPage> {
     final addCategory = context.read<CategoryBloc>();
 
     // dialog confirm
-    bool flag = await DialogCollection.confirmDialog(
+    bool flag = await DialogCollection.confirmOrder(
       context,
-      titleText: 'Delete this category and items?',
     );
 
     if (flag) {
@@ -88,6 +91,7 @@ class _CategoryPageState extends State<CategoryPage> {
             key: formkey,
             child: TextFormField(
               controller: newCategoryC,
+              focusNode: categoryF,
               style: const TextStyle(
                 fontSize: 12,
               ),

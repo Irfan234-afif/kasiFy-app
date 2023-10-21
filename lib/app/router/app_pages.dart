@@ -26,19 +26,26 @@ part 'app_route.dart';
 // import 'app_route.dart';
 
 final routerConfig = GoRouter(
-  redirect: (context, state) {
+  redirect: (context, state) async {
     final authRepo = context.read<AuthRepository>();
     final credential = authRepo.firebaseAuth.currentUser;
+    final userModel = authRepo.userModel;
     if (credential == null) {
       return '/login';
     } else {
-      final String email = credential.email!;
-      authRepo.initialize();
-      // print(email);
-      context.read<ItemBloc>().add(ItemGetEvent(email));
-      context.read<CategoryBloc>().add(CategoryGetEvent(email));
-      context.read<OrderBloc>().add(OrderGetEvent(email: email));
-      context.read<SalesBloc>().add(SalesGetEvent(email));
+      if (userModel.email == null) {
+        final String email = credential.email!;
+        await authRepo.initialize();
+
+        // ignore: use_build_context_synchronously
+        context.read<ItemBloc>().add(ItemGetEvent(email));
+        // ignore: use_build_context_synchronously
+        context.read<CategoryBloc>().add(CategoryGetEvent(email));
+        // ignore: use_build_context_synchronously
+        context.read<OrderBloc>().add(OrderGetEvent(email: email));
+        // ignore: use_build_context_synchronously
+        context.read<SalesBloc>().add(SalesGetEvent(email));
+      }
       return null;
     }
   },

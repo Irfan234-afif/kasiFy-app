@@ -382,8 +382,10 @@ class DialogCollection {
                       itemCount: orderModel.items?.length,
                       itemBuilder: (context, index) {
                         var data = orderModel.items![index];
-                        double priceItemTotal = double.parse(data.sellingPrice!) * data.quantity!;
-                        var newPriceItem = currencyFormat(priceItemTotal.toString());
+                        double priceItemTotal =
+                            double.parse(data.sellingPrice!) * data.quantity!;
+                        var newPriceItem =
+                            currencyFormat(priceItemTotal.toString());
                         return Column(
                           children: [
                             ListTile(
@@ -393,20 +395,23 @@ class DialogCollection {
                                 color: Colors.green,
                                 fontSize: 16,
                               ),
-                              titleTextStyle: themeData.textTheme.titleMedium!.copyWith(
+                              titleTextStyle:
+                                  themeData.textTheme.titleMedium!.copyWith(
                                 color: Colors.black87,
                               ),
                               leading: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(kSmallRadius),
+                                  borderRadius:
+                                      BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
                                 ),
                                 child: Text(
                                   '${data.quantity}x',
-                                  style: themeData.textTheme.titleMedium!.copyWith(
+                                  style:
+                                      themeData.textTheme.titleMedium!.copyWith(
                                     color: Colors.green,
                                     fontSize: 14,
                                   ),
@@ -433,7 +438,8 @@ class DialogCollection {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(mediaQuery.size.width, 0),
-                  padding: const EdgeInsets.symmetric(vertical: kDeffaultPadding),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: kDeffaultPadding),
                   backgroundColor: Colors.red,
                 ),
                 onPressed: () {
@@ -483,7 +489,8 @@ class DialogCollection {
     final mediaQuery = MediaQuery.of(context);
     final size = mediaQuery.size;
     final textTheme = Theme.of(context).textTheme;
-    final paddingHorizontal = isTablet ? kDeffaultPadding * 4 : kDeffaultPadding;
+    final paddingHorizontal =
+        isTablet ? kDeffaultPadding * 4 : kDeffaultPadding;
     final TextEditingController qtyC = TextEditingController();
     final TextEditingController noteC = TextEditingController();
     final GlobalKey<FormState> noteFormKey = GlobalKey<FormState>();
@@ -579,7 +586,8 @@ class DialogCollection {
                               child: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(kSmallRadius),
+                                  borderRadius:
+                                      BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
@@ -620,7 +628,8 @@ class DialogCollection {
                               child: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(kSmallRadius),
+                                  borderRadius:
+                                      BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
@@ -837,7 +846,8 @@ class DialogCollection {
                               behavior: HitTestBehavior.translucent,
                               child: Text(
                                 'Add items',
-                                style: themeData.textTheme.titleMedium!.copyWith(
+                                style:
+                                    themeData.textTheme.titleMedium!.copyWith(
                                   color: Colors.blue,
                                   fontSize: 14,
                                 ),
@@ -862,11 +872,13 @@ class DialogCollection {
                                       onSubmit: (item) {
                                         // print(item.detail);
                                         var whereItem = orderModel.items!
-                                            .indexWhere((element) => element.name == item.name);
+                                            .indexWhere((element) =>
+                                                element.name == item.name);
                                         context.read<TempOrderBloc>().add(
                                             // TempOrderUpdateEvent(item: item),
                                             TempOrderUpdateEvent(
-                                                orderModel: orderModel..items![whereItem] = item));
+                                                orderModel: orderModel
+                                                  ..items![whereItem] = item));
                                       },
                                       onDelete: (id) {
                                         _orderDelete(context, id);
@@ -912,8 +924,10 @@ class DialogCollection {
                             style: themeData.textTheme.titleSmall,
                             onChanged: (value) {
                               // box.write('textOrder', value);
-                              context.read<TempOrderBloc>().add(TempOrderUpdateEvent(
-                                  orderModel: orderModel.copyWith(name: value)));
+                              context.read<TempOrderBloc>().add(
+                                  TempOrderUpdateEvent(
+                                      orderModel:
+                                          orderModel.copyWith(name: value)));
                               // print(orderm)
                             },
                             validator: (value) {
@@ -925,13 +939,15 @@ class DialogCollection {
                             decoration: InputDecoration(
                               hintText: 'Atas nama..',
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderRadius:
+                                    BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderRadius:
+                                    BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
@@ -971,7 +987,8 @@ class DialogCollection {
                       padding: const MaterialStatePropertyAll(
                         EdgeInsets.symmetric(vertical: kDeffaultPadding),
                       ),
-                      backgroundColor: const MaterialStatePropertyAll(Colors.green),
+                      backgroundColor:
+                          const MaterialStatePropertyAll(Colors.green),
                       minimumSize: const MaterialStatePropertyAll(
                         Size(double.infinity, 0),
                       ),
@@ -980,8 +997,7 @@ class DialogCollection {
                       if (nameFormKey.currentState!.validate()) {
                         if (orderBloc.state is! OrderLoadingState) {
                           orderModel.name = nameC.text;
-                          bool flag =
-                              await confirmDialog(context, titleText: 'Pesanan akan di proses?');
+                          bool flag = await confirmOrder(context);
                           if (flag) {
                             // print(orderModel.toJsonPost());
                             // box.remove('textOrder');
@@ -994,18 +1010,19 @@ class DialogCollection {
                       listener: (context, state) {
                         // Lanjutan dari onTap elevated button
                         if (state is OrderLoadedState) {
-                          context.pop(); // back from bottomSheet
-                          context
-                              .read<TempOrderBloc>()
-                              .add(TempOrderEmptyEvent()); // clearing TempOder
+                          // context.pop(); // back from bottomSheet
                           nameC.clear();
                           noteC.clear();
+                          // context
+                          //     .read<TempOrderBloc>()
+                          //     .add(TempOrderEmptyEvent()); // clearing TempOder
                         } else if (state is OrderErrorState) {
                           _errorDialog(context);
                         }
                       },
                       builder: (context, state) {
-                        if (state is OrderLoadingState || state is OrderAddingState) {
+                        if (state is OrderLoadingState ||
+                            state is OrderAddingState) {
                           return const SizedBox(
                             height: 20,
                             width: 20,
@@ -1043,19 +1060,21 @@ class DialogCollection {
                     onPressed: () {
                       if (orderBloc.state is! OrderLoadingState) {
                         // restoreStock Item
-                        List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
+                        List<ItemModel> itemModel =
+                            context.read<ItemBloc>().state.itemModel!;
                         orderModel.items!.forEach((itemOrder) {
-                          var sameItem =
-                              itemModel.singleWhere((element) => element.name == itemOrder.name);
+                          var sameItem = itemModel.singleWhere(
+                              (element) => element.name == itemOrder.name);
                           var restoreStockItem = sameItem.copyWith(
                             stock: sameItem.originalStock,
                           );
-                          context
-                              .read<ItemBloc>()
-                              .add(ItemEditLocalEvent(itemModel: restoreStockItem));
+                          context.read<ItemBloc>().add(
+                              ItemEditLocalEvent(itemModel: restoreStockItem));
                         });
                         context.pop();
-                        context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
+                        context
+                            .read<TempOrderBloc>()
+                            .add(TempOrderEmptyEvent());
                       }
                     },
                     child: Row(
@@ -1134,6 +1153,10 @@ class DialogCollection {
     );
   }
 
+  static void _orderDelete(BuildContext context, String name) {
+    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
+  }
+
   static Future<dynamic> _errorDialog(BuildContext context) {
     return showDialog(
       context: context,
@@ -1153,7 +1176,7 @@ class DialogCollection {
     );
   }
 
-  static Future<bool> confirmDialog(BuildContext context, {required String titleText}) async {
+  static Future<bool> confirmOrder(BuildContext context) async {
     final textTheme = Theme.of(context).textTheme;
     final elevatedButtonTheme = Theme.of(context).elevatedButtonTheme;
     return await showDialog(
@@ -1165,7 +1188,7 @@ class DialogCollection {
             context.pop(false);
             return Future.value(true);
           },
-          child: AlertDialog(
+          child: AlertDialog.adaptive(
             title: const Text(
               'Confirm',
             ),
@@ -1216,6 +1239,53 @@ class DialogCollection {
     );
   }
 
+  static Future<bool> confirmLogout(BuildContext context) async {
+    final textTheme = Theme.of(context).textTheme;
+    return await showAdaptiveDialog(
+      context: context,
+      builder: (context) => AlertDialog.adaptive(
+        title: Text('Confirm'),
+        content: const Text(
+          'Log out account?',
+        ),
+        actions: [
+          OutlinedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.symmetric(
+                vertical: kSmallPadding,
+                horizontal: kDeffaultPadding,
+              ),
+            ),
+            onPressed: () => context.pop(false),
+            child: const Text(
+              'Cancel',
+            ),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              minimumSize: const Size(70, 0),
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(
+                vertical: kSmallPadding,
+                horizontal: kDeffaultPadding,
+              ),
+            ),
+            onPressed: () {
+              context.pop(true);
+            },
+            child: Text(
+              'Yes',
+              style: textTheme.titleSmall!.copyWith(
+                color: kTextColor2,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   static Column buildTextRow(
       {required BuildContext context,
       required String title,
@@ -1241,9 +1311,5 @@ class DialogCollection {
         const Divider(),
       ],
     );
-  }
-
-  static void _orderDelete(BuildContext context, String name) {
-    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
   }
 }

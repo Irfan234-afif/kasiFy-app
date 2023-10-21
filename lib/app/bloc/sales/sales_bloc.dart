@@ -1,7 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
+
 import 'package:kasir_app/app/model/sales_model.dart';
 import 'package:kasir_app/app/repository/sales_repository.dart';
 import 'package:meta/meta.dart';
@@ -14,6 +14,7 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
   SalesBloc() : super(SalesInitial()) {
     on<SalesGetEvent>((event, emit) async {
       emit(SalesLoadingState());
+      print('sales get');
       try {
         final res = await _salesRepository.getSales(event.email);
         // creating data
@@ -26,21 +27,34 @@ class SalesBloc extends Bloc<SalesEvent, SalesState> {
         res?.sort((a, b) => b.createdAt!.compareTo(a.createdAt!));
         // emit
         emit(SalesLoadedState(salesModel: res));
-      } on DioException catch (e) {
-        if (e.response != null) {
-          if (e.response!.statusMessage == 'Unauthenticated') {
-            emit(SalesErrorState(e.response!.statusMessage!));
-          } else {
-            emit(const SalesErrorState('Terjadi Kesalahan'));
-          }
-        } else {
-          print('oi');
-          print(e.response);
-          emit(const SalesErrorState('Terjadi kesalahan'));
-        }
+      } catch (e) {
+        print("Sales Bloc : $e");
+        emit(const SalesErrorState('Terjadi Kesalahan'));
+      }
+    });
+    on<SalesAddEvent>((event, emit) async {
+      List<SalesModel> data = List.from(state.salesModel ?? []);
+      try {
+        emit(SalesLoadingState());
+
+        // final res = await _salesRepository.addSales(
+        //   email: event.email,
+        //   data: event.data,
+        // );
+
+        // if (res != null) {
+        data.add(event.data);
+        data.sort(
+          (a, b) => b.createdAt!.compareTo(a.createdAt!),
+        );
+
+        emit(SalesLoadedState(salesModel: data));
+        // } else {
+        //   emit(SalesErrorState('Error'));
+        // }
       } catch (e) {
         print(e);
-        emit(const SalesErrorState('Terjadi Kesalahan'));
+        emit(SalesErrorState("Error $e"));
       }
     });
     // on<SalesGetTodayEvent>((event, emit) async {

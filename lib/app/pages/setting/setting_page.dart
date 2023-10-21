@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/theme/theme_cubit.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
+import 'package:kasir_app/app/util/dialog_collection.dart';
 
 import 'package:tabler_icons/tabler_icons.dart';
 
@@ -38,7 +40,8 @@ class _SettingPageState extends State<SettingPage> {
             ),
             BlocBuilder<ThemeCubit, ThemeState>(
               builder: (context, state) {
-                final bool isLightMode = state is ThemeInitial || state is ThemeLightState;
+                final bool isLightMode =
+                    state is ThemeInitial || state is ThemeLightState;
                 return SwitchListTile(
                   onChanged: (value) {
                     if (isLightMode) {
@@ -48,8 +51,6 @@ class _SettingPageState extends State<SettingPage> {
                     }
                   },
                   value: isLightMode,
-                  // onTap: () {},
-                  // leading: Icon(TablerIcons.sun),
                   title: Row(
                     children: [
                       Icon(TablerIcons.sun),
@@ -59,10 +60,6 @@ class _SettingPageState extends State<SettingPage> {
                       Text('Light Mode'),
                     ],
                   ),
-                  // trailing: Icon(
-                  //   Icons.arrow_forward_ios_rounded,
-                  //   size: 18,
-                  // ),
                 );
               },
             ),
@@ -76,6 +73,22 @@ class _SettingPageState extends State<SettingPage> {
               },
               leading: Icon(TablerIcons.info_circle),
               title: Text('About'),
+              trailing: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 18,
+              ),
+            ),
+            ListTile(
+              onTap: () async {
+                final bool flag = await DialogCollection.confirmLogout(context);
+                if (flag) {
+                  // context not changed anything
+                  // ignore: use_build_context_synchronously
+                  context.read<AuthBloc>().add(AuthSignOutEvent());
+                }
+              },
+              leading: Icon(TablerIcons.logout),
+              title: Text('Log Out'),
               trailing: Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 18,

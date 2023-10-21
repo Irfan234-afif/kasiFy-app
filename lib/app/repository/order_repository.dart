@@ -3,12 +3,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kasir_app/app/model/order_model.dart';
 
+import '../model/sales_model.dart';
+
 class OrderRepository {
-  final usersFirestore = FirebaseFirestore.instance.collection('users');
+  final usersCollection = FirebaseFirestore.instance.collection('users');
 
   Future<List<OrderModel>> getOrder(String email) async {
     List<OrderModel> data = [];
-    final getDataOrder = await usersFirestore.doc(email).collection('orders').get();
+    final getDataOrder =
+        await usersCollection.doc(email).collection('orders').get();
     for (var element in getDataOrder.docs) {
       data.add(OrderModel.fromJson(element.data()));
     }
@@ -21,7 +24,7 @@ class OrderRepository {
     final dateNow = DateTime.now();
     final today = DateTime(dateNow.year, dateNow.month, dateNow.day);
 
-    final getDataOrderToday = await usersFirestore
+    final getDataOrderToday = await usersCollection
         .doc(email)
         .collection('orders')
         .where('created_at', isGreaterThanOrEqualTo: today)
@@ -34,22 +37,62 @@ class OrderRepository {
     return data;
   }
 
-  Future<OrderModel> addOrder(String email, OrderModel orderModel) async {
-    final ordersFirestore = usersFirestore.doc(email).collection('orders').withConverter(
-          fromFirestore: (snapshot, options) => OrderModel.fromJson(snapshot.data()!),
-          toFirestore: (value, options) => value.toJson(),
-        );
+  Future<OrderModel?> addOrder(String email, OrderModel orderModel) async {
+    final ordersFirestore =
+        usersCollection.doc(email).collection('orders').withConverter(
+              fromFirestore: (snapshot, options) =>
+                  OrderModel.fromJson(snapshot.data()!),
+              toFirestore: (value, options) => value.toJsonPost(),
+            );
 
     final addToFirestore = await ordersFirestore.add(orderModel);
 
-    final getNewData = addToFirestore.get().then((value) => value.data()!);
+    final getNewData = await addToFirestore.get().then((value) => value.data());
+    await _addToSales(email, orderModel);
     return getNewData;
   }
 
-  Map<String, dynamic> _headers(String token) {
-    return {
-      'Accept': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
+  Future<void> _addToSales(String email, OrderModel data) async {
+    double revenue = double.parse(data.totalPrice!);
+    double profit = 0;
+
+    // find profit
+    // with loop item in orderModel
+    for (ItemOrder item in data.items!) {
+      // parse String to double
+      double parseSellingPrice = double.parse(item.sellingPrice!);
+      double parseBasicPrice = double.parse(item.basicPrice!);
+      profit += parseSellingPrice - parseBasicPrice;
+    }
+
+    OrderSales orderSales = OrderSales(
+      itemCount: data.items?.length,
+      orderAt: data.orderAt,
+      totalPrice: data.totalPrice,
+    );
+    SalesModel salesModel = SalesModel(
+      createdAt: data.orderAt,
+      order: orderSales,
+      profit: profit.toString(),
+      revenue: revenue.toString(),
+    );
+
+    final salesCollection =
+        usersCollection.doc(email).collection('sales').withConverter(
+              fromFirestore: (snapshot, options) =>
+                  SalesModel.fromJson(snapshot.data()!),
+              toFirestore: (value, options) => value.toJson(),
+            );
+    await salesCollection.add(salesModel);
+    // final getNewData = await addToFirestore.get().then((value) => value.data());
+
+    // return getNewData;
+
+    // context.read<SalesBloc>().add(
+    //       SalesAddEvent(
+    //         email: email,
+    //         data: salesModel,
+    //       ),
+    //     );
   }
 }

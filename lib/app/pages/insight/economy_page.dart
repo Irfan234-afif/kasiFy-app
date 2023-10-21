@@ -4,6 +4,7 @@ import 'package:kasir_app/app/pages/insight/widget/button_filter.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../bloc/sales/sales_bloc.dart';
 import '../../model/sales_model.dart';
@@ -43,6 +44,30 @@ class _EconomyPageState extends State<EconomyPage> {
     }
   }
 
+  void _showDialogChart({
+    required List<SalesModel> data,
+    required String Function(DateTime) metode,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          insetPadding: EdgeInsets.symmetric(
+              horizontal: kDeffaultPadding, vertical: kDeffaultPadding * 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
+            child: _ChartRevenue(
+              data: data,
+              metode: metode,
+              title: "Revenue & Profit",
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -72,9 +97,10 @@ class _EconomyPageState extends State<EconomyPage> {
               salesModel.sort(
                 (a, b) => a.createdAt!.compareTo(b.createdAt!),
               );
+              // print(salesModel.length);
 
               List<SalesModel> sortedData = [];
-              List<SalesModel> newDataRank = [];
+              List<SalesModel> dataChart = [];
               late String Function(DateTime) metode;
 
               // sorting data by filter
@@ -97,57 +123,69 @@ class _EconomyPageState extends State<EconomyPage> {
                 default:
               }
 
-              // /// Sorting data
-              // for (var element in salesModel) {
-              //   final dateNow = DateTime.now();
-              //   switch (indexFilter) {
-              //     case 0:
-              //       sortedData.add(element);
-              //       break;
-              //     case 1:
-              //       if (element.createdAt!.year == dateNow.year) {
-              //         sortedData.add(element);
-              //       }
-              //       break;
-              //     case 2:
-              //       if (element.createdAt!.year == dateNow.year &&
-              //           element.createdAt!.month == dateNow.month) {
-              //         sortedData.add(element);
-              //       }
-              //       break;
-              //     case 3:
-              //       if (element.createdAt!.year == dateNow.year &&
-              //           element.createdAt!.month == dateNow.month &&
-              //           element.createdAt!.day == dateNow.day) {
-              //         sortedData.add(element);
-              //       }
-              //       break;
-              //     default:
-              //   }
-              // }
+              /// Sorting data
+              for (var element in salesModel) {
+                final dateNow = DateTime.now();
+                switch (indexFilter) {
+                  case 0:
+                    sortedData.add(element);
+                    break;
+                  case 1:
+                    if (element.createdAt!.year == dateNow.year) {
+                      sortedData.add(element);
+                    }
+                    break;
+                  case 2:
+                    if (element.createdAt!.year == dateNow.year &&
+                        element.createdAt!.month == dateNow.month) {
+                      sortedData.add(element);
+                    }
+                    break;
+                  case 3:
+                    if (element.createdAt!.year == dateNow.year &&
+                        element.createdAt!.month == dateNow.month &&
+                        element.createdAt!.day == dateNow.day) {
+                      sortedData.add(element);
+                    }
+                    break;
+                  default:
+                }
+              }
 
               /// Sort table data
               for (var element in sortedData) {
                 final parse = metode(element.createdAt!);
 
-                int indexCheck = newDataRank.indexWhere((newRank) {
+                int indexCheck = dataChart.indexWhere((newRank) {
                   return metode(newRank.createdAt!) == parse;
                 });
                 if (indexCheck == -1) {
-                  newDataRank.add(element);
+                  dataChart.add(element);
                 } else {
-                  SalesModel sameData = newDataRank[indexCheck];
-                  final parseProfit = int.parse(sameData.profit!) + int.parse(element.profit!);
+                  SalesModel sameData = dataChart[indexCheck];
+                  final parseProfit = double.parse(sameData.profit!) +
+                      double.parse(element.profit!);
 
-                  final parseRevenue = int.parse(sameData.revenue!) + int.parse(element.revenue!);
+                  final parseRevenue = double.parse(sameData.revenue!) +
+                      double.parse(element.revenue!);
                   var copyData = sameData.copyWith(
                     revenue: parseRevenue.toString(),
                     profit: parseProfit.toString(),
                   );
-                  newDataRank.removeAt(indexCheck);
-                  newDataRank.insert(indexCheck, copyData);
+                  dataChart.removeAt(indexCheck);
+                  dataChart.insert(indexCheck, copyData);
                 }
               }
+
+              // if dataChart sort with a -> b
+              dataChart.sort(
+                (a, b) => a.createdAt!.compareTo(b.createdAt!),
+              );
+              // if data for table sort with b -> a
+              final newDataSort = List<SalesModel>.from(dataChart);
+              newDataSort.sort(
+                (a, b) => b.createdAt!.compareTo(a.createdAt!),
+              );
 
               return ListView(
                 padding: const EdgeInsets.all(kDeffaultPadding),
@@ -163,14 +201,37 @@ class _EconomyPageState extends State<EconomyPage> {
                     onChanged: _changeMarker,
                     dense: true,
                   ),
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Text(
+                        'Revenue & Profit',
+                        style: textTheme.titleMedium!.copyWith(
+                          fontSize: 18,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Positioned(
+                        right: 0,
+                        child: IconButton(
+                          onPressed: () =>
+                              _showDialogChart(data: dataChart, metode: metode),
+                          icon: Icon(
+                            TablerIcons.arrows_maximize,
+                            size: 18,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   _ChartRevenue(
-                    title: 'Revenue & Profit',
-                    data: newDataRank,
+                    data: dataChart,
                     isMarker: enableMarker,
                     metode: metode,
                   ),
-                  _tableRevenue(textTheme, newDataRank, metode),
-                  _tableProfit(textTheme, newDataRank, metode)
+                  _tableRevenue(textTheme, newDataSort, metode),
+                  _tableProfit(textTheme, newDataSort, metode)
                 ],
               );
             default:
@@ -181,8 +242,8 @@ class _EconomyPageState extends State<EconomyPage> {
     );
   }
 
-  Column _tableProfit(
-      TextTheme textTheme, List<SalesModel> newDataRank, String Function(DateTime data) metode) {
+  Column _tableProfit(TextTheme textTheme, List<SalesModel> newDataRank,
+      String Function(DateTime data) metode) {
     return Column(
       children: [
         Text(
@@ -270,8 +331,8 @@ class _EconomyPageState extends State<EconomyPage> {
     );
   }
 
-  Column _tableRevenue(
-      TextTheme textTheme, List<SalesModel> newDataRank, String Function(DateTime data) metode) {
+  Column _tableRevenue(TextTheme textTheme, List<SalesModel> newDataRank,
+      String Function(DateTime data) metode) {
     return Column(
       children: [
         Text(
@@ -360,35 +421,54 @@ class _EconomyPageState extends State<EconomyPage> {
   }
 }
 
-class _ChartRevenue extends StatelessWidget {
+class _ChartRevenue extends StatefulWidget {
   const _ChartRevenue(
-      {required this.data, required this.metode, required this.title, this.isMarker = true});
+      {required this.data,
+      required this.metode,
+      this.title,
+      this.isMarker = true});
 
   final List<SalesModel> data;
   final String Function(DateTime data) metode;
-  final String title;
+  final String? title;
   final bool isMarker;
+
+  @override
+  State<_ChartRevenue> createState() => _ChartRevenueState();
+}
+
+class _ChartRevenueState extends State<_ChartRevenue> {
+  late ZoomPanBehavior _zoomPanBehavior;
+  @override
+  void initState() {
+    _zoomPanBehavior = ZoomPanBehavior(enablePinching: true);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     return SfCartesianChart(
+      zoomPanBehavior: _zoomPanBehavior,
       primaryXAxis: CategoryAxis(),
       legend: const Legend(isVisible: true, position: LegendPosition.bottom),
-      title: ChartTitle(
-        text: title,
-        textStyle: textTheme.titleMedium,
-      ),
+      title: widget.title != null
+          ? ChartTitle(
+              text: widget.title!,
+              textStyle: textTheme.titleMedium,
+            )
+          : null,
       // Enable tooltip
       tooltipBehavior: TooltipBehavior(enable: true),
       series: <ChartSeries<SalesModel, String>>[
         LineSeries<SalesModel, String>(
-          dataSource: data,
+          dataSource: widget.data,
           name: 'Revenue',
-          xValueMapper: (SalesModel sales, _) => metode(sales.createdAt!),
+          xValueMapper: (SalesModel sales, _) =>
+              widget.metode(sales.createdAt!),
           yValueMapper: (SalesModel sales, _) => double.parse(sales.revenue!),
           markerSettings: MarkerSettings(
-              isVisible: isMarker,
+              isVisible: widget.isMarker,
               height: 4,
               width: 4,
               borderWidth: 3,
@@ -399,13 +479,14 @@ class _ChartRevenue extends StatelessWidget {
           ),
         ),
         LineSeries<SalesModel, String>(
-          dataSource: data,
+          dataSource: widget.data,
           color: Colors.amber,
           name: 'Profit',
-          xValueMapper: (SalesModel sales, _) => metode(sales.createdAt!),
+          xValueMapper: (SalesModel sales, _) =>
+              widget.metode(sales.createdAt!),
           yValueMapper: (SalesModel sales, _) => double.parse(sales.profit!),
           markerSettings: MarkerSettings(
-              isVisible: isMarker,
+              isVisible: widget.isMarker,
               height: 4,
               width: 4,
               // shape: DataMarkerType.Circle,

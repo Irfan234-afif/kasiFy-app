@@ -3,7 +3,7 @@ import 'package:kasir_app/app/model/order_model.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kasir_app/app/repository/auth_repository.dart';
+
 import 'package:kasir_app/app/util/dialog_collection.dart';
 
 import '../../../../bloc/order/order_bloc.dart';
@@ -59,7 +59,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return Column(
       children: [
         SearchBar(
-          onChanged: (value) => searchCubit.performSearch<List<OrderModel>>(value),
+          onChanged: (value) =>
+              searchCubit.performSearch<List<OrderModel>>(value),
           hintText: "Search order",
         ),
         const SizedBox(
@@ -172,7 +173,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
         surfaceTintColor: Colors.green,
         color: Colors.green,
         child: Padding(
-          padding: const EdgeInsets.only(left: kSmallPadding, right: kSmallPadding, bottom: 8),
+          padding: const EdgeInsets.only(
+              left: kSmallPadding, right: kSmallPadding, bottom: 8),
           child: Column(
             children: [
               ListTile(
@@ -222,7 +224,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       minimumSize: const Size(0, 0),
                       backgroundColor: Colors.red,
                       padding: EdgeInsets.symmetric(
-                          vertical: isTablet ? kDeffaultPadding + 8 : kDeffaultPadding,
+                          vertical: isTablet
+                              ? kDeffaultPadding + 8
+                              : kDeffaultPadding,
                           horizontal: kDeffaultPadding),
                     ),
                     onPressed: onDone ?? () {},

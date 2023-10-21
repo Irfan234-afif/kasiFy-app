@@ -21,9 +21,9 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         // orderModel.sort(
         //   (a, b) => b.orderAt!.compareTo(a.orderAt!),
         // );
-        // emit(
-        //   OrderLoadedState(orderModel: orderModel),
-        // );
+        emit(
+          OrderLoadedState(orderModel: res),
+        );
       } on DioException catch (e) {
         if (kDebugMode) {
           print(e);
@@ -42,22 +42,20 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         // orderModel.sort(
         //   (a, b) => b.orderAt!.compareTo(a.orderAt!),
         // );
-        // emit(
-        //   OrderLoadedState(orderModel: orderModel),
-        // );
-      } on DioException catch (e) {
-        print(e.response);
-        emit(OrderErrorState(e.toString()));
+        emit(
+          OrderLoadedState(orderModel: res),
+        );
       } catch (e) {
+        print("Order bloc : $e");
         emit(OrderErrorState(e.toString()));
       }
     });
     on<OrderAddEvent>((event, emit) async {
+      //TODO: decrease item stock when add order
       List<OrderModel> data = List.from(state.orderModel ?? []);
       try {
         emit(OrderAddingState());
-        print(event.orderModel.items![0].sellingPrice);
-        var res = await _orderRepository.addOrder(
+        final res = await _orderRepository.addOrder(
           event.email,
           event.orderModel,
         );
@@ -71,9 +69,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
         emit(
           OrderLoadedState(orderModel: data),
         );
-      } on DioException catch (e) {
-        print(e);
-        emit(OrderErrorState(e.toString()));
       } catch (e) {
         emit(OrderErrorState(e.toString()));
       }

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/bloc/category/category_bloc.dart';
 import 'package:kasir_app/app/bloc/search/search_cubit.dart';
 import 'package:kasir_app/app/model/item_model.dart';
-import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/global_function.dart';
@@ -121,7 +120,9 @@ class _StockPageState extends State<StockPage> {
                             default:
                               title = categoryModel[index - 1].name ?? '';
                               onChanged = (value) {
-                                context.read<SearchCubit>().filter<List<ItemModel>>(title);
+                                context
+                                    .read<SearchCubit>()
+                                    .filter<List<ItemModel>>(title);
                                 set(
                                   () {
                                     groupValue = value ?? 0;
@@ -193,7 +194,16 @@ class _StockPageState extends State<StockPage> {
                   ],
                 );
               case ItemLoadedState:
-                context.read<SearchCubit>().fetchItem<List<ItemModel>>(itemModel);
+                if (itemModel?.isEmpty ?? true) {
+                  return Center(
+                    child: Text(
+                      'Item not yet',
+                    ),
+                  );
+                }
+                context
+                    .read<SearchCubit>()
+                    .fetchItem<List<ItemModel>>(itemModel);
                 return _buildSearchBloc(size, itemModel);
 
               default:

@@ -35,6 +35,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         emit(CategoryLoadingState());
         final res = await _categoryRepository.addCategory(
             event.email, event.categoryModel.name!);
+        print(res);
         // print(res.statusCode);
         // // parse
         // final categoryFromRes = CategoryModel.fromJson(res.data['data']);
@@ -42,14 +43,19 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
         // // add data
         // final newData = data..add(categoryFromRes);
         // // emit state
-        emit(CategoryLoadedState(categoryModel: []));
-      } on DioException catch (e) {
-        print('error dio');
-        print(e.response);
-
-        emit(CategoryErrorState(e.response.toString()));
+        if (res != null) {
+          final addingData = data..add(res);
+          final sortData = addingData
+            ..sort(
+              (a, b) => a.name!.compareTo(b.name!),
+            );
+          emit(CategoryLoadedState(categoryModel: sortData));
+        } else {
+          emit(CategoryErrorState('Kesalahan'));
+        }
       } catch (e) {
         print(e);
+        emit(CategoryErrorState('Kesalahan'));
       }
     });
     on<CategoryDeleteEvent>((event, emit) async {

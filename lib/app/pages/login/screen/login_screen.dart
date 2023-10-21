@@ -64,6 +64,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: passwordC,
                   obsecureText: obsecureText,
                   hintText: 'example',
+                  textInputAction: TextInputAction.send,
+                  onFieldSubmitted: (value) => _onLogin(),
                 ),
                 SizedBox(
                   height: size.height * .02,

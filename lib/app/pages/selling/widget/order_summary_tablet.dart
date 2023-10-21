@@ -41,7 +41,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     nameFormKey = GlobalKey<FormState>();
 
     orderBloc = context.read<OrderBloc>();
-    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+    email =
+        context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     super.initState();
   }
 
@@ -98,10 +99,12 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
 
   void _orderUpdate(ItemOrder item) {
     // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem = widget.orderModel.items!.indexWhere((element) => element.name == item.name);
+    int indexItem = widget.orderModel.items!
+        .indexWhere((element) => element.name == item.name);
     // print(item.detail);
     context.read<TempOrderBloc>().add(
-          TempOrderUpdateEvent(orderModel: widget.orderModel..items![indexItem] = item),
+          TempOrderUpdateEvent(
+              orderModel: widget.orderModel..items![indexItem] = item),
         );
   }
 
@@ -124,7 +127,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
         } else {
           var dataItem = dataAll.items![checkData];
           var qty = dataItem.quantity! + quantity;
-          var price = double.parse(dataItem.sellingPrice!) + double.parse(data.sellingPrice!);
+          var price = double.parse(dataItem.sellingPrice!) +
+              double.parse(data.sellingPrice!);
           var detail = '${dataItem.detail!}, $note';
           dataItem.quantity = qty;
           dataItem.sellingPrice = price.toString();
@@ -157,7 +161,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
               if (state is DraggableItemOn) {
                 return Padding(
                   padding: EdgeInsets.symmetric(
-                      vertical: mediaQuery.padding.top, horizontal: kDeffaultPadding),
+                      vertical: mediaQuery.padding.top,
+                      horizontal: kDeffaultPadding),
                   child: Container(
                     constraints: const BoxConstraints.expand(),
                     // decoration: BoxDecoration(
@@ -224,12 +229,14 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                         data,
                                         onSubmit: (item) {
                                           int indexItem = orderModel.items!
-                                              .indexWhere((element) => element.name == item.name);
+                                              .indexWhere((element) =>
+                                                  element.name == item.name);
                                           // print(item.detail);
                                           context.read<TempOrderBloc>().add(
                                                 TempOrderUpdateEvent(
                                                     orderModel: orderModel
-                                                      ..items![indexItem] = item),
+                                                      ..items![indexItem] =
+                                                          item),
                                               );
                                         },
                                         onDelete: (name) {
@@ -248,14 +255,16 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                             children: [
                               Text(
                                 "Subtotal",
-                                style: themeData.textTheme.labelMedium!.copyWith(
+                                style:
+                                    themeData.textTheme.labelMedium!.copyWith(
                                   color: Colors.black87,
                                   fontSize: 16,
                                 ),
                               ),
                               Text(
                                 currencyFormat(orderModel.totalPrice ?? ''),
-                                style: themeData.textTheme.labelMedium!.copyWith(
+                                style:
+                                    themeData.textTheme.labelMedium!.copyWith(
                                   color: Colors.black87,
                                   fontSize: 14,
                                 ),
@@ -285,13 +294,15 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                               decoration: InputDecoration(
                                 hintText: 'Atas nama..',
                                 enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(kSmallRadius),
+                                  borderRadius:
+                                      BorderRadius.circular(kSmallRadius),
                                   borderSide: const BorderSide(
                                     color: Colors.black26,
                                   ),
                                 ),
                                 focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(kSmallRadius),
+                                  borderRadius:
+                                      BorderRadius.circular(kSmallRadius),
                                   borderSide: const BorderSide(
                                     color: Colors.black26,
                                   ),
@@ -329,13 +340,15 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                             decoration: InputDecoration(
                               hintText: 'Note..',
                               enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderRadius:
+                                    BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(kSmallRadius),
+                                borderRadius:
+                                    BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
@@ -356,8 +369,9 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                               if (nameFormKey.currentState!.validate()) {
                                 if (orderBloc.state is! OrderLoadingState) {
                                   orderModel.name = nameC.text;
-                                  bool flag = await DialogCollection.confirmDialog(context,
-                                      titleText: 'Pesanan akan di proses?');
+                                  bool flag =
+                                      await DialogCollection.confirmOrder(
+                                          context);
                                   if (flag) {
                                     // print(orderModel.toJsonPost());
                                     _orderAdd(orderModel, email);
@@ -367,7 +381,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                             },
                             child: BlocConsumer<OrderBloc, OrderState>(
                               listenWhen: (previous, current) {
-                                if (previous is OrderAddingState && current is OrderLoadedState) {
+                                if (previous is OrderAddingState &&
+                                    current is OrderLoadedState) {
                                   return true;
                                 }
                                 return false;
@@ -376,9 +391,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                 // Lanjutan dari _orderAdd
                                 if (state is OrderLoadedState) {
                                   context.pop(); // back from bottomSheet
-                                  context
-                                      .read<TempOrderBloc>()
-                                      .add(TempOrderEmptyEvent()); // clearing TempOder
+                                  context.read<TempOrderBloc>().add(
+                                      TempOrderEmptyEvent()); // clearing TempOder
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
                                       backgroundColor: Colors.green,
@@ -410,7 +424,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                 }
                               },
                               builder: (context, state) {
-                                if (state is OrderLoadingState || state is OrderAddingState) {
+                                if (state is OrderLoadingState ||
+                                    state is OrderAddingState) {
                                   return const SizedBox(
                                     height: 20,
                                     width: 20,
@@ -447,7 +462,9 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                             ),
                             onPressed: () {
                               if (orderBloc.state is! OrderLoadingState) {
-                                context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
+                                context
+                                    .read<TempOrderBloc>()
+                                    .add(TempOrderEmptyEvent());
                               }
                             },
                             child: Row(
@@ -462,7 +479,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                                 ),
                                 Text(
                                   'Delete all',
-                                  style: themeData.textTheme.labelLarge!.copyWith(
+                                  style:
+                                      themeData.textTheme.labelLarge!.copyWith(
                                     color: Colors.white,
                                   ),
                                 ),
@@ -472,7 +490,8 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                         ],
                       )
                     : const Center(
-                        child: Text('Tambah item dengan seret item atau klik item'),
+                        child: Text(
+                            'Tambah item dengan seret item atau klik item'),
                       ),
               );
             },

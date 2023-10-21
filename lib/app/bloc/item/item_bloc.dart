@@ -16,15 +16,8 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
       emit(ItemLoadingState());
       try {
         var res = await _itemRepository.getItem(event.email);
-        print(res);
-        var itemModel = itemModelFromList(res)
-          ..sort(
-            (a, b) {
-              return a.category!.categoryName!.compareTo(b.category!.categoryName!);
-            },
-          );
         // print(itemModel);
-        emit(ItemLoadedState(itemModel: itemModel));
+        emit(ItemLoadedState(itemModel: res));
       } on DioException catch (e) {
         //
         print(e.response);
@@ -56,11 +49,6 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
           );
         // print(res);
         emit(ItemLoadedState(itemModel: newData));
-      } on DioException catch (e) {
-        //
-        print('error dio');
-        print(e.response);
-        emit(ItemErrorState(e.response.toString()));
       } catch (e) {
         print('error mboh');
         print(e);
@@ -73,7 +61,8 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
       try {
         //
         emit(ItemLoadingState());
-        await _itemRepository.deleteItem(event.email, event.itemModel.name.toString());
+        await _itemRepository.deleteItem(
+            event.email, event.itemModel.name.toString());
         // final newData = data..removeWhere((element) => element.id == event.itemModel.id);
         // emit(ItemLoadedState(itemModel: newData));
       } on DioException catch (e) {

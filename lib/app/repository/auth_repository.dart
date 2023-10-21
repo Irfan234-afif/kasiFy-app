@@ -14,7 +14,6 @@ class AuthRepository {
           );
 
   Future<void> initialize() async {
-    print('init');
     final dataDb = await userFirestore
         .where('email', isEqualTo: firebaseAuth.currentUser?.email)
         .get();

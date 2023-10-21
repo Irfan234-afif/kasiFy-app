@@ -8,6 +8,7 @@ class TextFieldWithLabel extends StatelessWidget {
   final Widget? suffix;
   final bool obsecureText;
   final String hintText, label;
+  final ValueChanged<String>? onFieldSubmitted;
   const TextFieldWithLabel({
     super.key,
     this.suffix,
@@ -15,6 +16,7 @@ class TextFieldWithLabel extends StatelessWidget {
     this.controller,
     this.textInputAction,
     this.obsecureText = false,
+    this.onFieldSubmitted,
     required this.hintText,
   });
 
@@ -31,6 +33,7 @@ class TextFieldWithLabel extends StatelessWidget {
           controller: controller,
           textInputAction: textInputAction,
           obscureText: obsecureText,
+          onFieldSubmitted: onFieldSubmitted,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: textTheme.bodyMedium,
