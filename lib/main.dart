@@ -21,6 +21,14 @@ void main() async {
   // init GetStorage
   await GetStorage.init();
 
+  // trial date 1 day
+  GetStorage box = GetStorage();
+  String? trialEndDate = box.read('trialEndDate');
+  if (trialEndDate == null) {
+    box.write('trialEndDate',
+        DateTime.now().add(Duration(days: 1)).toIso8601String());
+  }
+
   // init Firebase
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

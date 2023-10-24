@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:get_storage/get_storage.dart';
 
 import 'app/bloc/auth/auth_bloc.dart';
 import 'app/bloc/category/category_bloc.dart';
@@ -35,7 +36,10 @@ class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
   void initState() {
     // check theme devices first
     WidgetsBinding.instance.addObserver(this);
-
+    // _checkTrialDate();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      // _checkTrialDate();
+    });
     super.initState();
   }
 
@@ -61,6 +65,25 @@ class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
     //     _themeCubit.state is! ThemeDarkState) {
     //   _themeCubit.themeDark();
     // }
+  }
+
+  _checkTrialDate() {
+    GetStorage box = GetStorage();
+    DateTime? trialEndDate = DateTime.parse(box.read('trialEndDate'));
+    if (trialEndDate.isBefore(DateTime.now())) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            title: Text('Uji Coba Berakhir'),
+            content: Text(
+                'Uji coba aplikasi kasir telah berakhir. Untuk melanjutkan, silakan membeli lisensi penuh.'),
+          );
+        },
+      );
+    }
   }
 
   @override

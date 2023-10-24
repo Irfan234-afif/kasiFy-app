@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
@@ -34,7 +35,39 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     userModel = context.read<AuthRepository>().userModel;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _checkTrialDate();
+    });
     super.initState();
+  }
+
+  _checkTrialDate() {
+    GetStorage box = GetStorage();
+    DateTime? trialEndDate = DateTime.parse(box.read('trialEndDate'));
+    if (trialEndDate.isBefore(DateTime.now())) {
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: Colors.red,
+            titleTextStyle: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            contentTextStyle: TextStyle(
+              color: Colors.white,
+            ),
+            title: Text(
+              'Uji Coba Berakhir'.toUpperCase(),
+              textAlign: TextAlign.center,
+            ),
+            content: Text(
+                'Uji coba aplikasi kasir telah berakhir. Untuk melanjutkan, silakan membeli lisensi penuh.'),
+          );
+        },
+      );
+    }
   }
 
   @override

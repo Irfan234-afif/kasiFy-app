@@ -1,4 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:kasir_app/app/bloc/category/category_bloc.dart';
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
@@ -25,8 +27,34 @@ import '../repository/auth_repository.dart';
 part 'app_route.dart';
 // import 'app_route.dart';
 
+bool _checkTrialDate(BuildContext context) {
+  GetStorage box = GetStorage();
+  DateTime? trialEndDate = DateTime.parse(box.read('trialEndDate'));
+  if (trialEndDate.isBefore(DateTime.now())) {
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.red,
+          title: Text('Uji Coba Berakhir'),
+          content: Text(
+              'Uji coba aplikasi kasir telah berakhir. Untuk melanjutkan, silakan membeli lisensi penuh.'),
+        );
+      },
+    );
+    return false;
+  } else {
+    return true;
+  }
+}
+
 final routerConfig = GoRouter(
   redirect: (context, state) async {
+    // bool flag = _checkTrialDate(context);
+    // if(flag){
+
+    // }
     final authRepo = context.read<AuthRepository>();
     final credential = authRepo.firebaseAuth.currentUser;
     final userModel = authRepo.userModel;
