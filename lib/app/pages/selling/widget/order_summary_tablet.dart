@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/widget/tile_item_order.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
+import '../../../bloc/item/item_bloc.dart';
 import '../../../bloc/order/order_bloc.dart';
 import '../../../bloc/temp_order/temp_order_bloc.dart';
 import '../../../model/item_model.dart';
@@ -462,6 +463,12 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                             ),
                             onPressed: () {
                               if (orderBloc.state is! OrderLoadingState) {
+                                orderModel.items!.forEach((element) {
+                                  context.read<ItemBloc>().add(
+                                        ItemRestockEvent(email,
+                                            itemName: element.name!),
+                                      );
+                                });
                                 context
                                     .read<TempOrderBloc>()
                                     .add(TempOrderEmptyEvent());

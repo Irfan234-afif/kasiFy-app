@@ -71,14 +71,15 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   }) {
     assert(_debugOrderOn(item, itemModel));
     // var quantity = int.parse(qtyC.text);
+    final priceItem = double.parse(itemModel!.sellingPrice!) * quantity;
     context.read<TempOrderBloc>().add(
           TempOrderAddEvent(
             item: item ??
                 ItemOrder(
                   detail: note ?? '',
-                  name: itemModel!.name,
+                  name: itemModel.name,
                   basicPrice: itemModel.basicPrice,
-                  sellingPrice: itemModel.sellingPrice,
+                  sellingPrice: priceItem.toString(),
                   quantity: quantity,
                 ),
           ),
@@ -102,7 +103,6 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
       context,
       item,
       onSubmit: (item, quantity, note) {
-        print(item.toJson());
         final dataAll = context
             .read<TempOrderBloc>()
             .state
@@ -110,6 +110,14 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         final checkData = dataAll?.items?.indexWhere(
           (element) => element.name == item.name,
         ); // cari data
+
+        // edit stock item local
+        final newItem = item.copyWith(
+          originalStock: item.stock,
+          stock: item.stock! - quantity,
+        );
+        context.read<ItemBloc>().add(ItemEditLocalEvent(itemModel: newItem));
+        //
         if (checkData == null || checkData == -1) {
           //-1 adalah data yang sama tidak di temukan
           _orderOn(
@@ -123,9 +131,11 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
           var dataItem =
               dataAll!.items![checkData]; // ambil data sesuai dari cari data
           var qty = dataItem.quantity! + quantity;
-          var price = double.parse(dataItem.sellingPrice!) +
-              double.parse(item.sellingPrice!);
-          var detail = '${dataItem.detail!}, $note';
+          var price = double.parse(dataItem.sellingPrice!) * qty;
+          var detail = '';
+          if (dataItem.detail!.isNotEmpty && note.isNotEmpty) {
+            detail = '${dataItem.detail!}, $note';
+          }
           dataItem.quantity = qty;
           dataItem.sellingPrice = price.toString();
           dataItem.detail = detail;

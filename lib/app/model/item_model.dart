@@ -14,14 +14,14 @@ String itemModelToJson(List<ItemModel> data) =>
     json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
 class ItemModel {
-  String? name;
-  int? codeProduct;
-  int? stock;
-  int? originalStock;
-  String? description;
-  String? basicPrice;
-  String? sellingPrice;
-  CategoryItem? category;
+  final String? name;
+  final int? codeProduct;
+  final int? stock;
+  final int? originalStock;
+  final String? description;
+  final String? basicPrice;
+  final String? sellingPrice;
+  final CategoryItem? category;
 
   ItemModel({
     this.name,
@@ -57,8 +57,9 @@ class ItemModel {
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => ItemModel(
         name: json["name"],
-        codeProduct:
-            json["code_product"] is int ? json['code_product'] : int.parse(json['code_product']),
+        codeProduct: json["code_product"] is int
+            ? json['code_product']
+            : int.parse(json['code_product']),
         stock: json['stock'] == null
             ? 0
             : json["stock"] is int
@@ -70,12 +71,15 @@ class ItemModel {
                 ? json["stock"]
                 : int.parse(json["stock"]),
         description: json["description"],
-        basicPrice:
-            json["basic_price"] is String ? json["basic_price"] : json["basic_price"].toString(),
+        basicPrice: json["basic_price"] is String
+            ? json["basic_price"]
+            : json["basic_price"].toString(),
         sellingPrice: json["selling_price"] is String
             ? json["selling_price"]
             : json["selling_price"].toString(),
-        category: json["category"] == null ? null : CategoryItem.fromJson(json["category"]),
+        category: json["category"] == null
+            ? null
+            : CategoryItem.fromJson(json["category"]),
       );
 
   Map<String, dynamic> toJson() => {

@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 
 import 'package:kasir_app/app/bloc/order/order_bloc.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
@@ -82,6 +83,16 @@ class _SellingPageState extends State<SellingPage> {
         );
   }
 
+  void _updateStockItem(OrderModel data) {
+    for (var element in data.items!) {
+      ItemModel itemData =
+          ItemModel(name: element.name, stock: element.quantity);
+      context
+          .read<ItemBloc>()
+          .add(ItemUpdateStockEvent(email, itemModel: itemData));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
@@ -91,6 +102,7 @@ class _SellingPageState extends State<SellingPage> {
     final size = mediaQuery.size;
     return BlocBuilder<TempOrderBloc, TempOrderState>(
       builder: (context, state) {
+        print(state);
         return isTablet
             ? _buildTabletLayout(size, mediaQuery, state.orderModel!)
             : _buildMobileLayout(size, mediaQuery, state, themeData);
@@ -171,6 +183,8 @@ class _SellingPageState extends State<SellingPage> {
                     ),
                   );
 
+                  _updateStockItem(data);
+
                   _addToSales(data);
                   // final nexStep = await orderBloc.;
                 },
@@ -227,6 +241,11 @@ class _SellingPageState extends State<SellingPage> {
                       //   context.read<ItemBloc>().add(
                       //       ItemEditLocalEvent(itemModel: restoreStockItem));
                       // }
+                      orderModel.items!.forEach((element) {
+                        context.read<ItemBloc>().add(
+                              ItemRestockEvent(email, itemName: element.name!),
+                            );
+                      });
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

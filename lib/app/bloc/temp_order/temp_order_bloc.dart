@@ -32,11 +32,15 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
       //   sellingPrice: event.item.sellingPrice,
       //   quantity: event.item.quantity,
       // );
+      double totalPrice = 0;
+      for (var element in event.orderModel.items!) {
+        totalPrice += double.parse(element.sellingPrice!);
+      }
       final newData = orderModel.copyWith(
         items: event.orderModel.items,
         name: event.orderModel.name,
         orderAt: event.orderModel.orderAt,
-        totalPrice: event.orderModel.totalPrice,
+        totalPrice: totalPrice.toString(),
       );
 
       // print(orderModel.name);
@@ -44,18 +48,29 @@ class TempOrderBloc extends Bloc<TempOrderEvent, TempOrderState> {
       emit(TempOrderisOrderState(orderModel: newData));
     });
     on<TempOrderEmptyEvent>((event, emit) {
-      emit(
-        TempOrderEmptyState(
-            orderModel: OrderModel(
-          items: [],
-        )),
-      );
+      // TODO : balikkan stock ketika temporder telah di batalkan
+      try {
+        emit(
+          TempOrderEmptyState(
+              orderModel: OrderModel(
+            items: [],
+          )),
+        );
+      } catch (e) {
+        //
+      }
     });
     on<TempOrderDeleteEvent>((event, emit) {
       OrderModel orderModel = state.orderModel!;
       var name = event.name;
       orderModel.items!.removeWhere((element) => element.name == name);
-      emit(TempOrderisOrderState(orderModel: orderModel));
+      if (orderModel.items!.isEmpty) {
+        print('tempempty');
+        emit(TempOrderEmptyState(orderModel: OrderModel(items: [])));
+      } else {
+        print('temp order');
+        emit(TempOrderisOrderState(orderModel: orderModel));
+      }
     });
   }
 }

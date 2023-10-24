@@ -56,4 +56,20 @@ class ItemRepository {
           .delete();
     }
   }
+
+  Future<void> updateStockItem(String email, String itemName, int stock) async {
+    final itemCollection =
+        usersCollection.doc(email).collection('items').withConverter(
+              fromFirestore: (snapshot, options) =>
+                  ItemModel.fromJson(snapshot.data()!),
+              toFirestore: (value, options) => value.toJson(),
+            );
+    final itemWhere =
+        await itemCollection.where('name', isEqualTo: itemName).get();
+    final itemDB = itemWhere.docs.first;
+
+    await itemCollection.doc(itemDB.id).update(
+      {'stock': stock},
+    );
+  }
 }

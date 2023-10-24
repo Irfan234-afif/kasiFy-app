@@ -38,31 +38,32 @@ class _SettingPageState extends State<SettingPage> {
                 size: 18,
               ),
             ),
-            BlocBuilder<ThemeCubit, ThemeState>(
-              builder: (context, state) {
-                final bool isLightMode =
-                    state is ThemeInitial || state is ThemeLightState;
-                return SwitchListTile(
-                  onChanged: (value) {
-                    if (isLightMode) {
-                      context.read<ThemeCubit>().themeDark();
-                    } else {
-                      context.read<ThemeCubit>().themeLight();
-                    }
-                  },
-                  value: isLightMode,
-                  title: Row(
-                    children: [
-                      Icon(TablerIcons.sun),
-                      SizedBox(
-                        width: 16,
-                      ),
-                      Text('Light Mode'),
-                    ],
-                  ),
-                );
-              },
-            ),
+            // BlocBuilder<ThemeCubit, ThemeState>(
+            //   builder: (context, state) {
+            //     final bool isLightMode =
+            //         state is ThemeInitial || state is ThemeLightState;
+            //     return SwitchListTile(
+
+            //       onChanged: (value) {
+            //         if (isLightMode) {
+            //           context.read<ThemeCubit>().themeDark();
+            //         } else {
+            //           context.read<ThemeCubit>().themeLight();
+            //         }
+            //       },
+            //       value: isLightMode,
+            //       title: Row(
+            //         children: [
+            //           Icon(TablerIcons.sun),
+            //           SizedBox(
+            //             width: 16,
+            //           ),
+            //           Text('Light Mode'),
+            //         ],
+            //       ),
+            //     );
+            //   },
+            // ),
             ListTile(
               onTap: () {
                 showAboutDialog(

@@ -219,6 +219,30 @@ class _TrafficPageState extends State<TrafficPage> {
         const SizedBox(
           height: kDeffaultPadding,
         ),
+        SfCircularChart(
+          title: ChartTitle(),
+          series: [
+            PieSeries<ItemOrder, String>(
+              dataSource: newDataItemOrder,
+              dataLabelSettings: DataLabelSettings(
+                isVisible: true,
+                // color: Colors.white,
+                // textStyle: TextStyle(color: Colors.white),
+                builder: (data, point, series, pointIndex, seriesIndex) => Text(
+                  '${data.name}\n${data.quantity}',
+                  style: TextStyle(color: Colors.white),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              // dataLabelMapper: (datum, index) => datum.name,
+              xValueMapper: (data, index) => data.name,
+              yValueMapper: (data, index) => data.quantity,
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: kDeffaultPadding,
+        ),
         Text(
           'Table Item',
           style: textTheme.titleLarge,

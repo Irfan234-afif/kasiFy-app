@@ -61,14 +61,11 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
       try {
         //
         emit(ItemLoadingState());
+        data.removeWhere((element) => element.name == event.itemModel.name);
         await _itemRepository.deleteItem(
             event.email, event.itemModel.name.toString());
         // final newData = data..removeWhere((element) => element.id == event.itemModel.id);
-        // emit(ItemLoadedState(itemModel: newData));
-      } on DioException catch (e) {
-        //
-        print('error dio');
-        emit(ItemErrorState(e.response.toString()));
+        emit(ItemLoadedState(itemModel: data));
       } catch (e) {
         print(e);
         emit(ItemErrorState(e.toString()));
@@ -77,29 +74,84 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     on<ItemEmptyEvent>((event, emit) {
       emit(const ItemEmptyState(itemModel: []));
     });
-    // on<ItemEditLocalEvent>((event, emit) {
-    //   List<ItemModel> data = List.from(state.itemModel ?? []);
-    //   int indexWhere = data.indexWhere((element) => element.id == event.itemModel.id);
-    //   if (indexWhere != -1) {
-    //     var sameItem = data[indexWhere];
-    //     ItemModel newData = sameItem.copyWith(
-    //       basicPrice: event.itemModel.basicPrice,
-    //       category: event.itemModel.category,
-    //       codeProduct: event.itemModel.codeProduct,
-    //       stock: event.itemModel.stock,
-    //       originalStock: event.itemModel.originalStock,
-    //       description: event.itemModel.description,
-    //       name: event.itemModel.name,
-    //       sellingPrice: event.itemModel.sellingPrice,
-    //     );
-    //     data.removeAt(indexWhere);
-    //     final insertData = data..insert(indexWhere, newData);
-    //     final sortingData = insertData
-    //       ..sort(
-    //         (a, b) => a.name!.compareTo(b.name!),
-    //       );
-    //     emit(ItemLoadedState(itemModel: sortingData));
-    //   }
-    // });
+    on<ItemUpdateStockEvent>((event, emit) async {
+      List<ItemModel> data = List.from(state.itemModel ?? []);
+      try {
+        emit(ItemLoadingState());
+        int indexWhere =
+            data.indexWhere((element) => element.name == event.itemModel.name);
+        if (indexWhere != -1) {
+          ItemModel sameItem = data[indexWhere];
+          int stock = sameItem.originalStock! - event.itemModel.stock!;
+          ItemModel newItemData = sameItem.copyWith(
+            stock: stock,
+          );
+          data.removeAt(indexWhere);
+          data.insert(indexWhere, newItemData);
+
+          await _itemRepository.updateStockItem(
+            event.email,
+            sameItem.name!,
+            stock,
+          );
+
+          emit(ItemLoadedState(itemModel: data));
+        } else {
+          emit(ItemErrorState('Data error'));
+        }
+      } catch (e) {
+        //
+        print(e);
+        emit(ItemErrorState(e.toString()));
+      }
+    });
+    on<ItemEditLocalEvent>((event, emit) {
+      List<ItemModel> data = List.from(state.itemModel ?? []);
+      print('from event : ${event.itemModel.toJson()}');
+      int indexWhere =
+          data.indexWhere((element) => element.name == event.itemModel.name);
+      if (indexWhere != -1) {
+        var sameItem = data[indexWhere];
+        ItemModel newData = sameItem.copyWith(
+          basicPrice: event.itemModel.basicPrice,
+          category: event.itemModel.category,
+          codeProduct: event.itemModel.codeProduct,
+          stock: event.itemModel.stock,
+          originalStock: event.itemModel.originalStock,
+          description: event.itemModel.description,
+          name: event.itemModel.name,
+          sellingPrice: event.itemModel.sellingPrice,
+        );
+        print('new item : ${newData.toJson()}');
+        data.removeAt(indexWhere);
+        final insertData = data..insert(indexWhere, newData);
+        final sortingData = insertData
+          ..sort(
+            (a, b) => a.name!.compareTo(b.name!),
+          );
+        print('new Data : ${sortingData[indexWhere]}');
+        emit(ItemLoadedState(itemModel: sortingData));
+      }
+    });
+    on<ItemRestockEvent>((event, emit) {
+      List<ItemModel> data = List.from(state.itemModel ?? []);
+      try {
+        emit(ItemLoadingState());
+        int indexWhere =
+            data.indexWhere((element) => element.name == event.itemName);
+        ItemModel sameItem = data[indexWhere];
+        ItemModel newItemData = sameItem.copyWith(
+          stock: sameItem.originalStock,
+        );
+
+        data.removeAt(indexWhere);
+        data.insert(indexWhere, newItemData);
+        emit(ItemLoadedState(itemModel: data));
+      } catch (e) {
+        //
+        print(e);
+        emit(ItemErrorState(e.toString()));
+      }
+    });
   }
 }

@@ -51,7 +51,6 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
       }
     });
     on<OrderAddEvent>((event, emit) async {
-      //TODO: decrease item stock when add order
       List<OrderModel> data = List.from(state.orderModel ?? []);
       try {
         emit(OrderAddingState());

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:kasir_app/app/bloc/item/item_bloc.dart';
+import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/util/util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -34,14 +35,7 @@ class DialogCollection {
 
     qtyC.text = '1';
     noteC.clear();
-    List<String> dataChip = [
-      'Merah',
-      'Hitam',
-      'Putih',
-      'Hijau',
-    ];
 
-    int? selectedChip;
     int stock = item.stock! - 1; // -1 because initial qty this 1
     await showDialog(
       context: context,
@@ -189,33 +183,33 @@ class DialogCollection {
                 SizedBox(
                   height: 8,
                 ),
-                Wrap(
-                  spacing: 6,
-                  alignment: WrapAlignment.center,
-                  children: List.generate(
-                    dataChip.length,
-                    (index) {
-                      return ChoiceChip(
-                        selectedColor: Colors.green,
-                        label: Text(dataChip[index]),
-                        selected: selectedChip == index,
-                        onSelected: (value) {
-                          if (selectedChip == index) {
-                            setState(() {
-                              selectedChip = null;
-                              noteC.clear();
-                            });
-                          } else {
-                            setState(() {
-                              noteC.text = dataChip[index];
-                              selectedChip = index;
-                            });
-                          }
-                        },
-                      );
-                    },
-                  ),
-                ),
+                // Wrap(
+                //   spacing: 6,
+                //   alignment: WrapAlignment.center,
+                //   children: List.generate(
+                //     dataChip.length,
+                //     (index) {
+                //       return ChoiceChip(
+                //         selectedColor: Colors.green,
+                //         label: Text(dataChip[index]),
+                //         selected: selectedChip == index,
+                //         onSelected: (value) {
+                //           if (selectedChip == index) {
+                //             setState(() {
+                //               selectedChip = null;
+                //               noteC.clear();
+                //             });
+                //           } else {
+                //             setState(() {
+                //               noteC.text = dataChip[index];
+                //               selectedChip = index;
+                //             });
+                //           }
+                //         },
+                //       );
+                //     },
+                //   ),
+                // ),
                 SizedBox(
                   height: 8,
                 ),
@@ -257,10 +251,11 @@ class DialogCollection {
                   onPressed: () {
                     if (noteFormKey.currentState!.validate()) {
                       context.pop();
-                      final ItemModel newData = item.copyWith(
-                        sellingPrice: totalPrice.toString(),
-                      );
-                      item.stock = stock;
+                      final ItemModel newData = item
+                        ..copyWith(
+                          stock: stock,
+                          sellingPrice: totalPrice.toString(),
+                        );
                       // save stock item in getStorage to keep watch when order is cancel
                       // GetStorage().write(key, value)
                       onSubmit?.call(newData, int.parse(qtyC.text), noteC.text);
@@ -497,15 +492,15 @@ class DialogCollection {
 
     qtyC.text = item.quantity.toString();
     noteC.text = item.detail ?? '';
-    List<String> dataChip = [
-      'Ice',
-      'Hot',
-    ];
-    int? selectedChip;
-    var checkNote = dataChip.indexWhere((element) => element == item.detail);
-    if (checkNote != -1) {
-      selectedChip = checkNote;
-    }
+
+    double originalPrice = double.parse(item.sellingPrice!) / item.quantity!;
+    double totalPrice = double.parse(item.sellingPrice!);
+
+    ItemBloc itemBloc = context.read<ItemBloc>();
+    ItemModel itemModel = itemBloc.state.itemModel!
+        .singleWhere((element) => element.name == item.name);
+
+    int stock = itemModel.stock!;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -515,8 +510,6 @@ class DialogCollection {
         return StatefulBuilder(builder: (context, setState) {
           final mediaQuery1 = MediaQuery.of(context);
 
-          var quantity = int.parse(qtyC.text);
-          var totalPrice = double.parse(item.sellingPrice!) * quantity;
           return SingleChildScrollView(
             padding: EdgeInsets.only(
               left: paddingHorizontal,
@@ -580,6 +573,8 @@ class DialogCollection {
                                   if (qtyC.text != '0') {
                                     var currentQty = int.parse(qtyC.text);
                                     qtyC.text = (currentQty - 1).toString();
+                                    totalPrice =
+                                        originalPrice * int.parse(qtyC.text);
                                   }
                                 });
                               },
@@ -620,10 +615,15 @@ class DialogCollection {
                             ),
                             GestureDetector(
                               onTap: () {
-                                setState(() {
-                                  var currentQty = int.parse(qtyC.text);
-                                  qtyC.text = (currentQty + 1).toString();
-                                });
+                                if (stock != 0) {
+                                  setState(() {
+                                    stock -= 1;
+                                    var currentQty = int.parse(qtyC.text);
+                                    qtyC.text = (currentQty + 1).toString();
+                                    totalPrice =
+                                        originalPrice * int.parse(qtyC.text);
+                                  });
+                                }
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
@@ -645,39 +645,47 @@ class DialogCollection {
                         ),
                       ],
                     ),
+                    if (stock == 0)
+                      Text(
+                        'Stock is empty',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     Text(
                       'Total harga : ${(currencyFormat(totalPrice.toString()))}',
+                    ),
+                    Text(
+                      'Stock : $stock',
                     ),
                     const SizedBox(
                       height: 8,
                     ),
 
-                    Wrap(
-                      spacing: 6,
-                      direction: Axis.horizontal,
-                      children: List.generate(
-                        dataChip.length,
-                        (index) {
-                          return ChoiceChip(
-                            selectedColor: Colors.green,
-                            label: Text(dataChip[index]),
-                            selected: selectedChip == index,
-                            onSelected: (value) {
-                              if (selectedChip == index) {
-                                setState(() {
-                                  selectedChip = null;
-                                });
-                              } else {
-                                setState(() {
-                                  noteC.text = dataChip[index];
-                                  selectedChip = index;
-                                });
-                              }
-                            },
-                          );
-                        },
-                      ),
-                    ),
+                    // Wrap(
+                    //   spacing: 6,
+                    //   direction: Axis.horizontal,
+                    //   children: List.generate(
+                    //     dataChip.length,
+                    //     (index) {
+                    //       return ChoiceChip(
+                    //         selectedColor: Colors.green,
+                    //         label: Text(dataChip[index]),
+                    //         selected: selectedChip == index,
+                    //         onSelected: (value) {
+                    //           if (selectedChip == index) {
+                    //             setState(() {
+                    //               selectedChip = null;
+                    //             });
+                    //           } else {
+                    //             setState(() {
+                    //               noteC.text = dataChip[index];
+                    //               selectedChip = index;
+                    //             });
+                    //           }
+                    //         },
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
                     const SizedBox(
                       height: 8,
                     ),
@@ -730,21 +738,30 @@ class DialogCollection {
                         ),
                       ),
                       onPressed: () {
-                        if (noteFormKey.currentState!.validate()) {
-                          context.pop();
-                          // OrderModel(
-                          //   items: [],
-                          // );
-                          item.sellingPrice = totalPrice.toString();
-                          item.detail = noteC.text;
-                          item.quantity = int.parse(qtyC.text);
-                          // item.description = noteC.text;
-                          // _orderOn(item);
-                          onSubmit?.call(item);
+                        if (stock != itemModel.stock) {
+                          // jika stock berubah maka akan di update lagi
+                          final newItem = itemModel.copyWith(
+                            stock: stock,
+                          );
+                          context
+                              .read<ItemBloc>()
+                              .add(ItemEditLocalEvent(itemModel: newItem));
                         }
+                        // if (noteFormKey.currentState!.validate()) {
+                        context.pop();
+                        // OrderModel(
+                        //   items: [],
+                        // );
+                        item.sellingPrice = totalPrice.toString();
+                        item.detail = noteC.text;
+                        item.quantity = int.parse(qtyC.text);
+                        // item.description = noteC.text;
+                        // _orderOn(item);
+                        onSubmit?.call(item);
+                        // }
                       },
                       child: Text(
-                        'Order',
+                        'Save',
                         style: textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                         ),
@@ -796,7 +813,7 @@ class DialogCollection {
 
   static void bottomSheetOrder(
     BuildContext context,
-    OrderModel orderModel1, {
+    OrderModel data, {
     Function(OrderModel orderModel)? onConfirm,
   }) {
     final mediaQuery = MediaQuery.of(context);
@@ -870,15 +887,47 @@ class DialogCollection {
                                       context,
                                       data,
                                       onSubmit: (item) {
-                                        // print(item.detail);
-                                        var whereItem = orderModel.items!
-                                            .indexWhere((element) =>
+                                        // update stock item
+                                        final itemBloc =
+                                            context.read<ItemBloc>();
+                                        final itemModel =
+                                            itemBloc.state.itemModel;
+                                        int indexWhere = itemModel!.indexWhere(
+                                            (element) =>
                                                 element.name == item.name);
-                                        context.read<TempOrderBloc>().add(
-                                            // TempOrderUpdateEvent(item: item),
-                                            TempOrderUpdateEvent(
-                                                orderModel: orderModel
-                                                  ..items![whereItem] = item));
+                                        var sameItem = itemModel[indexWhere];
+                                        final newItem = sameItem.copyWith(
+                                          stock: sameItem.originalStock! -
+                                              item.quantity!,
+                                        );
+                                        itemBloc.add(ItemEditLocalEvent(
+                                          itemModel: newItem,
+                                        ));
+                                        //
+
+                                        // update TempOrder
+                                        // ketika quantity 0 maka item akan di delete dari tempOrder
+                                        if (item.quantity == 0) {
+                                          if (orderModel.items!.length == 1) {
+                                            // ketika item nya hanya 1 dan quantity nya update ke 0
+                                            // otomatis tidak ada item lagi maka context pop akan menutup bottom sheet
+                                            // karna tempOrder sudah tidak ada atau sudah empty
+                                            context.pop();
+                                          }
+                                          context.read<TempOrderBloc>().add(
+                                              TempOrderDeleteEvent(
+                                                  name: item.name!));
+                                        } else {
+                                          var whereItem = orderModel.items!
+                                              .indexWhere((element) =>
+                                                  element.name == item.name);
+                                          context.read<TempOrderBloc>().add(
+                                              // TempOrderUpdateEvent(item: item),
+                                              TempOrderUpdateEvent(
+                                                  orderModel: orderModel
+                                                    ..items![whereItem] =
+                                                        item));
+                                        }
                                       },
                                       onDelete: (id) {
                                         _orderDelete(context, id);
@@ -1059,6 +1108,8 @@ class DialogCollection {
                     ),
                     onPressed: () {
                       if (orderBloc.state is! OrderLoadingState) {
+                        String email =
+                            context.read<AuthRepository>().userModel.email!;
                         // restoreStock Item
                         List<ItemModel> itemModel =
                             context.read<ItemBloc>().state.itemModel!;
@@ -1070,6 +1121,14 @@ class DialogCollection {
                           );
                           context.read<ItemBloc>().add(
                               ItemEditLocalEvent(itemModel: restoreStockItem));
+                        });
+
+                        // kembalikan stock item
+                        orderModel.items!.forEach((element) {
+                          context.read<ItemBloc>().add(
+                                ItemRestockEvent(email,
+                                    itemName: element.name!),
+                              );
                         });
                         context.pop();
                         context
