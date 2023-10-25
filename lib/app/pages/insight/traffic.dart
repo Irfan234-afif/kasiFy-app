@@ -154,7 +154,8 @@ class _TrafficPageState extends State<TrafficPage> {
         trafficItemRankCalc(dataSorted: sortedData);
 
     return ListView(
-      padding: const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
+      padding: const EdgeInsets.symmetric(
+          horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
       children: [
         ButtonFilter(
           index: indexFilter,
