@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kasir_app/app/bloc/auth/auth_bloc.dart';
-import 'package:kasir_app/app/bloc/theme/theme_cubit.dart';
+
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/dialog_collection.dart';
 
 import 'package:tabler_icons/tabler_icons.dart';
+
+import '../../bloc/theme/theme_cubit.dart';
 
 class SettingPage extends StatefulWidget {
   const SettingPage({super.key});
@@ -20,10 +22,10 @@ class _SettingPageState extends State<SettingPage> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text('Setting'),
+        title: const Text('Setting'),
       ),
       body: Padding(
-        padding: EdgeInsets.symmetric(
+        padding: const EdgeInsets.symmetric(
           horizontal: kDeffaultPadding,
           vertical: kDeffaultPadding,
         ),
@@ -31,39 +33,38 @@ class _SettingPageState extends State<SettingPage> {
           children: [
             ListTile(
               onTap: () {},
-              leading: Icon(TablerIcons.user),
-              title: Text('Profile'),
-              trailing: Icon(
+              leading: const Icon(TablerIcons.user),
+              title: const Text('Profile'),
+              trailing: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 18,
               ),
             ),
-            // BlocBuilder<ThemeCubit, ThemeState>(
-            //   builder: (context, state) {
-            //     final bool isLightMode =
-            //         state is ThemeInitial || state is ThemeLightState;
-            //     return SwitchListTile(
-
-            //       onChanged: (value) {
-            //         if (isLightMode) {
-            //           context.read<ThemeCubit>().themeDark();
-            //         } else {
-            //           context.read<ThemeCubit>().themeLight();
-            //         }
-            //       },
-            //       value: isLightMode,
-            //       title: Row(
-            //         children: [
-            //           Icon(TablerIcons.sun),
-            //           SizedBox(
-            //             width: 16,
-            //           ),
-            //           Text('Light Mode'),
-            //         ],
-            //       ),
-            //     );
-            //   },
-            // ),
+            BlocBuilder<ThemeCubit, ThemeState>(
+              builder: (context, state) {
+                final bool isLightMode =
+                    state is ThemeInitial || state is ThemeLightState;
+                return SwitchListTile(
+                  onChanged: (value) {
+                    if (isLightMode) {
+                      context.read<ThemeCubit>().themeDark();
+                    } else {
+                      context.read<ThemeCubit>().themeLight();
+                    }
+                  },
+                  value: isLightMode,
+                  title: Row(
+                    children: [
+                      Icon(TablerIcons.sun),
+                      SizedBox(
+                        width: 16,
+                      ),
+                      Text('Light Mode'),
+                    ],
+                  ),
+                );
+              },
+            ),
             ListTile(
               onTap: () {
                 showAboutDialog(
@@ -72,9 +73,9 @@ class _SettingPageState extends State<SettingPage> {
                   applicationVersion: '0.5',
                 );
               },
-              leading: Icon(TablerIcons.info_circle),
-              title: Text('About'),
-              trailing: Icon(
+              leading: const Icon(TablerIcons.info_circle),
+              title: const Text('About'),
+              trailing: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 18,
               ),
@@ -88,9 +89,9 @@ class _SettingPageState extends State<SettingPage> {
                   context.read<AuthBloc>().add(AuthSignOutEvent());
                 }
               },
-              leading: Icon(TablerIcons.logout),
-              title: Text('Log Out'),
-              trailing: Icon(
+              leading: const Icon(TablerIcons.logout),
+              title: const Text('Log Out'),
+              trailing: const Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 18,
               ),

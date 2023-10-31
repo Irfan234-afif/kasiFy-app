@@ -89,7 +89,7 @@ class _SellingPageState extends State<SellingPage> {
           ItemModel(name: element.name, stock: element.quantity);
       context
           .read<ItemBloc>()
-          .add(ItemUpdateStockEvent(email, itemModel: itemData));
+          .add(ItemDecreaseStockEvent(email, itemModel: itemData));
     }
   }
 

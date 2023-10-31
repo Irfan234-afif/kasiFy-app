@@ -74,7 +74,7 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
     on<ItemEmptyEvent>((event, emit) {
       emit(const ItemEmptyState(itemModel: []));
     });
-    on<ItemUpdateStockEvent>((event, emit) async {
+    on<ItemDecreaseStockEvent>((event, emit) async {
       List<ItemModel> data = List.from(state.itemModel ?? []);
       try {
         emit(ItemLoadingState());
@@ -83,6 +83,37 @@ class ItemBloc extends Bloc<ItemEvent, ItemState> {
         if (indexWhere != -1) {
           ItemModel sameItem = data[indexWhere];
           int stock = sameItem.originalStock! - event.itemModel.stock!;
+          ItemModel newItemData = sameItem.copyWith(
+            stock: stock,
+          );
+          data.removeAt(indexWhere);
+          data.insert(indexWhere, newItemData);
+
+          await _itemRepository.updateStockItem(
+            event.email,
+            sameItem.name!,
+            stock,
+          );
+
+          emit(ItemLoadedState(itemModel: data));
+        } else {
+          emit(ItemErrorState('Data error'));
+        }
+      } catch (e) {
+        //
+        print(e);
+        emit(ItemErrorState(e.toString()));
+      }
+    });
+    on<ItemUpdateStockEvent>((event, emit) async {
+      List<ItemModel> data = List.from(state.itemModel ?? []);
+      try {
+        emit(ItemLoadingState());
+        int indexWhere =
+            data.indexWhere((element) => element.name == event.itemModel.name);
+        if (indexWhere != -1) {
+          ItemModel sameItem = data[indexWhere];
+          int stock = event.itemModel.stock ?? 0;
           ItemModel newItemData = sameItem.copyWith(
             stock: stock,
           );

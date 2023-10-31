@@ -19,7 +19,7 @@ const kButtonColor = Color(0xFF5D4037);
 const kButtonColor2 = Color(0xFFFEFEFE);
 const kButtonColor3 = Colors.green;
 
-const kScaffolColor = Color(0xFFFEFEFE);
+final Color kScaffolColor = Colors.blue[50]!;
 
 const double kDeffaultPadding = 16;
 const double kSmallPadding = 8;
@@ -60,15 +60,16 @@ class AppTheme {
       materialTapTargetSize: MaterialTapTargetSize.padded,
       useMaterial3: true,
       // primaryColor: ,
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         surfaceTintColor: kScaffolColor,
         backgroundColor: kScaffolColor,
         elevation: 0,
       ),
       cardTheme: CardTheme(
+          margin: EdgeInsets.zero,
           shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(kRadiusDeffault),
-      )),
+            borderRadius: BorderRadius.circular(kRadiusDeffault),
+          )),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: kButtonColor,

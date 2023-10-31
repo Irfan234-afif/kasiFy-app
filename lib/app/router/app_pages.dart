@@ -15,6 +15,7 @@ import 'package:kasir_app/app/pages/insight/traffic.dart';
 import 'package:kasir_app/app/pages/login/login_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/pages/order_succes/order_succes_page.dart';
+import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
 import 'package:kasir_app/app/pages/selling/selling_page.dart';
 import 'package:kasir_app/app/pages/stock/stock_page.dart';
 import 'package:kasir_app/app/pages/setting/setting_page.dart';
@@ -57,18 +58,24 @@ final routerConfig = GoRouter(
       builder: (_, __) => const HomePage(),
       routes: [
         GoRoute(
-            path: 'selling',
-            name: Routes.selling,
-            builder: (context, state) => const SellingPage(),
-            routes: [
-              GoRoute(
-                path: 'order-succes',
-                name: Routes.orderSucces,
-                builder: (_, state) => OrderSuccesPage(
-                  data: state.extra as OrderModel,
-                ),
+          path: 'selling',
+          name: Routes.selling,
+          builder: (context, state) => const SellingPage(),
+          routes: [
+            GoRoute(
+              path: 'order-succes',
+              name: Routes.orderSucces,
+              builder: (_, state) => OrderSuccesPage(
+                data: state.extra as OrderModel,
               ),
-            ]),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'history',
+          name: Routes.history,
+          builder: (context, state) => HistoryPage(),
+        ),
         GoRoute(
           path: 'stock',
           name: Routes.stock,

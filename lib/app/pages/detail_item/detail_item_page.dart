@@ -1,6 +1,11 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:kasir_app/app/bloc/item/item_bloc.dart';
 import 'package:kasir_app/app/model/item_model.dart';
+import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/util.dart';
@@ -17,6 +22,70 @@ class DetailItemPage extends StatefulWidget {
 }
 
 class _DetailItemPageState extends State<DetailItemPage> {
+  late TextEditingController qtyC;
+  late int stockChange;
+  late int stock;
+
+  late bool isLongPressDecrease;
+  late bool isLongPressIncrease;
+
+  @override
+  void initState() {
+    isLongPressDecrease = false;
+    isLongPressIncrease = false;
+    qtyC = TextEditingController();
+    stock = widget.itemModel.stock!;
+    stockChange = widget.itemModel.stock!;
+    qtyC.text = stockChange.toString();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    qtyC.dispose();
+    super.dispose();
+  }
+
+  void _updateStockItem() {
+    if (stockChange != stock) {
+      ItemModel newData = widget.itemModel.copyWith(
+        stock: stockChange,
+      );
+      String email = context.read<AuthRepository>().userModel.email ?? '';
+      context.read<ItemBloc>().add(
+            ItemUpdateStockEvent(email, itemModel: newData),
+          );
+    }
+  }
+
+  void _increaseStock() => setState(() {
+        stockChange++;
+        qtyC.text = stockChange.toString();
+      });
+
+  void _decreaseStock() {
+    if (stockChange != 0) {
+      setState(() {
+        stockChange--;
+        qtyC.text = stockChange.toString();
+      });
+    }
+  }
+
+  void _startDecreaseStock() {
+    if (isLongPressDecrease) {
+      _decreaseStock();
+      Future.delayed(const Duration(milliseconds: 100), _startDecreaseStock);
+    }
+  }
+
+  void _startIncreaseStock() {
+    if (isLongPressIncrease) {
+      _increaseStock();
+      Future.delayed(const Duration(milliseconds: 100), _startIncreaseStock);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -24,6 +93,7 @@ class _DetailItemPageState extends State<DetailItemPage> {
     String identityItem = takeLetterIdentity(itemModel.name!);
     String basicPrice = currencyFormat(itemModel.basicPrice!);
     String sellingPrice = currencyFormat(itemModel.sellingPrice!);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail Item'),
@@ -88,40 +158,187 @@ class _DetailItemPageState extends State<DetailItemPage> {
               children: [
                 _TextLabel(
                   label: 'Stock',
-                  title: itemModel.stock.toString(),
+                  title: stock.toString(),
                 ),
-                const _TextLabel(
-                  label: 'Order Count',
-                  title: '12',
+                _TextLabel(
+                  label: 'Description',
+                  title: itemModel.description!,
                 ),
               ],
             ),
             const SizedBox(
               height: kDeffaultPadding,
             ),
-            Row(
-              children: [
-                _CustomElevated(
-                  onTap: () {},
-                  backgroundColor: Colors.red,
-                  icon: TablerIcons.trash_x,
-                  label: "Delete",
-                ),
-                const SizedBox(
-                  width: kSmallPadding,
-                ),
-                _CustomElevated(
-                  onTap: () {
-                    context.goNamed(Routes.addItem, extra: itemModel);
-                  },
-                  icon: TablerIcons.edit,
-                  label: 'Edit',
-                ),
-              ],
-            )
+            const Divider(),
+            _updateStock(textTheme),
+            const Divider(),
+            _button(context, itemModel)
           ],
         ),
       ),
+    );
+  }
+
+  Widget _updateStock(TextTheme textTheme) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      children: [
+        Text(
+          'Add stock',
+          style: textTheme.titleMedium,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            GestureDetector(
+              onLongPressStart: (details) {
+                isLongPressDecrease = true;
+                _startDecreaseStock();
+              },
+              onLongPressEnd: (details) {
+                isLongPressDecrease = false;
+              },
+              onTap: _decreaseStock,
+              child: Container(
+                padding: const EdgeInsets.all(kSmallPadding),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kSmallRadius),
+                  border: Border.all(
+                    color: Colors.black12,
+                  ),
+                ),
+                child: const Icon(
+                  TablerIcons.minus,
+                  size: 28,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 70,
+              child: TextField(
+                controller: qtyC,
+                textAlign: TextAlign.center,
+                style: textTheme.titleMedium,
+                enabled: false,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            GestureDetector(
+              onLongPressStart: (_) {
+                isLongPressIncrease = true;
+                _startIncreaseStock();
+              },
+              onLongPressEnd: (_) {
+                isLongPressIncrease = false;
+              },
+              onTap: _increaseStock,
+              child: Container(
+                padding: const EdgeInsets.all(kSmallPadding),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(kSmallRadius),
+                  border: Border.all(
+                    color: Colors.black12,
+                  ),
+                ),
+                child: const Icon(
+                  TablerIcons.plus,
+                  size: 28,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (stockChange != stock)
+          IconButton(
+            onPressed: () => setState(() {
+              stockChange = stock;
+              qtyC.text = stockChange.toString();
+            }),
+            icon: Icon(Icons.refresh_rounded),
+          ),
+        const SizedBox(
+          height: kSmallPadding,
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.green,
+            fixedSize: const Size.fromHeight(55),
+          ),
+          onPressed: stockChange != stock ? _updateStockItem : null,
+          child: BlocConsumer<ItemBloc, ItemState>(
+            listenWhen: (previous, current) {
+              if (previous is ItemLoadingState && current is ItemLoadedState) {
+                return true;
+              } else {
+                return false;
+              }
+            },
+            listener: (context, state) {
+              setState(() {
+                stock = stockChange;
+              });
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Succes update stock'),
+                  duration: Duration(seconds: 2),
+                ),
+              );
+            },
+            builder: (context, state) {
+              if (state is ItemLoadingState) {
+                return const FittedBox(
+                  fit: BoxFit.contain,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 5,
+                    color: Colors.white,
+                  ),
+                );
+              }
+              return const Text('Save');
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Row _button(BuildContext context, ItemModel itemModel) {
+    return Row(
+      children: [
+        Expanded(
+          child: _CustomElevated(
+            onTap: () {},
+            backgroundColor: Colors.red,
+            icon: TablerIcons.trash_x,
+            label: "Delete",
+          ),
+        ),
+        const SizedBox(
+          width: kSmallPadding,
+        ),
+        Expanded(
+          child: _CustomElevated(
+            onTap: () {
+              context.goNamed(Routes.addItem, extra: itemModel);
+            },
+            icon: TablerIcons.edit,
+            label: 'Edit',
+          ),
+        ),
+      ],
     );
   }
 }
@@ -129,39 +346,38 @@ class _DetailItemPageState extends State<DetailItemPage> {
 class _CustomElevated extends StatelessWidget {
   const _CustomElevated({
     this.backgroundColor,
-    required this.icon,
+    this.icon,
     required this.label,
     required this.onTap,
   });
 
   final Color? backgroundColor;
-  final IconData icon;
+  final IconData? icon;
   final String label;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor,
-        ),
-        onPressed: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+      ),
+      onPressed: onTap,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (icon != null)
             Icon(
               icon,
               size: 20,
             ),
-            const SizedBox(
-              width: 4,
-            ),
-            Text(
-              label,
-            ),
-          ],
-        ),
+          const SizedBox(
+            width: 4,
+          ),
+          Text(
+            label,
+          ),
+        ],
       ),
     );
   }

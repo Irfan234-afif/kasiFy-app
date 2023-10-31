@@ -29,6 +29,13 @@ class ItemUpdateStockEvent extends ItemEvent {
   ItemUpdateStockEvent(this.email, {required this.itemModel});
 }
 
+class ItemDecreaseStockEvent extends ItemEvent {
+  final String email;
+  final ItemModel itemModel;
+
+  ItemDecreaseStockEvent(this.email, {required this.itemModel});
+}
+
 class ItemRestockEvent extends ItemEvent {
   final String email;
   final String itemName;

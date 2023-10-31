@@ -36,6 +36,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    emailC.text = 'dadka';
     final themeData = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
     final size = mediaQuery.size;

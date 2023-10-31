@@ -10,6 +10,7 @@ import 'package:kasir_app/app/util/util.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../bloc/order/order_bloc.dart';
+import '../../util/calculation_traffic.dart';
 
 class TrafficPage extends StatefulWidget {
   const TrafficPage({super.key});
@@ -149,7 +150,7 @@ class _TrafficPageState extends State<TrafficPage> {
       default:
     }
     List<OrderModel> sortedData =
-        trafficSortCalc(dataOrder: orderModel, indexFilter: indexFilter);
+        trafficOrderCalc(dataOrder: orderModel, indexFilter: indexFilter);
     List<ItemOrder> newDataItemOrder =
         trafficItemRankCalc(dataSorted: sortedData);
 
