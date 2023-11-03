@@ -11,7 +11,9 @@ import 'package:kasir_app/app/widget/initial_image.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 import '../bloc/order/order_bloc.dart';
+import '../bloc/search/search_cubit.dart';
 import '../bloc/temp_order/temp_order_bloc.dart';
+import '../model/category_model.dart';
 import '../model/item_model.dart';
 import '../model/order_model.dart';
 import '../theme/app_theme.dart';
@@ -336,27 +338,27 @@ class DialogCollection {
                     SizedBox(
                       height: mediaQuery.size.height * .02,
                     ),
-                    buildTextRow(
+                    _buildTextRow(
                       context: context,
                       title: 'Status ',
                       trailling: 'Selesai',
                     ),
-                    buildTextRow(
+                    _buildTextRow(
                       context: context,
                       title: 'Atas nama',
                       trailling: nama!,
                     ),
-                    buildTextRow(
+                    _buildTextRow(
                       context: context,
                       title: 'Jumlah item',
                       trailling: jumlahItem,
                     ),
-                    buildTextRow(
+                    _buildTextRow(
                       context: context,
                       title: 'Pesan pada jam',
                       trailling: orderAt,
                     ),
-                    buildTextRow(
+                    _buildTextRow(
                       context: context,
                       title: 'Subtotal',
                       trailling: totalPrice,
@@ -377,10 +379,8 @@ class DialogCollection {
                       itemCount: orderModel.items?.length,
                       itemBuilder: (context, index) {
                         var data = orderModel.items![index];
-                        double priceItemTotal =
-                            double.parse(data.sellingPrice!) * data.quantity!;
-                        var newPriceItem =
-                            currencyFormat(priceItemTotal.toString());
+                        double priceItemTotal = double.parse(data.sellingPrice!) * data.quantity!;
+                        var newPriceItem = currencyFormat(priceItemTotal.toString());
                         return Column(
                           children: [
                             ListTile(
@@ -390,23 +390,20 @@ class DialogCollection {
                                 color: Colors.green,
                                 fontSize: 16,
                               ),
-                              titleTextStyle:
-                                  themeData.textTheme.titleMedium!.copyWith(
+                              titleTextStyle: themeData.textTheme.titleMedium!.copyWith(
                                 color: Colors.black87,
                               ),
                               leading: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(kSmallRadius),
+                                  borderRadius: BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
                                 ),
                                 child: Text(
                                   '${data.quantity}x',
-                                  style:
-                                      themeData.textTheme.titleMedium!.copyWith(
+                                  style: themeData.textTheme.titleMedium!.copyWith(
                                     color: Colors.green,
                                     fontSize: 14,
                                   ),
@@ -433,8 +430,7 @@ class DialogCollection {
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(mediaQuery.size.width, 0),
-                  padding:
-                      const EdgeInsets.symmetric(vertical: kDeffaultPadding),
+                  padding: const EdgeInsets.symmetric(vertical: kDeffaultPadding),
                   backgroundColor: Colors.red,
                 ),
                 onPressed: () {
@@ -484,8 +480,7 @@ class DialogCollection {
     final mediaQuery = MediaQuery.of(context);
     final size = mediaQuery.size;
     final textTheme = Theme.of(context).textTheme;
-    final paddingHorizontal =
-        isTablet ? kDeffaultPadding * 4 : kDeffaultPadding;
+    final paddingHorizontal = isTablet ? kDeffaultPadding * 4 : kDeffaultPadding;
     final TextEditingController qtyC = TextEditingController();
     final TextEditingController noteC = TextEditingController();
     final GlobalKey<FormState> noteFormKey = GlobalKey<FormState>();
@@ -497,8 +492,8 @@ class DialogCollection {
     double totalPrice = double.parse(item.sellingPrice!);
 
     ItemBloc itemBloc = context.read<ItemBloc>();
-    ItemModel itemModel = itemBloc.state.itemModel!
-        .singleWhere((element) => element.name == item.name);
+    ItemModel itemModel =
+        itemBloc.state.itemModel!.singleWhere((element) => element.name == item.name);
 
     int stock = itemModel.stock!;
     showModalBottomSheet(
@@ -573,16 +568,14 @@ class DialogCollection {
                                   if (qtyC.text != '0') {
                                     var currentQty = int.parse(qtyC.text);
                                     qtyC.text = (currentQty - 1).toString();
-                                    totalPrice =
-                                        originalPrice * int.parse(qtyC.text);
+                                    totalPrice = originalPrice * int.parse(qtyC.text);
                                   }
                                 });
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(kSmallRadius),
+                                  borderRadius: BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
@@ -620,16 +613,14 @@ class DialogCollection {
                                     stock -= 1;
                                     var currentQty = int.parse(qtyC.text);
                                     qtyC.text = (currentQty + 1).toString();
-                                    totalPrice =
-                                        originalPrice * int.parse(qtyC.text);
+                                    totalPrice = originalPrice * int.parse(qtyC.text);
                                   });
                                 }
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(kSmallPadding),
                                 decoration: BoxDecoration(
-                                  borderRadius:
-                                      BorderRadius.circular(kSmallRadius),
+                                  borderRadius: BorderRadius.circular(kSmallRadius),
                                   border: Border.all(
                                     color: Colors.black12,
                                   ),
@@ -743,9 +734,7 @@ class DialogCollection {
                           final newItem = itemModel.copyWith(
                             stock: stock,
                           );
-                          context
-                              .read<ItemBloc>()
-                              .add(ItemEditLocalEvent(itemModel: newItem));
+                          context.read<ItemBloc>().add(ItemEditLocalEvent(itemModel: newItem));
                         }
                         // if (noteFormKey.currentState!.validate()) {
                         context.pop();
@@ -863,8 +852,7 @@ class DialogCollection {
                               behavior: HitTestBehavior.translucent,
                               child: Text(
                                 'Add items',
-                                style:
-                                    themeData.textTheme.titleMedium!.copyWith(
+                                style: themeData.textTheme.titleMedium!.copyWith(
                                   color: Colors.blue,
                                   fontSize: 14,
                                 ),
@@ -888,17 +876,13 @@ class DialogCollection {
                                       data,
                                       onSubmit: (item) {
                                         // update stock item
-                                        final itemBloc =
-                                            context.read<ItemBloc>();
-                                        final itemModel =
-                                            itemBloc.state.itemModel;
-                                        int indexWhere = itemModel!.indexWhere(
-                                            (element) =>
-                                                element.name == item.name);
+                                        final itemBloc = context.read<ItemBloc>();
+                                        final itemModel = itemBloc.state.itemModel;
+                                        int indexWhere = itemModel!
+                                            .indexWhere((element) => element.name == item.name);
                                         var sameItem = itemModel[indexWhere];
                                         final newItem = sameItem.copyWith(
-                                          stock: sameItem.originalStock! -
-                                              item.quantity!,
+                                          stock: sameItem.originalStock! - item.quantity!,
                                         );
                                         itemBloc.add(ItemEditLocalEvent(
                                           itemModel: newItem,
@@ -914,19 +898,17 @@ class DialogCollection {
                                             // karna tempOrder sudah tidak ada atau sudah empty
                                             context.pop();
                                           }
-                                          context.read<TempOrderBloc>().add(
-                                              TempOrderDeleteEvent(
-                                                  name: item.name!));
+                                          context
+                                              .read<TempOrderBloc>()
+                                              .add(TempOrderDeleteEvent(name: item.name!));
                                         } else {
                                           var whereItem = orderModel.items!
-                                              .indexWhere((element) =>
-                                                  element.name == item.name);
+                                              .indexWhere((element) => element.name == item.name);
                                           context.read<TempOrderBloc>().add(
                                               // TempOrderUpdateEvent(item: item),
                                               TempOrderUpdateEvent(
                                                   orderModel: orderModel
-                                                    ..items![whereItem] =
-                                                        item));
+                                                    ..items![whereItem] = item));
                                         }
                                       },
                                       onDelete: (id) {
@@ -973,10 +955,8 @@ class DialogCollection {
                             style: themeData.textTheme.titleSmall,
                             onChanged: (value) {
                               // box.write('textOrder', value);
-                              context.read<TempOrderBloc>().add(
-                                  TempOrderUpdateEvent(
-                                      orderModel:
-                                          orderModel.copyWith(name: value)));
+                              context.read<TempOrderBloc>().add(TempOrderUpdateEvent(
+                                  orderModel: orderModel.copyWith(name: value)));
                               // print(orderm)
                             },
                             validator: (value) {
@@ -988,15 +968,13 @@ class DialogCollection {
                             decoration: InputDecoration(
                               hintText: 'Atas nama..',
                               enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(kSmallRadius),
+                                borderRadius: BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
                               ),
                               focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(kSmallRadius),
+                                borderRadius: BorderRadius.circular(kSmallRadius),
                                 borderSide: const BorderSide(
                                   color: Colors.black26,
                                 ),
@@ -1036,8 +1014,7 @@ class DialogCollection {
                       padding: const MaterialStatePropertyAll(
                         EdgeInsets.symmetric(vertical: kDeffaultPadding),
                       ),
-                      backgroundColor:
-                          const MaterialStatePropertyAll(Colors.green),
+                      backgroundColor: const MaterialStatePropertyAll(Colors.green),
                       minimumSize: const MaterialStatePropertyAll(
                         Size(double.infinity, 0),
                       ),
@@ -1070,8 +1047,7 @@ class DialogCollection {
                         }
                       },
                       builder: (context, state) {
-                        if (state is OrderLoadingState ||
-                            state is OrderAddingState) {
+                        if (state is OrderLoadingState || state is OrderAddingState) {
                           return const SizedBox(
                             height: 20,
                             width: 20,
@@ -1108,32 +1084,28 @@ class DialogCollection {
                     ),
                     onPressed: () {
                       if (orderBloc.state is! OrderLoadingState) {
-                        String email =
-                            context.read<AuthRepository>().userModel.email!;
+                        String email = context.read<AuthRepository>().userModel.email!;
                         // restoreStock Item
-                        List<ItemModel> itemModel =
-                            context.read<ItemBloc>().state.itemModel!;
+                        List<ItemModel> itemModel = context.read<ItemBloc>().state.itemModel!;
                         orderModel.items!.forEach((itemOrder) {
-                          var sameItem = itemModel.singleWhere(
-                              (element) => element.name == itemOrder.name);
+                          var sameItem =
+                              itemModel.singleWhere((element) => element.name == itemOrder.name);
                           var restoreStockItem = sameItem.copyWith(
                             stock: sameItem.originalStock,
                           );
-                          context.read<ItemBloc>().add(
-                              ItemEditLocalEvent(itemModel: restoreStockItem));
+                          context
+                              .read<ItemBloc>()
+                              .add(ItemEditLocalEvent(itemModel: restoreStockItem));
                         });
 
                         // kembalikan stock item
                         orderModel.items!.forEach((element) {
                           context.read<ItemBloc>().add(
-                                ItemRestockEvent(email,
-                                    itemName: element.name!),
+                                ItemRestockEvent(email, itemName: element.name!),
                               );
                         });
                         context.pop();
-                        context
-                            .read<TempOrderBloc>()
-                            .add(TempOrderEmptyEvent());
+                        context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                       }
                     },
                     child: Row(
@@ -1197,7 +1169,7 @@ class DialogCollection {
 
   static void snakBarSuccesAddItem(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
+      const SnackBar(
         backgroundColor: Colors.green,
         content: Row(
           children: [
@@ -1345,7 +1317,38 @@ class DialogCollection {
     );
   }
 
-  static Column buildTextRow(
+  static Future<bool?> dialogConfirm({
+    required BuildContext context,
+    required String titleText,
+    required String contentText,
+  }) async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => AlertDialog(
+        title: Text(titleText),
+        content: Text(
+          contentText,
+        ),
+        actions: [
+          OutlinedButton(
+            onPressed: () => context.pop(false),
+            child: Text(
+              'Cancel',
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () => context.pop(true),
+            child: Text(
+              "Yes",
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Column _buildTextRow(
       {required BuildContext context,
       required String title,
       required String trailling,

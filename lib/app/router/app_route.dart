@@ -14,5 +14,6 @@ abstract class Routes {
   static const category = 'category';
   static const traffic = 'traffic';
   static const economy = 'economy';
+  static const comingSoon = 'comingSoon';
   static const setting = 'setting';
 }

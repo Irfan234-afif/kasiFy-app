@@ -44,8 +44,7 @@ class _SellingPageState extends State<SellingPage> {
     noteC = TextEditingController();
     nameFormKey = GlobalKey<FormState>();
     isOrder = false;
-    email =
-        context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     orderBloc = context.read<OrderBloc>();
     super.initState();
   }
@@ -85,11 +84,8 @@ class _SellingPageState extends State<SellingPage> {
 
   void _updateStockItem(OrderModel data) {
     for (var element in data.items!) {
-      ItemModel itemData =
-          ItemModel(name: element.name, stock: element.quantity);
-      context
-          .read<ItemBloc>()
-          .add(ItemDecreaseStockEvent(email, itemModel: itemData));
+      ItemModel itemData = ItemModel(name: element.name, stock: element.quantity);
+      context.read<ItemBloc>().add(ItemDecreaseStockEvent(email, itemModel: itemData));
     }
   }
 
@@ -102,6 +98,7 @@ class _SellingPageState extends State<SellingPage> {
     final size = mediaQuery.size;
     return BlocBuilder<TempOrderBloc, TempOrderState>(
       builder: (context, state) {
+        print(state.orderModel?.items?.length);
         print(state);
         return isTablet
             ? _buildTabletLayout(size, mediaQuery, state.orderModel!)
@@ -110,8 +107,7 @@ class _SellingPageState extends State<SellingPage> {
     );
   }
 
-  Widget _buildTabletLayout(
-      Size size, MediaQueryData mediaQuery, OrderModel orderlModel) {
+  Widget _buildTabletLayout(Size size, MediaQueryData mediaQuery, OrderModel orderlModel) {
     return Row(
       children: [
         Expanded(
@@ -121,7 +117,7 @@ class _SellingPageState extends State<SellingPage> {
             body: const SellingScreenBody(),
           ),
         ),
-        const Material(child: VerticalDivider()),
+        VerticalDivider(),
         Expanded(
           flex: 3,
           child: OrderSummaryTablet(orderModel: orderlModel),
@@ -130,8 +126,8 @@ class _SellingPageState extends State<SellingPage> {
     );
   }
 
-  Stack _buildMobileLayout(Size size, MediaQueryData mediaQuery,
-      TempOrderState state, ThemeData themeData) {
+  Stack _buildMobileLayout(
+      Size size, MediaQueryData mediaQuery, TempOrderState state, ThemeData themeData) {
     return Stack(
       children: [
         Positioned.fill(
@@ -142,15 +138,13 @@ class _SellingPageState extends State<SellingPage> {
             body: const SellingScreenBody(),
           ),
         ),
-        if (state is TempOrderisOrderState)
-          _widgetOnOrder(size, themeData, state.orderModel!),
+        if (state is TempOrderisOrderState) _widgetOnOrder(size, themeData, state.orderModel!),
       ],
     );
   }
 
   // Order On
-  Positioned _widgetOnOrder(
-      Size size, ThemeData themeData, OrderModel orderModel) {
+  Positioned _widgetOnOrder(Size size, ThemeData themeData, OrderModel orderModel) {
     final totalItem = orderModel.items?.length;
     final totalPrice = currencyFormat(orderModel.totalPrice!);
     return Positioned(
@@ -160,8 +154,7 @@ class _SellingPageState extends State<SellingPage> {
           listener: (context, state) {
             // lanjutan ontap button
             final salesBloc = context.read<SalesBloc>();
-            if (state is OrderLoadedState &&
-                salesBloc.state is SalesLoadedState) {
+            if (state is OrderLoadedState && salesBloc.state is SalesLoadedState) {
               // context.read<SalesBloc>().add(SalesGetEvent(email));
               context.pop(); // close bottomsheet
               context.goNamed(Routes.orderSucces, // go succes_page
@@ -206,12 +199,10 @@ class _SellingPageState extends State<SellingPage> {
                     child: Material(
                       color: Colors.transparent,
                       child: ListTile(
-                        titleTextStyle:
-                            themeData.textTheme.titleMedium!.copyWith(
+                        titleTextStyle: themeData.textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                         ),
-                        leadingAndTrailingTextStyle:
-                            themeData.textTheme.titleMedium!.copyWith(
+                        leadingAndTrailingTextStyle: themeData.textTheme.titleMedium!.copyWith(
                           color: Colors.white,
                         ),
                         leading: const Icon(

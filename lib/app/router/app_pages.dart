@@ -19,6 +19,7 @@ import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
 import 'package:kasir_app/app/pages/selling/selling_page.dart';
 import 'package:kasir_app/app/pages/stock/stock_page.dart';
 import 'package:kasir_app/app/pages/setting/setting_page.dart';
+import 'package:kasir_app/app/pages/comingsoon/comingsoon_page.dart';
 
 import '../pages/home/home_page.dart';
 import '../repository/auth_repository.dart';
@@ -133,6 +134,11 @@ final routerConfig = GoRouter(
       path: '/error',
       name: Routes.error,
       builder: (_, __) => const ErrorPage(),
+    ),
+    GoRoute(
+      path: '/comingsoon',
+      name: Routes.comingSoon,
+      builder: (_, __) => const ComingSoonPage(),
     ),
   ],
 );

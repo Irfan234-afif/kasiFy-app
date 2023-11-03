@@ -23,60 +23,63 @@ class InsightScreen extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return Scaffold(
       body: ListView(
-        physics: Platform.isIOS
-            ? const ClampingScrollPhysics()
-            : const RangeMaintainingScrollPhysics(),
+        physics:
+            Platform.isIOS ? const ClampingScrollPhysics() : const RangeMaintainingScrollPhysics(),
         padding: const EdgeInsets.all(kDeffaultPadding),
         children: [
           _headerBox(textTheme),
           const SizedBox(
             height: kDeffaultPadding,
           ),
-          Column(
-            children: [
-              const IRContainerShadow(
-                child: Text('Insight'),
-              ),
-              const SizedBox(
-                height: kSmallPadding,
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: IRCardItemHome(
-                      height: 150,
-                      onTap: () => context.goNamed(Routes.traffic),
-                      label: "Traffic Order",
-                      icon: Expanded(
-                        child: SizedBox(
-                          width: 70,
-                          child: Image.asset('assets/icons/traffic_icon.png'),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(
-                    width: 12,
-                  ),
-                  Expanded(
-                    child: IRCardItemHome(
-                      height: 150,
-                      onTap: () => context.goNamed(Routes.economy),
-                      label: "Traffic Economy",
-                      icon: Expanded(
-                        child: SizedBox(
-                          width: 70,
-                          child: Image.asset('assets/icons/economy_icon.png'),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          _insightBody(context),
         ],
       ),
+    );
+  }
+
+  Column _insightBody(BuildContext context) {
+    return Column(
+      children: [
+        const IRContainerShadow(
+          child: Text('Insight'),
+        ),
+        const SizedBox(
+          height: kSmallPadding,
+        ),
+        Row(
+          children: [
+            Expanded(
+              child: IRCardItemHome(
+                height: 150,
+                onTap: () => context.goNamed(Routes.traffic),
+                label: "Traffic Order",
+                icon: Expanded(
+                  child: SizedBox(
+                    width: 70,
+                    child: Image.asset('assets/icons/traffic_icon.png'),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Expanded(
+              child: IRCardItemHome(
+                height: 150,
+                onTap: () => context.goNamed(Routes.economy),
+                label: "Traffic Economy",
+                icon: Expanded(
+                  child: SizedBox(
+                    width: 70,
+                    child: Image.asset('assets/icons/economy_icon.png'),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -116,11 +119,7 @@ class InsightScreen extends StatelessWidget {
 }
 
 class _ChartRevenue extends StatefulWidget {
-  const _ChartRevenue(
-      {required this.data,
-      required this.metode,
-      this.title,
-      this.isMarker = true});
+  const _ChartRevenue({required this.data, required this.metode, this.title, this.isMarker = true});
 
   final List<SalesModel> data;
   final String Function(DateTime data) metode;
@@ -145,9 +144,8 @@ class _ChartRevenueState extends State<_ChartRevenue> {
     return SfCartesianChart(
       zoomPanBehavior: _zoomPanBehavior,
       primaryXAxis: DateTimeAxis(
-        dateFormat: DateFormat.Hm(),
-        intervalType: DateTimeIntervalType.hours,
-        interval: 5,
+        dateFormat: DateFormat.MMMd(),
+        intervalType: DateTimeIntervalType.days,
       ),
       legend: const Legend(isVisible: true, position: LegendPosition.bottom),
       title: widget.title != null

@@ -89,12 +89,10 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   void _orderUpdate({required OrderModel orderModel, required ItemOrder item}) {
     print(orderModel.toJson());
     // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem =
-        orderModel.items!.indexWhere((element) => element.name == item.name);
+    int indexItem = orderModel.items!.indexWhere((element) => element.name == item.name);
     // print(item.detail);
     context.read<TempOrderBloc>().add(
-          TempOrderUpdateEvent(
-              orderModel: orderModel..items![indexItem] = item),
+          TempOrderUpdateEvent(orderModel: orderModel..items![indexItem] = item),
         );
   }
 
@@ -103,10 +101,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
       context,
       item,
       onSubmit: (item, quantity, note) {
-        final dataAll = context
-            .read<TempOrderBloc>()
-            .state
-            .orderModel; // ambil data dari bloc
+        final dataAll = context.read<TempOrderBloc>().state.orderModel; // ambil data dari bloc
         final checkData = dataAll?.items?.indexWhere(
           (element) => element.name == item.name,
         ); // cari data
@@ -128,8 +123,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         } else {
           // jika item ditemukan
 
-          var dataItem =
-              dataAll!.items![checkData]; // ambil data sesuai dari cari data
+          var dataItem = dataAll!.items![checkData]; // ambil data sesuai dari cari data
           var qty = dataItem.quantity! + quantity;
           var price = double.parse(dataItem.sellingPrice!) * qty;
           var detail = '';
@@ -234,9 +228,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   }
 
   Widget _buildBody(Size size, List<ItemModel> data) {
-    return isTablet
-        ? _buildTabletItem(size, data)
-        : _buildMobileItem(size, data);
+    return isTablet ? _buildTabletItem(size, data) : _buildMobileItem(size, data);
   }
 
   Widget _buildShimmer() {
@@ -305,69 +297,108 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
   ListView _buildTabletItem(Size size, List<ItemModel> data) {
     return ListView.builder(
       shrinkWrap: true,
-      padding: const EdgeInsets.only(top: kSmallPadding),
+      // padding: const EdgeInsets.only(top: kSmallPadding),
       scrollDirection: Axis.vertical,
-      physics: const ClampingScrollPhysics(),
+      physics: RangeMaintainingScrollPhysics(),
       itemCount: data.length,
       itemBuilder: (context, index) {
-        final sizeImageItem = size.height * 0.073;
-        final sizeImageItemOnDrag = size.height * 0.1;
+        // final sizeImageItem = size.height * 0.5;
+        // final sizeImageItemOnDrag = size.height * 0.1;
         ItemModel item = data[index];
         String leadingText = takeLetterIdentity(item.name!);
-        return LongPressDraggable<ItemModel>(
-          onDragStarted: () => context.read<DraggableItemCubit>().dragOn(),
-          onDragEnd: (details) => context.read<DraggableItemCubit>().dragOff(),
-          data: item,
-          feedback: SizedBox(
-            height: sizeImageItemOnDrag,
-            width: sizeImageItemOnDrag,
-            child: CircleAvatar(
-              backgroundColor: kCircleAvatarBackground,
-              child: Image.asset(
-                'assets/images/drink-${Random().nextInt(4) + 1}.png',
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
-          child: TileItem(
-            onTap: () {
-              DialogCollection.dialogItem(
-                context,
-                item,
-                onSubmit: (item, quantity, note) {
-                  // var dataAll = context.read<TempOrderBloc>().state.orderModel;
-                  // var checkData = dataAll?.items?.indexWhere(
-                  //   (element) => element.id == item.id,
-                  // );
-                  // // when item is added in order
-                  // if (checkData == null || checkData == -1) {
-                  //   //-1 adalah data yang sama tidak di temukan
-                  //   _orderOn(
-                  //     quantity: quantity,
-                  //     itemModel: item,
-                  //     note: note,
-                  //   );
-                  // } else {
-                  //   var dataItem = dataAll!.items![checkData];
-                  //   var qty = dataItem.quantity! + quantity;
-                  //   var price =
-                  //       double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
-                  //   var detail = '${dataItem.detail!}, $note';
-                  //   dataItem.quantity = qty;
-                  //   dataItem.sellingPrice = price.toString();
-                  //   dataItem.detail = detail;
-                  //   _orderUpdate(item: dataItem, orderModel: dataAll);
-                  // }
-                },
-              );
-            },
-            sizeImage: sizeImageItem,
-            leadingText: leadingText,
-            title: item.name!,
-            subtitle: item.description!,
-            trailing: currencyFormat(item.sellingPrice!),
-            isLeadingImage: false,
-          ),
+        // return LongPressDraggable<ItemModel>(
+        //   onDragStarted: () => context.read<DraggableItemCubit>().dragOn(),
+        //   onDragEnd: (details) => context.read<DraggableItemCubit>().dragOff(),
+        //   data: item,
+        //   feedback: SizedBox(
+        //     height: sizeImageItemOnDrag,
+        //     width: sizeImageItemOnDrag,
+        //     child: CircleAvatar(
+        //       backgroundColor: kCircleAvatarBackground,
+        //       child: Image.asset(
+        //         'assets/images/drink-${Random().nextInt(4) + 1}.png',
+        //         fit: BoxFit.contain,
+        //       ),
+        //     ),
+        //   ),
+        //   child: TileItem(
+        //     onTap: () {
+        //       DialogCollection.dialogItem(
+        //         context,
+        //         item,
+        //         onSubmit: (item, quantity, note) {
+        //           // var dataAll = context.read<TempOrderBloc>().state.orderModel;
+        //           // var checkData = dataAll?.items?.indexWhere(
+        //           //   (element) => element.id == item.id,
+        //           // );
+        //           // // when item is added in order
+        //           // if (checkData == null || checkData == -1) {
+        //           //   //-1 adalah data yang sama tidak di temukan
+        //           //   _orderOn(
+        //           //     quantity: quantity,
+        //           //     itemModel: item,
+        //           //     note: note,
+        //           //   );
+        //           // } else {
+        //           //   var dataItem = dataAll!.items![checkData];
+        //           //   var qty = dataItem.quantity! + quantity;
+        //           //   var price =
+        //           //       double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
+        //           //   var detail = '${dataItem.detail!}, $note';
+        //           //   dataItem.quantity = qty;
+        //           //   dataItem.sellingPrice = price.toString();
+        //           //   dataItem.detail = detail;
+        //           //   _orderUpdate(item: dataItem, orderModel: dataAll);
+        //           // }
+        //         },
+        //       );
+        //     },
+        //     sizeImage: sizeImageItem,
+        //     leadingText: leadingText,
+        //     title: item.name!,
+        //     subtitle: item.description!,
+        //     trailing: currencyFormat(item.sellingPrice!),
+        //     isLeadingImage: false,
+        //   ),
+        // );
+        return TileItem(
+          onTap: () => _itemOnTap(item),
+          // onTap: () {
+          //   DialogCollection.dialogItem(
+          //     context,
+          //     item,
+          //     onSubmit: (item, quantity, note) {
+          //       // var dataAll = context.read<TempOrderBloc>().state.orderModel;
+          //       // var checkData = dataAll?.items?.indexWhere(
+          //       //   (element) => element.id == item.id,
+          //       // );
+          //       // // when item is added in order
+          //       // if (checkData == null || checkData == -1) {
+          //       //   //-1 adalah data yang sama tidak di temukan
+          //       //   _orderOn(
+          //       //     quantity: quantity,
+          //       //     itemModel: item,
+          //       //     note: note,
+          //       //   );
+          //       // } else {
+          //       //   var dataItem = dataAll!.items![checkData];
+          //       //   var qty = dataItem.quantity! + quantity;
+          //       //   var price =
+          //       //       double.parse(dataItem.sellingPrice!) + double.parse(item.sellingPrice!);
+          //       //   var detail = '${dataItem.detail!}, $note';
+          //       //   dataItem.quantity = qty;
+          //       //   dataItem.sellingPrice = price.toString();
+          //       //   dataItem.detail = detail;
+          //       //   _orderUpdate(item: dataItem, orderModel: dataAll);
+          //       // }
+          //     },
+          //   );
+          // },
+          leadingText: leadingText,
+          title: item.name!,
+          subtitle: item.description!,
+          trailing: currencyFormat(item.sellingPrice!),
+          isLeadingImage: false,
         );
       },
     );
@@ -377,41 +408,72 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
     data.sort(
       (a, b) => a.name!.compareTo(b.name!),
     );
-    return BlocBuilder<TempOrderBloc, TempOrderState>(
-      builder: (context, state) {
-        // if(state is TempOrderisOrderState){
+    // return BlocBuilder<TempOrderBloc, TempOrderState>(
+    //   builder: (context, state) {
+    //     // if(state is TempOrderisOrderState){
 
+    //     // }
+    //     return ListView.builder(
+    //       shrinkWrap: true,
+    //       // padding: const EdgeInsets.only(top: 0),
+    //       scrollDirection: Axis.vertical,
+    //       physics: const ClampingScrollPhysics(),
+    //       itemCount: data.length,
+    //       itemBuilder: (context, index) {
+    //         final sizeImageItem = size.height * 0.073;
+    //         ItemModel item = data[index];
+    //         // // check item stock equal to temporder
+    //         // List<ItemOrder> itemOrder = context.read<TempOrderBloc>().state.orderModel?.items ?? [];
+    //         // var indexCheckItem = itemOrder.indexWhere((element) => element.id == item.id);
+    //         // if (indexCheckItem != -1) {
+    //         //   item.stock = item.stock! - itemOrder[indexCheckItem].quantity!;
+    //         // }
+
+    //         String leadingText = takeLetterIdentity(item.name!);
+    //         final bool enabled = item.stock != 0;
+
+    //         return TileItem(
+    //           onTap: () => _itemOnTap(item),
+    //           enabled: enabled,
+    //           sizeImage: sizeImageItem,
+    //           leadingText: leadingText,
+    //           title: item.name!,
+    //           subtitle: item.description!,
+    //           trailing: currencyFormat(item.sellingPrice!),
+    //           isLeadingImage: false,
+    //         );
+    //       },
+    //     );
+    //   },
+    // );
+    return ListView.builder(
+      shrinkWrap: true,
+      // padding: const EdgeInsets.only(top: 0),
+      scrollDirection: Axis.vertical,
+      physics: const ClampingScrollPhysics(),
+      itemCount: data.length,
+      itemBuilder: (context, index) {
+        final sizeImageItem = size.height * 0.073;
+        ItemModel item = data[index];
+        // // check item stock equal to temporder
+        // List<ItemOrder> itemOrder = context.read<TempOrderBloc>().state.orderModel?.items ?? [];
+        // var indexCheckItem = itemOrder.indexWhere((element) => element.id == item.id);
+        // if (indexCheckItem != -1) {
+        //   item.stock = item.stock! - itemOrder[indexCheckItem].quantity!;
         // }
-        return ListView.builder(
-          shrinkWrap: true,
-          // padding: const EdgeInsets.only(top: 0),
-          scrollDirection: Axis.vertical,
-          physics: const ClampingScrollPhysics(),
-          itemCount: data.length,
-          itemBuilder: (context, index) {
-            final sizeImageItem = size.height * 0.073;
-            ItemModel item = data[index];
-            // // check item stock equal to temporder
-            // List<ItemOrder> itemOrder = context.read<TempOrderBloc>().state.orderModel?.items ?? [];
-            // var indexCheckItem = itemOrder.indexWhere((element) => element.id == item.id);
-            // if (indexCheckItem != -1) {
-            //   item.stock = item.stock! - itemOrder[indexCheckItem].quantity!;
-            // }
 
-            String leadingText = takeLetterIdentity(item.name!);
-            final bool enabled = item.stock != 0;
+        String leadingText = takeLetterIdentity(item.name!);
+        final bool enabled = item.stock != 0;
 
-            return TileItem(
-              onTap: () => _itemOnTap(item),
-              enabled: enabled,
-              sizeImage: sizeImageItem,
-              leadingText: leadingText,
-              title: item.name!,
-              subtitle: item.description!,
-              trailing: currencyFormat(item.sellingPrice!),
-              isLeadingImage: false,
-            );
-          },
+        return TileItem(
+          onTap: () => _itemOnTap(item),
+          enabled: enabled,
+          sizeImage: sizeImageItem,
+          leadingText: leadingText,
+          title: item.name!,
+          subtitle: item.description!,
+          trailing: currencyFormat(item.sellingPrice!),
+          isLeadingImage: false,
         );
       },
     );

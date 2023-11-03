@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/model/order_model.dart';
@@ -74,7 +75,6 @@ class _TrafficPageState extends State<TrafficPage> {
                         ),
                       );
                     case SalesLoadedState:
-                      // when empty
                       salesModel.sort(
                         (a, b) => a.createdAt!.compareTo(b.createdAt!),
                       );
@@ -83,7 +83,6 @@ class _TrafficPageState extends State<TrafficPage> {
                       );
                       return _buildBody(
                         indexFilter,
-                        // salesModel,
                         orderModel,
                       );
 
@@ -149,10 +148,8 @@ class _TrafficPageState extends State<TrafficPage> {
         break;
       default:
     }
-    List<OrderModel> sortedData =
-        trafficOrderCalc(dataOrder: orderModel, indexFilter: indexFilter);
-    List<ItemOrder> newDataItemOrder =
-        trafficItemRankCalc(dataSorted: sortedData);
+    List<OrderModel> sortedData = trafficOrderCalc(dataOrder: orderModel, indexFilter: indexFilter);
+    List<ItemOrder> newDataItemOrder = trafficItemRankCalc(dataSorted: sortedData);
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
@@ -182,8 +179,7 @@ class _TrafficPageState extends State<TrafficPage> {
         // ),
         SfCartesianChart(
           primaryXAxis: CategoryAxis(),
-          legend:
-              const Legend(isVisible: true, position: LegendPosition.bottom),
+          legend: const Legend(isVisible: true, position: LegendPosition.bottom),
           title: ChartTitle(
             text: 'Order',
             textStyle: textTheme.titleMedium,
@@ -199,8 +195,7 @@ class _TrafficPageState extends State<TrafficPage> {
               yValueMapper: (OrderModel order, index) {
                 // logic to know length per-column
                 int length = orderModel
-                    .where((element) =>
-                        metode(element.orderAt!) == metode(order.orderAt!))
+                    .where((element) => metode(element.orderAt!) == metode(order.orderAt!))
                     .length;
                 return length;
               },
