@@ -1,6 +1,3 @@
-import 'dart:math';
-
-import 'package:kasir_app/app/bloc/draggable_item/draggable_item_cubit.dart';
 import 'package:kasir_app/app/bloc/search/search_cubit.dart';
 import 'package:kasir_app/app/bloc/temp_order/temp_order_bloc.dart';
 import 'package:kasir_app/app/model/item_model.dart';
@@ -306,6 +303,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         // final sizeImageItemOnDrag = size.height * 0.1;
         ItemModel item = data[index];
         String leadingText = takeLetterIdentity(item.name!);
+        final bool enabled = item.stock != 0;
         // return LongPressDraggable<ItemModel>(
         //   onDragStarted: () => context.read<DraggableItemCubit>().dragOn(),
         //   onDragEnd: (details) => context.read<DraggableItemCubit>().dragOff(),
@@ -362,6 +360,7 @@ class _SellingScreenBodyState extends State<SellingScreenBody> {
         //   ),
         // );
         return TileItem(
+          enabled: enabled,
           onTap: () => _itemOnTap(item),
           // onTap: () {
           //   DialogCollection.dialogItem(

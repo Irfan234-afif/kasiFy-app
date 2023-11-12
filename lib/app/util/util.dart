@@ -18,8 +18,7 @@ String simpleCurrencyFormat(String data) {
 String currencyFormat(String data) {
   if (data.isNotEmpty) {
     var value = double.parse(data);
-    final formatter =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final newValue = formatter.format(value);
     return newValue;
   } else {
@@ -56,9 +55,7 @@ String hoursFormat(DateTime data) {
 
 bool isToday(DateTime dateTime) {
   final now = DateTime.now();
-  return dateTime.year == now.year &&
-      dateTime.month == now.month &&
-      dateTime.day == now.day;
+  return dateTime.year == now.year && dateTime.month == now.month && dateTime.day == now.day;
 }
 
 String generateCodeProduct() {
@@ -117,4 +114,14 @@ DateTime parseTime(dynamic date) {
   }
   // return Platform.isIOS ? (date as Timestamp).toDate() : (date as DateTime);
   return data;
+}
+
+// String upperCaseFirst(String data){
+//   data.
+// }
+
+extension StringExtension on String {
+  String capitalizeFirst() {
+    return this[0].toUpperCase() + substring(1);
+  }
 }

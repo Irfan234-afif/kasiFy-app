@@ -11,7 +11,7 @@ import 'package:kasir_app/app/pages/additional/loading_page.dart';
 import 'package:kasir_app/app/pages/category/category_page.dart';
 import 'package:kasir_app/app/pages/detail_item/detail_item_page.dart';
 import 'package:kasir_app/app/pages/insight/economy_page.dart';
-import 'package:kasir_app/app/pages/insight/traffic.dart';
+import 'package:kasir_app/app/pages/insight/traffic_page.dart';
 import 'package:kasir_app/app/pages/login/login_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/pages/order_succes/order_succes_page.dart';

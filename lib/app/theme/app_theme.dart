@@ -75,11 +75,11 @@ class AppTheme {
           backgroundColor: kButtonColor,
           foregroundColor: Colors.white,
           minimumSize: const Size.fromHeight(0),
-          padding: EdgeInsets.symmetric(
-              vertical: isTablet ? kDeffaultPadding + 8 : kDeffaultPadding),
+          padding:
+              EdgeInsets.symmetric(vertical: isTablet ? kDeffaultPadding + 8 : kDeffaultPadding),
           textStyle: GoogleFonts.poppins(
             color: kTextColor2,
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w500,
             // fontSize: 14,
           ),
           shape: RoundedRectangleBorder(
@@ -90,8 +90,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(double.infinity, 0),
-          padding: EdgeInsets.symmetric(
-              vertical: isTablet ? kDeffaultPadding + 8 : kDeffaultPadding),
+          padding:
+              EdgeInsets.symmetric(vertical: isTablet ? kDeffaultPadding + 8 : kDeffaultPadding),
           side: const BorderSide(
             color: Colors.black26,
           ),

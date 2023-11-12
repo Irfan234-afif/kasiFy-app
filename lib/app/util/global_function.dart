@@ -7,7 +7,7 @@ import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
 
 class GlobalFunction {
-  static void refresh(BuildContext context) {
+  static Future<void> refresh(BuildContext context) async {
     String token = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     context.read<SalesBloc>().add(SalesGetEvent(token));
     context.read<ItemBloc>().add(ItemGetEvent(token));

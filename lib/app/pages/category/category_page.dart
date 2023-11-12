@@ -4,6 +4,7 @@ import 'package:kasir_app/app/model/category_model.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
 import 'package:kasir_app/app/util/dialog_collection.dart';
 import 'package:kasir_app/app/util/global_function.dart';
+import 'package:kasir_app/app/util/util.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../bloc/category/category_bloc.dart';
@@ -39,28 +40,29 @@ class _CategoryPageState extends State<CategoryPage> {
 
   void _addCategory() {
     if (newCategoryC.text.isNotEmpty) {
+      String nameCategory = newCategoryC.text.capitalizeFirst();
+      final categoryModel = CategoryModel(
+        name: nameCategory,
+      );
+      context.read<CategoryBloc>().add(CategoryAddEvent(email, categoryModel: categoryModel));
       newCategoryC.clear();
       categoryF.unfocus();
-      final categoryModel = CategoryModel(
-        name: newCategoryC.text,
-      );
-      context
-          .read<CategoryBloc>()
-          .add(CategoryAddEvent(email, categoryModel: categoryModel));
     }
   }
 
   void _deleteCategory(CategoryModel category) async {
     // initial expression
-    final addCategory = context.read<CategoryBloc>();
+    final categoryBloc = context.read<CategoryBloc>();
 
     // dialog confirm
-    bool flag = await DialogCollection.confirmOrder(
-      context,
+    bool? flag = await DialogCollection.dialogConfirm(
+      context: context,
+      titleText: 'Category will be delete',
+      contentText: '${category.name} will be deleted',
     );
 
-    if (flag) {
-      addCategory.add(CategoryDeleteEvent(email, categoryModel: category));
+    if (flag!) {
+      categoryBloc.add(CategoryDeleteEvent(email, categoryModel: category));
     }
   }
 
@@ -71,8 +73,8 @@ class _CategoryPageState extends State<CategoryPage> {
         title: const Text("Product's item category"),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
+        padding:
+            const EdgeInsets.symmetric(horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
         child: Column(
           children: [
             _buildTextFieldAddCategory(),
@@ -97,8 +99,7 @@ class _CategoryPageState extends State<CategoryPage> {
               ),
               decoration: InputDecoration(
                 hintText: 'Input a new category',
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
+                contentPadding: const EdgeInsets.symmetric(horizontal: kDeffaultPadding),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(kRadiusDeffault),
                   borderSide: const BorderSide(color: Colors.black26),

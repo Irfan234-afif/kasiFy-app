@@ -117,7 +117,9 @@ class _SellingPageState extends State<SellingPage> {
             body: const SellingScreenBody(),
           ),
         ),
-        VerticalDivider(),
+        const Material(
+          child: VerticalDivider(),
+        ),
         Expanded(
           flex: 3,
           child: OrderSummaryTablet(orderModel: orderlModel),
@@ -232,11 +234,11 @@ class _SellingPageState extends State<SellingPage> {
                       //   context.read<ItemBloc>().add(
                       //       ItemEditLocalEvent(itemModel: restoreStockItem));
                       // }
-                      orderModel.items!.forEach((element) {
+                      for (var element in orderModel.items!) {
                         context.read<ItemBloc>().add(
                               ItemRestockEvent(email, itemName: element.name!),
                             );
-                      });
+                      }
                       context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
                     },
                     icon: const Icon(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:tabler_icons/tabler_icons.dart';
 
 class ComingSoonPage extends StatelessWidget {
   const ComingSoonPage({super.key});

@@ -61,11 +61,13 @@ class _HomePageState extends State<HomePage> {
         topRight: Radius.circular(kRadiusDeffault),
       ),
       child: BottomNavigationBar(
+        landscapeLayout: BottomNavigationBarLandscapeLayout.centered,
         backgroundColor: Colors.transparent,
         currentIndex: _index,
         onTap: (value) => setState(() {
           _index = value;
         }),
+        showUnselectedLabels: true,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(TablerIcons.home),
@@ -210,8 +212,7 @@ class _HomePageState extends State<HomePage> {
     final themeState = context.watch<ThemeCubit>().state;
     return AppBar(
       backgroundColor: Colors.white,
-      foregroundColor:
-          themeState is ThemeLightState ? Colors.black : Colors.white,
+      foregroundColor: themeState is ThemeLightState ? Colors.black : Colors.white,
       surfaceTintColor: kPrimaryColor,
       centerTitle: true,
       title: const Text(
@@ -455,9 +456,7 @@ class _HomePageState extends State<HomePage> {
                 Text(
                   userModel.shopName ?? '',
                   style: textTheme.titleMedium!.copyWith(
-                    color: themeState is ThemeLightState
-                        ? kTextColor3
-                        : Colors.white,
+                    color: themeState is ThemeLightState ? kTextColor3 : Colors.white,
                   ),
                 ),
               ],

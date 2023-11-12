@@ -1,5 +1,5 @@
-import 'package:kasir_app/app/bloc/draggable_item/draggable_item_cubit.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
+import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/dialog_collection.dart';
 import 'package:flutter/material.dart';
@@ -55,10 +55,10 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     super.dispose();
   }
 
-  void _listenerAfterOrder(context, state) {
+  void _listenerAfterOrder(BuildContext context, OrderState state) {
     // Lanjutan dari _orderAdd
     if (state is OrderLoadedState) {
-      context.pop(); // back from bottomSheet
+      context.goNamed(Routes.orderSucces, extra: state.orderModel!.first);
       context.read<TempOrderBloc>().add(TempOrderEmptyEvent()); // clearing TempOder
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -138,9 +138,11 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
       onSubmit: (item) {
         // update stock item
         final itemBloc = context.read<ItemBloc>();
+        // find data item in model
         final itemModel = itemBloc.state.itemModel;
         int indexWhere = itemModel!.indexWhere((element) => element.name == item.name);
         var sameItem = itemModel[indexWhere];
+        // create new data item with new stock <- originalStock - quantity
         final newItem = sameItem.copyWith(
           stock: sameItem.originalStock! - item.quantity!,
         );
@@ -152,12 +154,6 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
         // update TempOrder
         // ketika quantity 0 maka item akan di delete dari tempOrder
         if (item.quantity == 0) {
-          if (orderModel.items!.length == 1) {
-            // ketika item nya hanya 1 dan quantity nya update ke 0
-            // otomatis tidak ada item lagi maka context pop akan menutup bottom sheet
-            // karna tempOrder sudah tidak ada atau sudah empty
-            context.pop();
-          }
           context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: item.name!));
         } else {
           var whereItem = orderModel.items!.indexWhere((element) => element.name == item.name);
@@ -239,7 +235,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                       height: 20,
                     ),
                     const Text(
-                      'Pesanan atas nama',
+                      'Order in the name of',
                     ),
                     const SizedBox(
                       height: 8,
@@ -251,12 +247,12 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                         style: themeData.textTheme.titleSmall,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Isi nama';
+                            return 'Fill name';
                           }
                           return null;
                         },
                         decoration: InputDecoration(
-                          hintText: 'Atas nama..',
+                          hintText: 'Name..',
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(kSmallRadius),
                             borderSide: const BorderSide(
@@ -282,10 +278,10 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                     RichText(
                       text: TextSpan(
                         style: themeData.textTheme.bodyMedium,
-                        text: 'Tambahkan catatan ',
+                        text: 'Add notes',
                         children: [
                           TextSpan(
-                            text: '(opsional)',
+                            text: '(optional)',
                             style: themeData.textTheme.bodyMedium!.copyWith(color: Colors.black45),
                           ),
                         ],
@@ -328,11 +324,6 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
                         if (nameFormKey.currentState!.validate()) {
                           if (orderBloc.state is! OrderLoadingState) {
                             orderModel.name = nameC.text;
-                            // bool flag = await DialogCollection.confirmOrder(context);
-                            // if (flag) {
-                            //   // print(orderModel.toJsonPost());
-                            //   _orderAdd(orderModel, email);
-                            // }
                             orderBloc.add(
                               OrderAddEvent(
                                 orderModel: orderModel,

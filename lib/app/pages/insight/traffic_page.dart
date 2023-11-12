@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:kasir_app/app/bloc/sales/sales_bloc.dart';
 import 'package:kasir_app/app/model/order_model.dart';
@@ -44,17 +43,8 @@ class _TrafficPageState extends State<TrafficPage> {
           List<OrderModel> orderModel = stateOrder.orderModel ?? [];
           switch (stateOrder.runtimeType) {
             case OrderLoadingState:
-              return LayoutBuilder(
-                builder: (context, constraint) => ListView(
-                  children: [
-                    SizedBox(
-                      height: constraint.maxHeight,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  ],
-                ),
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             case OrderLoadedState:
               return BlocBuilder<SalesBloc, SalesState>(
@@ -62,17 +52,8 @@ class _TrafficPageState extends State<TrafficPage> {
                   List<SalesModel> salesModel = stateSales.salesModel ?? [];
                   switch (stateSales.runtimeType) {
                     case SalesLoadingState:
-                      return LayoutBuilder(
-                        builder: (context, constraint) => ListView(
-                          children: [
-                            SizedBox(
-                              height: constraint.maxHeight,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                          ],
-                        ),
+                      return const Center(
+                        child: CircularProgressIndicator(),
                       );
                     case SalesLoadedState:
                       salesModel.sort(
