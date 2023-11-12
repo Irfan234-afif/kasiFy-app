@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get_storage/get_storage.dart';
@@ -29,8 +28,6 @@ class KasiFyApp extends StatefulWidget {
 
 class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
   // use WidgetBindingObserver for listen platformBrightness
-
-  late ThemeCubit _themeCubit;
 
   @override
   void initState() {
@@ -91,8 +88,7 @@ class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
     // Detect Tablet or Mobile and rotatation
     // and save variable in isTablet and isLandscape
     final shortSide = MediaQuery.of(context).size.shortestSide;
-    final orientation =
-        MediaQuery.of(context).orientation == Orientation.portrait;
+    final orientation = MediaQuery.of(context).orientation == Orientation.portrait;
 
     final isMobile = shortSide < 600;
     isTablet = !isMobile;
@@ -104,7 +100,6 @@ class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
         providers: _listBlocProvider,
         child: BlocBuilder<ThemeCubit, ThemeState>(
           builder: (context, state) {
-            _themeCubit = context.read<ThemeCubit>();
             return MaterialApp.router(
               debugShowCheckedModeBanner: false,
               theme: state.appTheme.themeData,
@@ -125,8 +120,7 @@ class _KasiFyAppState extends State<KasiFyApp> with WidgetsBindingObserver {
   List<SingleChildWidget> get _listBlocProvider {
     return [
       BlocProvider(create: (context) => ThemeCubit()),
-      BlocProvider(
-          create: (context) => AuthBloc(context.read<AuthRepository>())),
+      BlocProvider(create: (context) => AuthBloc(context.read<AuthRepository>())),
       BlocProvider(create: (context) => ItemBloc()),
       BlocProvider(create: (context) => TempOrderBloc()),
       BlocProvider(create: (context) => OrderBloc()),

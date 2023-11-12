@@ -8,7 +8,7 @@ import '../theme/app_theme.dart';
 class TileItem extends StatelessWidget {
   const TileItem({
     super.key,
-    required this.sizeImage,
+    this.sizeImage,
     required this.title,
     required this.subtitle,
     required this.trailing,
@@ -18,7 +18,7 @@ class TileItem extends StatelessWidget {
     this.enabled = true,
   });
 
-  final double sizeImage;
+  final double? sizeImage;
   final String title, subtitle, trailing, leadingText;
   final bool isLeadingImage, enabled;
   final Function()? onTap;

@@ -92,7 +92,7 @@ class OrderSuccesPage extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                onPressed: () => context.pushNamed(Routes.traffic),
+                onPressed: () => context.goNamed(Routes.traffic),
                 child: const Padding(
                   padding: EdgeInsets.only(left: kDeffaultPadding),
                   child: Text(
@@ -112,7 +112,7 @@ class OrderSuccesPage extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                onPressed: () {},
+                onPressed: () => context.pushNamed(Routes.comingSoon),
                 child: const Padding(
                   padding: EdgeInsets.only(left: kDeffaultPadding),
                   child: Text(

@@ -10,14 +10,14 @@ import '../../../../bloc/order/order_bloc.dart';
 import '../../../../util/constant.dart';
 import '../../../../util/util.dart';
 
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _HistoryPageState extends State<HistoryPage> {
   late OrderBloc orderBloc;
   late SearchCubit searchCubit;
   late String token;
@@ -125,10 +125,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
   }
 
   ListView _buildListCard(List<OrderModel> orderData) {
-    return ListView.builder(
+    return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: orderData.length,
+      separatorBuilder: (context, index) => SizedBox(
+        height: 8,
+      ),
       itemBuilder: (context, index) {
         OrderModel data = orderData[index];
 

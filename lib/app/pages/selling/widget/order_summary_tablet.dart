@@ -1,5 +1,5 @@
-import 'package:kasir_app/app/bloc/draggable_item/draggable_item_cubit.dart';
 import 'package:kasir_app/app/repository/auth_repository.dart';
+import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/dialog_collection.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +10,11 @@ import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../../bloc/item/item_bloc.dart';
 import '../../../bloc/order/order_bloc.dart';
+import '../../../bloc/sales/sales_bloc.dart';
 import '../../../bloc/temp_order/temp_order_bloc.dart';
 import '../../../model/item_model.dart';
 import '../../../model/order_model.dart';
+import '../../../model/sales_model.dart';
 import '../../../util/util.dart';
 
 class OrderSummaryTablet extends StatefulWidget {
@@ -42,8 +44,7 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     nameFormKey = GlobalKey<FormState>();
 
     orderBloc = context.read<OrderBloc>();
-    email =
-        context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
+    email = context.read<AuthRepository>().firebaseAuth.currentUser?.email ?? '';
     super.initState();
   }
 
@@ -54,94 +55,124 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
     super.dispose();
   }
 
-  bool _debugOrderOn(ItemOrder? item, ItemModel? itemModel) {
-    if (item != null && itemModel != null) {
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Parameter e siji wae blok.'),
-        ErrorDescription('Asu raimu.'),
-      ]);
+  void _listenerAfterOrder(BuildContext context, OrderState state) {
+    // Lanjutan dari _orderAdd
+    if (state is OrderLoadedState) {
+      context.goNamed(Routes.orderSucces, extra: state.orderModel!.first);
+      context.read<TempOrderBloc>().add(TempOrderEmptyEvent()); // clearing TempOder
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
+          content: Text(
+            'Berhasil menambahkan order',
+          ),
+        ),
+      );
+      nameC.clear();
+      noteC.clear();
+    } else if (state is OrderErrorState) {
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('terjadi kesalahan'),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  context.pop();
+                },
+                child: const Text('Kembali'),
+              ),
+            ],
+          );
+        },
+      );
     }
-    return true;
   }
 
-  void _orderAdd(OrderModel orderModel, String email) {
-    orderBloc.add(
-      OrderAddEvent(
-        orderModel: orderModel,
-        email: email,
-      ),
+  void _addToSales(OrderModel data) {
+    double revenue = double.parse(data.totalPrice!);
+    double profit = 0;
+
+    // find profit
+    // with loop item in orderModel
+    for (ItemOrder item in data.items!) {
+      // parse String to double
+      double parseSellingPrice = double.parse(item.sellingPrice!);
+      double parseBasicPrice = double.parse(item.basicPrice!);
+      profit += parseSellingPrice - parseBasicPrice;
+    }
+
+    OrderSales orderSales = OrderSales(
+      itemCount: data.items?.length,
+      orderAt: data.orderAt,
+      totalPrice: data.totalPrice,
     );
-  }
+    SalesModel salesModel = SalesModel(
+      createdAt: data.orderAt,
+      order: orderSales,
+      profit: profit.toString(),
+      revenue: revenue.toString(),
+    );
 
-  void _orderOn({
-    required int quantity,
-    ItemOrder? item,
-    ItemModel? itemModel,
-    String? note,
-  }) {
-    assert(_debugOrderOn(item, itemModel));
-    // var quantity = int.parse(qtyC.text);
-    context.read<TempOrderBloc>().add(
-          TempOrderAddEvent(
-            item: item ??
-                ItemOrder(
-                  detail: note ?? '',
-                  name: itemModel!.name,
-                  sellingPrice: itemModel.sellingPrice,
-                  quantity: quantity,
-                ),
+    context.read<SalesBloc>().add(
+          SalesAddEvent(
+            email: email,
+            data: salesModel,
           ),
         );
   }
 
-  void _orderDelete(String name) {
-    context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
+  void _updateStockItem(OrderModel data) {
+    for (var element in data.items!) {
+      ItemModel itemData = ItemModel(name: element.name, stock: element.quantity);
+      context.read<ItemBloc>().add(ItemDecreaseStockEvent(email, itemModel: itemData));
+    }
   }
 
-  void _orderUpdate(ItemOrder item) {
-    // context.read<TempOrderBloc>().add(TempOrderUpdateEvent(item: item));
-    int indexItem = widget.orderModel.items!
-        .indexWhere((element) => element.name == item.name);
-    // print(item.detail);
-    context.read<TempOrderBloc>().add(
-          TempOrderUpdateEvent(
-              orderModel: widget.orderModel..items![indexItem] = item),
-        );
-  }
-
-  void _onAccept(ItemModel data) {
-    OrderModel dataAll = widget.orderModel;
-    DialogCollection.dialogItem(
+  void _tileOnTap({required OrderModel orderModel, required ItemOrder dataItem}) {
+    DialogCollection.bottomSheetEditItem(
       context,
-      data,
-      onSubmit: (item, quantity, note) {
-        var checkData = dataAll.items?.indexWhere(
-          (element) => element.name == item.name,
+      dataItem,
+      onSubmit: (item) {
+        // update stock item
+        final itemBloc = context.read<ItemBloc>();
+        // find data item in model
+        final itemModel = itemBloc.state.itemModel;
+        int indexWhere = itemModel!.indexWhere((element) => element.name == item.name);
+        var sameItem = itemModel[indexWhere];
+        // create new data item with new stock <- originalStock - quantity
+        final newItem = sameItem.copyWith(
+          stock: sameItem.originalStock! - item.quantity!,
         );
-        if (checkData == null || checkData == -1) {
-          //-1 adalah data yang sama tidak di temukan
-          _orderOn(
-            quantity: quantity,
-            itemModel: item,
-            note: note,
-          );
+        itemBloc.add(ItemEditLocalEvent(
+          itemModel: newItem,
+        ));
+        //
+
+        // update TempOrder
+        // ketika quantity 0 maka item akan di delete dari tempOrder
+        if (item.quantity == 0) {
+          context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: item.name!));
         } else {
-          var dataItem = dataAll.items![checkData];
-          var qty = dataItem.quantity! + quantity;
-          var price = double.parse(dataItem.sellingPrice!) +
-              double.parse(data.sellingPrice!);
-          var detail = '${dataItem.detail!}, $note';
-          dataItem.quantity = qty;
-          dataItem.sellingPrice = price.toString();
-          dataItem.detail = detail;
-          // delete du
-          _orderUpdate(dataItem);
-          // _orderDelete(dataItem.id!);
-          // _orderOn(
-          //   quantity: quantity,
-          //   item: dataItem,
-          //   note: note,
-          // );
+          var whereItem = orderModel.items!.indexWhere((element) => element.name == item.name);
+          context.read<TempOrderBloc>().add(
+              // TempOrderUpdateEvent(item: item),
+              TempOrderUpdateEvent(orderModel: orderModel..items![whereItem] = item));
+        }
+      },
+      onDelete: (name) async {
+        bool? flag = await DialogCollection.dialogConfirm(
+          context: context,
+          titleText: 'Confirm delete',
+          contentText: "Item order will be delete",
+        );
+        if (flag!) {
+          // ignore: use_build_context_synchronously
+          context.pop();
+          // ignore: use_build_context_synchronously
+          context.read<TempOrderBloc>().add(TempOrderDeleteEvent(name: name));
         }
       },
     );
@@ -150,362 +181,243 @@ class _OrderSummaryTabletState extends State<OrderSummaryTablet> {
   @override
   Widget build(BuildContext context) {
     final themeData = Theme.of(context);
-    final orderModel = widget.orderModel;
-    final mediaQuery = MediaQuery.of(context);
-    return Scaffold(
-      body: BlocBuilder<DraggableItemCubit, DraggableItemState>(
-        builder: (context, state) {
-          return DragTarget<ItemModel>(
-            hitTestBehavior: HitTestBehavior.opaque,
-            onAccept: _onAccept,
-            builder: (context, dataAccepted, rejectedData) {
-              if (state is DraggableItemOn) {
-                return Padding(
-                  padding: EdgeInsets.symmetric(
-                      vertical: mediaQuery.padding.top,
-                      horizontal: kDeffaultPadding),
-                  child: Container(
-                    constraints: const BoxConstraints.expand(),
-                    // decoration: BoxDecoration(
-                    //   border: Border.all(color: Colors.blue),
-                    // ),
-                    child: CustomPaint(
-                      painter: DashedBorderPainter(
-                        color: Colors.black26,
-                        strokeWidth: 4,
-                        dashWidth: 8,
-                        dashSpace: 4,
-                        borderRadius: BorderRadius.circular(24),
-                      ),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              TablerIcons.download,
+    return BlocBuilder<TempOrderBloc, TempOrderState>(builder: (context, state) {
+      final OrderModel orderModel = state.orderModel!;
+      return Scaffold(
+        body: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: kDeffaultPadding,
+            vertical: kDeffaultPadding + 24,
+          ),
+          constraints: const BoxConstraints.expand(),
+          alignment: Alignment.center,
+          child: orderModel.items!.isNotEmpty
+              ? ListView(
+                  // padding: EdgeInsets.only(bottom: kDeffaultPadding),
+                  children: [
+                    Text(
+                      "Order summary",
+                      style: themeData.textTheme.titleLarge,
+                    ),
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: orderModel.items?.length ?? 0,
+                      separatorBuilder: (context, index) => const Divider(),
+                      itemBuilder: (context, index) {
+                        final data = orderModel.items![index];
+                        return TileItemOrder(
+                          data: data,
+                          onTap: () => _tileOnTap(orderModel: orderModel, dataItem: data),
+                        );
+                      },
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Subtotal",
+                          style: themeData.textTheme.labelMedium!.copyWith(
+                            color: Colors.black87,
+                            fontSize: 16,
+                          ),
+                        ),
+                        Text(
+                          currencyFormat(orderModel.totalPrice ?? ''),
+                          style: themeData.textTheme.labelMedium!.copyWith(
+                            color: Colors.black87,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const Text(
+                      'Order in the name of',
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Form(
+                      key: nameFormKey,
+                      child: TextFormField(
+                        controller: nameC,
+                        style: themeData.textTheme.titleSmall,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Fill name';
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          hintText: 'Name..',
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(kSmallRadius),
+                            borderSide: const BorderSide(
                               color: Colors.black26,
-                              size: mediaQuery.size.height * .3,
                             ),
-                            const Text(
-                              "Tarik disini",
-                              style: TextStyle(
-                                color: Colors.black26,
-                              ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(kSmallRadius),
+                            borderSide: const BorderSide(
+                              color: Colors.black26,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              }
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: kDeffaultPadding,
-                  vertical: kDeffaultPadding + 24,
-                ),
-                constraints: const BoxConstraints.expand(),
-                alignment: Alignment.center,
-                child: orderModel.items!.isNotEmpty
-                    ? ListView(
-                        // padding: EdgeInsets.only(bottom: kDeffaultPadding),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    const Divider(),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    RichText(
+                      text: TextSpan(
+                        style: themeData.textTheme.bodyMedium,
+                        text: 'Add notes',
                         children: [
-                          Text(
-                            "Order summary",
-                            style: themeData.textTheme.titleLarge,
+                          TextSpan(
+                            text: '(optional)',
+                            style: themeData.textTheme.bodyMedium!.copyWith(color: Colors.black45),
                           ),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: orderModel.items?.length,
-                            itemBuilder: (context, index) {
-                              final data = orderModel.items![index];
-                              return Column(
-                                children: [
-                                  TileItemOrder(
-                                    data: data,
-                                    onTap: () {
-                                      DialogCollection.bottomSheetEditItem(
-                                        context,
-                                        data,
-                                        onSubmit: (item) {
-                                          int indexItem = orderModel.items!
-                                              .indexWhere((element) =>
-                                                  element.name == item.name);
-                                          // print(item.detail);
-                                          context.read<TempOrderBloc>().add(
-                                                TempOrderUpdateEvent(
-                                                    orderModel: orderModel
-                                                      ..items![indexItem] =
-                                                          item),
-                                              );
-                                        },
-                                        onDelete: (name) {
-                                          _orderDelete(name);
-                                        },
-                                      );
-                                    },
-                                  ),
-                                  const Divider(),
-                                ],
-                              );
-                            },
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    TextField(
+                      controller: noteC,
+                      style: themeData.textTheme.titleSmall,
+                      maxLines: null,
+                      decoration: InputDecoration(
+                        hintText: 'Note..',
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(kSmallRadius),
+                          borderSide: const BorderSide(
+                            color: Colors.black26,
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(kSmallRadius),
+                          borderSide: const BorderSide(
+                            color: Colors.black26,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 18,
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: kButtonColor3,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: kSmallBorderRadius,
+                        ),
+                      ),
+                      onPressed: () async {
+                        if (nameFormKey.currentState!.validate()) {
+                          if (orderBloc.state is! OrderLoadingState) {
+                            orderModel.name = nameC.text;
+                            orderBloc.add(
+                              OrderAddEvent(
+                                orderModel: orderModel,
+                                email: email,
+                              ),
+                            );
+
+                            _updateStockItem(orderModel);
+
+                            _addToSales(orderModel);
+                          }
+                        }
+                      },
+                      child: BlocConsumer<OrderBloc, OrderState>(
+                        listenWhen: (previous, current) {
+                          if (previous is OrderAddingState && current is OrderLoadedState) {
+                            return true;
+                          }
+                          return false;
+                        },
+                        listener: _listenerAfterOrder,
+                        builder: (context, state) {
+                          if (state is OrderLoadingState || state is OrderAddingState) {
+                            return const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                              ),
+                            );
+                          }
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
-                                "Subtotal",
-                                style:
-                                    themeData.textTheme.labelMedium!.copyWith(
-                                  color: Colors.black87,
-                                  fontSize: 16,
-                                ),
+                              const Icon(
+                                TablerIcons.truck_delivery,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(
+                                width: kSmallPadding,
                               ),
                               Text(
-                                currencyFormat(orderModel.totalPrice ?? ''),
-                                style:
-                                    themeData.textTheme.labelMedium!.copyWith(
-                                  color: Colors.black87,
-                                  fontSize: 14,
-                                ),
+                                'Order',
+                                style: themeData.textTheme.labelLarge,
                               ),
                             ],
-                          ),
-                          const SizedBox(
-                            height: 20,
-                          ),
-                          const Text(
-                            'Pesanan atas nama',
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Form(
-                            key: nameFormKey,
-                            child: TextFormField(
-                              controller: nameC,
-                              style: themeData.textTheme.titleSmall,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Isi nama';
-                                }
-                                return null;
-                              },
-                              decoration: InputDecoration(
-                                hintText: 'Atas nama..',
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(kSmallRadius),
-                                  borderSide: const BorderSide(
-                                    color: Colors.black26,
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius:
-                                      BorderRadius.circular(kSmallRadius),
-                                  borderSide: const BorderSide(
-                                    color: Colors.black26,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          const Divider(),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          RichText(
-                            text: TextSpan(
-                              style: themeData.textTheme.bodyMedium,
-                              text: 'Tambahkan catatan ',
-                              children: [
-                                TextSpan(
-                                  text: '(opsional)',
-                                  style: themeData.textTheme.bodyMedium!
-                                      .copyWith(color: Colors.black45),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          TextField(
-                            controller: noteC,
-                            style: themeData.textTheme.titleSmall,
-                            maxLines: null,
-                            decoration: InputDecoration(
-                              hintText: 'Note..',
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(kSmallRadius),
-                                borderSide: const BorderSide(
-                                  color: Colors.black26,
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius:
-                                    BorderRadius.circular(kSmallRadius),
-                                borderSide: const BorderSide(
-                                  color: Colors.black26,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 18,
-                          ),
-                          ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: kButtonColor3,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: kSmallBorderRadius,
-                              ),
-                            ),
-                            onPressed: () async {
-                              if (nameFormKey.currentState!.validate()) {
-                                if (orderBloc.state is! OrderLoadingState) {
-                                  orderModel.name = nameC.text;
-                                  bool flag =
-                                      await DialogCollection.confirmOrder(
-                                          context);
-                                  if (flag) {
-                                    // print(orderModel.toJsonPost());
-                                    _orderAdd(orderModel, email);
-                                  }
-                                }
-                              }
-                            },
-                            child: BlocConsumer<OrderBloc, OrderState>(
-                              listenWhen: (previous, current) {
-                                if (previous is OrderAddingState &&
-                                    current is OrderLoadedState) {
-                                  return true;
-                                }
-                                return false;
-                              },
-                              listener: (context, state) {
-                                // Lanjutan dari _orderAdd
-                                if (state is OrderLoadedState) {
-                                  context.pop(); // back from bottomSheet
-                                  context.read<TempOrderBloc>().add(
-                                      TempOrderEmptyEvent()); // clearing TempOder
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      backgroundColor: Colors.green,
-                                      duration: Duration(seconds: 3),
-                                      content: Text(
-                                        'Berhasil menambahkan order',
-                                      ),
-                                    ),
-                                  );
-                                  nameC.clear();
-                                  noteC.clear();
-                                } else if (state is OrderErrorState) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        title: const Text('terjadi kesalahan'),
-                                        actions: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              context.pop();
-                                            },
-                                            child: const Text('Kembali'),
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                }
-                              },
-                              builder: (context, state) {
-                                if (state is OrderLoadingState ||
-                                    state is OrderAddingState) {
-                                  return const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                    ),
-                                  );
-                                }
-                                return Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      TablerIcons.truck_delivery,
-                                      color: Colors.white,
-                                    ),
-                                    const SizedBox(
-                                      width: 8,
-                                    ),
-                                    Text(
-                                      'Order',
-                                      style: themeData.textTheme.labelLarge,
-                                    ),
-                                  ],
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                      ),
+                      onPressed: () {
+                        if (orderBloc.state is! OrderLoadingState) {
+                          for (var element in orderModel.items!) {
+                            context.read<ItemBloc>().add(
+                                  ItemRestockEvent(email, itemName: element.name!),
                                 );
-                              },
-                            ),
+                          }
+                          context.read<TempOrderBloc>().add(TempOrderEmptyEvent());
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            TablerIcons.eraser,
+                            color: Colors.white,
                           ),
                           const SizedBox(
-                            height: 8,
+                            width: 8,
                           ),
-                          OutlinedButton(
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
-                            onPressed: () {
-                              if (orderBloc.state is! OrderLoadingState) {
-                                orderModel.items!.forEach((element) {
-                                  context.read<ItemBloc>().add(
-                                        ItemRestockEvent(email,
-                                            itemName: element.name!),
-                                      );
-                                });
-                                context
-                                    .read<TempOrderBloc>()
-                                    .add(TempOrderEmptyEvent());
-                              }
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  TablerIcons.eraser,
-                                  color: Colors.white,
-                                ),
-                                const SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  'Delete all',
-                                  style:
-                                      themeData.textTheme.labelLarge!.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            'Delete all',
+                            style: themeData.textTheme.labelLarge!.copyWith(
+                              color: Colors.white,
                             ),
                           ),
                         ],
-                      )
-                    : const Center(
-                        child: Text(
-                            'Tambah item dengan seret item atau klik item'),
                       ),
-              );
-            },
-          );
-        },
-      ),
-    );
+                    ),
+                  ],
+                )
+              : const Center(
+                  child: Text('Tambah item dengan seret item atau klik item'),
+                ),
+        ),
+      );
+    });
   }
 }
 

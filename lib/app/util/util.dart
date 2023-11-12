@@ -5,8 +5,6 @@ import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-import '../model/order_model.dart';
-
 String simpleCurrencyFormat(String data) {
   var value = double.parse(data);
   // final formatter =
@@ -20,8 +18,7 @@ String simpleCurrencyFormat(String data) {
 String currencyFormat(String data) {
   if (data.isNotEmpty) {
     var value = double.parse(data);
-    final formatter =
-        NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
+    final formatter = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp', decimalDigits: 0);
     final newValue = formatter.format(value);
     return newValue;
   } else {
@@ -31,6 +28,11 @@ String currencyFormat(String data) {
 
 String ymdFormat(DateTime data) {
   var parse = DateFormat.yMMMMd().format(data);
+  return parse;
+}
+
+String mmmdFormat(DateTime data) {
+  final parse = DateFormat.MMMd().format(data);
   return parse;
 }
 
@@ -53,9 +55,7 @@ String hoursFormat(DateTime data) {
 
 bool isToday(DateTime dateTime) {
   final now = DateTime.now();
-  return dateTime.year == now.year &&
-      dateTime.month == now.month &&
-      dateTime.day == now.day;
+  return dateTime.year == now.year && dateTime.month == now.month && dateTime.day == now.day;
 }
 
 String generateCodeProduct() {
@@ -116,69 +116,12 @@ DateTime parseTime(dynamic date) {
   return data;
 }
 
-List<OrderModel> trafficSortCalc({
-  required List<OrderModel> dataOrder,
-  required int indexFilter,
-}) {
-  List<OrderModel> sortedData = [];
+// String upperCaseFirst(String data){
+//   data.
+// }
 
-  for (var element in dataOrder) {
-    final dateNow = DateTime.now();
-    switch (indexFilter) {
-      case 0:
-        sortedData.add(element);
-        break;
-      case 1:
-        if (element.orderAt!.year == dateNow.year) {
-          sortedData.add(element);
-        }
-        break;
-      case 2:
-        if (element.orderAt!.year == dateNow.year &&
-            element.orderAt!.month == dateNow.month) {
-          sortedData.add(element);
-        }
-        break;
-      case 3:
-        if (element.orderAt!.year == dateNow.year &&
-            element.orderAt!.month == dateNow.month &&
-            element.orderAt!.day == dateNow.day) {
-          sortedData.add(element);
-        }
-        break;
-      default:
-    }
+extension StringExtension on String {
+  String capitalizeFirst() {
+    return this[0].toUpperCase() + substring(1);
   }
-
-  return sortedData;
-}
-
-List<ItemOrder> trafficItemRankCalc({
-  required List<OrderModel> dataSorted,
-}) {
-  final List<ItemOrder> newData = [];
-  for (var dataOrder in dataSorted) {
-    for (var item in dataOrder.items!) {
-      int indexCheckItem =
-          newData.indexWhere((newItem) => newItem.name == item.name);
-      if (indexCheckItem == -1) {
-        // print('oi');
-        newData.add(item);
-      } else {
-        ItemOrder sameItem = newData[indexCheckItem];
-        var newItemData = sameItem.copyWith(
-          quantity: sameItem.quantity! + item.quantity!,
-          sellingPrice: sameItem.sellingPrice! + item.sellingPrice!,
-          basicPrice: sameItem.basicPrice! + item.basicPrice!,
-        );
-        newData.removeAt(indexCheckItem);
-        newData.insert(indexCheckItem, newItemData);
-      }
-    }
-  }
-  // sort data item berdasarkan quantityy
-  newData.sort(
-    (a, b) => b.quantity!.compareTo(a.quantity!),
-  );
-  return newData;
 }

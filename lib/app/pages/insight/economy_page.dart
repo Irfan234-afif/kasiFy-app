@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kasir_app/app/pages/insight/widget/button_filter.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
+import 'package:kasir_app/app/util/calculation_traffic.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:tabler_icons/tabler_icons.dart';
@@ -57,7 +58,7 @@ class _EconomyPageState extends State<EconomyPage> {
           child: Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: kDeffaultPadding, vertical: kDeffaultPadding),
-            child: _ChartRevenue(
+            child: _ChartEconomy(
               data: data,
               metode: metode,
               title: "Revenue & Profit",
@@ -99,8 +100,6 @@ class _EconomyPageState extends State<EconomyPage> {
               );
               // print(salesModel.length);
 
-              List<SalesModel> sortedData = [];
-              List<SalesModel> dataChart = [];
               late String Function(DateTime) metode;
 
               // sorting data by filter
@@ -123,67 +122,15 @@ class _EconomyPageState extends State<EconomyPage> {
                 default:
               }
 
-              /// Sorting data
-              for (var element in salesModel) {
-                final dateNow = DateTime.now();
-                switch (indexFilter) {
-                  case 0:
-                    sortedData.add(element);
-                    break;
-                  case 1:
-                    if (element.createdAt!.year == dateNow.year) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  case 2:
-                    if (element.createdAt!.year == dateNow.year &&
-                        element.createdAt!.month == dateNow.month) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  case 3:
-                    if (element.createdAt!.year == dateNow.year &&
-                        element.createdAt!.month == dateNow.month &&
-                        element.createdAt!.day == dateNow.day) {
-                      sortedData.add(element);
-                    }
-                    break;
-                  default:
-                }
-              }
+              final List<SalesModel> sortedData =
+                  sortEconomyData(data: salesModel, indexFilter: indexFilter);
+              final List<SalesModel> dataChart =
+                  trafficEconomyCalc(data: sortedData, metode: metode);
 
-              /// Sort table data
-              for (var element in sortedData) {
-                final parse = metode(element.createdAt!);
-
-                int indexCheck = dataChart.indexWhere((newRank) {
-                  return metode(newRank.createdAt!) == parse;
-                });
-                if (indexCheck == -1) {
-                  dataChart.add(element);
-                } else {
-                  SalesModel sameData = dataChart[indexCheck];
-                  final parseProfit = double.parse(sameData.profit!) +
-                      double.parse(element.profit!);
-
-                  final parseRevenue = double.parse(sameData.revenue!) +
-                      double.parse(element.revenue!);
-                  var copyData = sameData.copyWith(
-                    revenue: parseRevenue.toString(),
-                    profit: parseProfit.toString(),
-                  );
-                  dataChart.removeAt(indexCheck);
-                  dataChart.insert(indexCheck, copyData);
-                }
-              }
-
-              // if dataChart sort with a -> b
-              dataChart.sort(
-                (a, b) => a.createdAt!.compareTo(b.createdAt!),
-              );
-              // if data for table sort with b -> a
-              final newDataSort = List<SalesModel>.from(dataChart);
-              newDataSort.sort(
+              final List<SalesModel> dataTable =
+                  List<SalesModel>.from(dataChart);
+              //  data for table sort with b -> a
+              dataTable.sort(
                 (a, b) => b.createdAt!.compareTo(a.createdAt!),
               );
 
@@ -225,13 +172,13 @@ class _EconomyPageState extends State<EconomyPage> {
                       ),
                     ],
                   ),
-                  _ChartRevenue(
+                  _ChartEconomy(
                     data: dataChart,
                     isMarker: enableMarker,
                     metode: metode,
                   ),
-                  _tableRevenue(textTheme, newDataSort, metode),
-                  _tableProfit(textTheme, newDataSort, metode)
+                  _tableRevenue(textTheme, dataTable, metode),
+                  _tableProfit(textTheme, dataTable, metode)
                 ],
               );
             default:
@@ -421,8 +368,8 @@ class _EconomyPageState extends State<EconomyPage> {
   }
 }
 
-class _ChartRevenue extends StatefulWidget {
-  const _ChartRevenue(
+class _ChartEconomy extends StatefulWidget {
+  const _ChartEconomy(
       {required this.data,
       required this.metode,
       this.title,
@@ -434,10 +381,10 @@ class _ChartRevenue extends StatefulWidget {
   final bool isMarker;
 
   @override
-  State<_ChartRevenue> createState() => _ChartRevenueState();
+  State<_ChartEconomy> createState() => _ChartEconomyState();
 }
 
-class _ChartRevenueState extends State<_ChartRevenue> {
+class _ChartEconomyState extends State<_ChartEconomy> {
   late ZoomPanBehavior _zoomPanBehavior;
   @override
   void initState() {

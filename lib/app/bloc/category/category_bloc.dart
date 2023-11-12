@@ -17,13 +17,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       try {
         emit(CategoryLoadingState());
         final res = await _categoryRepository.getCategory(event.email);
-        print(res);
+        res.sort(
+          (a, b) => a.name!.compareTo(b.name!),
+        );
         // final categoryModel = categoryModelFromList(res.data['data']);
         emit(CategoryLoadedState(categoryModel: res));
-      } on DioException catch (e) {
-        print('Dio error');
-        print(e.response);
-        emit(CategoryErrorState(e.response.toString()));
       } catch (e) {
         print(e);
         emit(CategoryErrorState(e.toString()));
@@ -33,8 +31,7 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       List<CategoryModel> data = List.from(state.categoryModel ?? []);
       try {
         emit(CategoryLoadingState());
-        final res = await _categoryRepository.addCategory(
-            event.email, event.categoryModel.name!);
+        final res = await _categoryRepository.addCategory(event.email, event.categoryModel.name!);
         print(res);
         // print(res.statusCode);
         // // parse
@@ -51,11 +48,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
             );
           emit(CategoryLoadedState(categoryModel: sortData));
         } else {
-          emit(CategoryErrorState('Kesalahan'));
+          emit(const CategoryErrorState('Kesalahan'));
         }
       } catch (e) {
         print(e);
-        emit(CategoryErrorState('Kesalahan'));
+        emit(const CategoryErrorState('Kesalahan'));
       }
     });
     on<CategoryDeleteEvent>((event, emit) async {
@@ -63,12 +60,11 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
       try {
         emit(CategoryLoadingState());
         // deleting data in server
-        await _categoryRepository.deleteCategory(
-            event.email, event.categoryModel.name.toString());
+        await _categoryRepository.deleteCategory(event.email, event.categoryModel.name.toString());
         // deleting data in model
-        // final newData = data..removeWhere((element) => element.id == event.categoryModel.id);
+        final newData = data..removeWhere((element) => element.name == event.categoryModel.name);
         // // change state
-        // emit(CategoryLoadedState(categoryModel: newData));
+        emit(CategoryLoadedState(categoryModel: newData));
       } on DioException catch (e) {
         print('error dio');
         print(e.response);

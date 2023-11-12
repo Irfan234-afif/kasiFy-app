@@ -43,6 +43,65 @@ class _StockPageState extends State<StockPage> {
     super.dispose();
   }
 
+  void dialogFilter(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Category Filter',
+          ),
+          content: StatefulBuilder(builder: (context, set) {
+            return SizedBox(
+              width: double.maxFinite,
+              // height: 100,
+              child: ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: categoryModel.length + 1,
+                itemBuilder: (context, index) {
+                  late String title;
+                  late Function(int? value) onChanged;
+                  switch (index) {
+                    case 0:
+                      title = 'All Category';
+                      onChanged = (value) {
+                        context.read<SearchCubit>().searchOff();
+                        set(() {
+                          groupValue = value ?? 0;
+                        });
+                        context.pop();
+                      };
+                      break;
+                    default:
+                      title = categoryModel[index - 1].name ?? '';
+                      onChanged = (value) {
+                        context.read<SearchCubit>().filter<List<ItemModel>>(title);
+                        set(
+                          () {
+                            groupValue = value ?? 0;
+                          },
+                        );
+                        context.pop();
+                      };
+                  }
+                  return RadioListTile(
+                    controlAffinity: ListTileControlAffinity.trailing,
+                    selected: groupValue == index,
+                    value: index,
+                    groupValue: groupValue,
+                    title: Text(title),
+                    onChanged: onChanged,
+                  );
+                },
+              ),
+            );
+          }),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     categoryModel = context.watch<CategoryBloc>().state.categoryModel ?? [];
@@ -88,64 +147,7 @@ class _StockPageState extends State<StockPage> {
         ),
         IconButton(
           onPressed: () {
-            showDialog(
-              context: context,
-              builder: (context) {
-                return AlertDialog(
-                  title: const Text(
-                    'Category Filter',
-                  ),
-                  content: StatefulBuilder(builder: (context, set) {
-                    return SizedBox(
-                      width: double.maxFinite,
-                      // height: 100,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: categoryModel.length + 1,
-                        itemBuilder: (context, index) {
-                          late String title;
-                          late Function(int? value) onChanged;
-                          switch (index) {
-                            case 0:
-                              title = 'All Category';
-                              onChanged = (value) {
-                                context.read<SearchCubit>().searchOff();
-                                set(() {
-                                  groupValue = value ?? 0;
-                                });
-                                context.pop();
-                              };
-                              break;
-                            default:
-                              title = categoryModel[index - 1].name ?? '';
-                              onChanged = (value) {
-                                context
-                                    .read<SearchCubit>()
-                                    .filter<List<ItemModel>>(title);
-                                set(
-                                  () {
-                                    groupValue = value ?? 0;
-                                  },
-                                );
-                                context.pop();
-                              };
-                          }
-                          return RadioListTile(
-                            controlAffinity: ListTileControlAffinity.trailing,
-                            selected: groupValue == index,
-                            value: index,
-                            groupValue: groupValue,
-                            title: Text(title),
-                            onChanged: onChanged,
-                          );
-                        },
-                      ),
-                    );
-                  }),
-                );
-              },
-            );
+            dialogFilter(context);
           },
           icon: const Icon(
             TablerIcons.filter,
@@ -201,9 +203,7 @@ class _StockPageState extends State<StockPage> {
                     ),
                   );
                 }
-                context
-                    .read<SearchCubit>()
-                    .fetchItem<List<ItemModel>>(itemModel);
+                context.read<SearchCubit>().fetchItem<List<ItemModel>>(itemModel);
                 return _buildSearchBloc(size, itemModel);
 
               default:

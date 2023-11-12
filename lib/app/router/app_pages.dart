@@ -13,13 +13,15 @@ import 'package:kasir_app/app/pages/additional/loading_page.dart';
 import 'package:kasir_app/app/pages/category/category_page.dart';
 import 'package:kasir_app/app/pages/detail_item/detail_item_page.dart';
 import 'package:kasir_app/app/pages/insight/economy_page.dart';
-import 'package:kasir_app/app/pages/insight/traffic.dart';
+import 'package:kasir_app/app/pages/insight/traffic_page.dart';
 import 'package:kasir_app/app/pages/login/login_page.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kasir_app/app/pages/order_succes/order_succes_page.dart';
+import 'package:kasir_app/app/pages/selling/screen/history/history_screen.dart';
 import 'package:kasir_app/app/pages/selling/selling_page.dart';
 import 'package:kasir_app/app/pages/stock/stock_page.dart';
 import 'package:kasir_app/app/pages/setting/setting_page.dart';
+import 'package:kasir_app/app/pages/comingsoon/comingsoon_page.dart';
 
 import '../pages/home/home_page.dart';
 import '../repository/auth_repository.dart';
@@ -85,18 +87,24 @@ final routerConfig = GoRouter(
       builder: (_, __) => const HomePage(),
       routes: [
         GoRoute(
-            path: 'selling',
-            name: Routes.selling,
-            builder: (context, state) => const SellingPage(),
-            routes: [
-              GoRoute(
-                path: 'order-succes',
-                name: Routes.orderSucces,
-                builder: (_, state) => OrderSuccesPage(
-                  data: state.extra as OrderModel,
-                ),
+          path: 'selling',
+          name: Routes.selling,
+          builder: (context, state) => const SellingPage(),
+          routes: [
+            GoRoute(
+              path: 'order-succes',
+              name: Routes.orderSucces,
+              builder: (_, state) => OrderSuccesPage(
+                data: state.extra as OrderModel,
               ),
-            ]),
+            ),
+          ],
+        ),
+        GoRoute(
+          path: 'history',
+          name: Routes.history,
+          builder: (context, state) => HistoryPage(),
+        ),
         GoRoute(
           path: 'stock',
           name: Routes.stock,
@@ -154,6 +162,11 @@ final routerConfig = GoRouter(
       path: '/error',
       name: Routes.error,
       builder: (_, __) => const ErrorPage(),
+    ),
+    GoRoute(
+      path: '/comingsoon',
+      name: Routes.comingSoon,
+      builder: (_, __) => const ComingSoonPage(),
     ),
   ],
 );

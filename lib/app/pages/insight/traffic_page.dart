@@ -10,6 +10,7 @@ import 'package:kasir_app/app/util/util.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../../bloc/order/order_bloc.dart';
+import '../../util/calculation_traffic.dart';
 
 class TrafficPage extends StatefulWidget {
   const TrafficPage({super.key});
@@ -42,17 +43,8 @@ class _TrafficPageState extends State<TrafficPage> {
           List<OrderModel> orderModel = stateOrder.orderModel ?? [];
           switch (stateOrder.runtimeType) {
             case OrderLoadingState:
-              return LayoutBuilder(
-                builder: (context, constraint) => ListView(
-                  children: [
-                    SizedBox(
-                      height: constraint.maxHeight,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                    ),
-                  ],
-                ),
+              return const Center(
+                child: CircularProgressIndicator(),
               );
             case OrderLoadedState:
               return BlocBuilder<SalesBloc, SalesState>(
@@ -60,20 +52,10 @@ class _TrafficPageState extends State<TrafficPage> {
                   List<SalesModel> salesModel = stateSales.salesModel ?? [];
                   switch (stateSales.runtimeType) {
                     case SalesLoadingState:
-                      return LayoutBuilder(
-                        builder: (context, constraint) => ListView(
-                          children: [
-                            SizedBox(
-                              height: constraint.maxHeight,
-                              child: const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                            ),
-                          ],
-                        ),
+                      return const Center(
+                        child: CircularProgressIndicator(),
                       );
                     case SalesLoadedState:
-                      // when empty
                       salesModel.sort(
                         (a, b) => a.createdAt!.compareTo(b.createdAt!),
                       );
@@ -82,7 +64,6 @@ class _TrafficPageState extends State<TrafficPage> {
                       );
                       return _buildBody(
                         indexFilter,
-                        // salesModel,
                         orderModel,
                       );
 
@@ -148,10 +129,8 @@ class _TrafficPageState extends State<TrafficPage> {
         break;
       default:
     }
-    List<OrderModel> sortedData =
-        trafficSortCalc(dataOrder: orderModel, indexFilter: indexFilter);
-    List<ItemOrder> newDataItemOrder =
-        trafficItemRankCalc(dataSorted: sortedData);
+    List<OrderModel> sortedData = trafficOrderCalc(dataOrder: orderModel, indexFilter: indexFilter);
+    List<ItemOrder> newDataItemOrder = trafficItemRankCalc(dataSorted: sortedData);
 
     return ListView(
       padding: const EdgeInsets.symmetric(
@@ -182,8 +161,7 @@ class _TrafficPageState extends State<TrafficPage> {
         // ),
         SfCartesianChart(
           primaryXAxis: CategoryAxis(),
-          legend:
-              const Legend(isVisible: true, position: LegendPosition.bottom),
+          legend: const Legend(isVisible: true, position: LegendPosition.bottom),
           title: ChartTitle(
             text: 'Order',
             textStyle: textTheme.titleMedium,
@@ -199,8 +177,7 @@ class _TrafficPageState extends State<TrafficPage> {
               yValueMapper: (OrderModel order, index) {
                 // logic to know length per-column
                 int length = orderModel
-                    .where((element) =>
-                        metode(element.orderAt!) == metode(order.orderAt!))
+                    .where((element) => metode(element.orderAt!) == metode(order.orderAt!))
                     .length;
                 return length;
               },
