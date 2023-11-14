@@ -7,6 +7,8 @@ import 'package:kasir_app/app/model/item_model.dart';
 import 'package:kasir_app/app/router/app_pages.dart';
 import 'package:kasir_app/app/theme/app_theme.dart';
 import 'package:kasir_app/app/util/global_function.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:tabler_icons/tabler_icons.dart';
 
 import '../../bloc/item/item_bloc.dart';
@@ -14,32 +16,71 @@ import '../../model/category_model.dart';
 import '../../util/util.dart';
 import '../../widget/tile_item.dart';
 
+// TODO : scroll to index
 class StockPage extends StatefulWidget {
-  const StockPage({super.key});
+  const StockPage({
+    this.nameItemHighlight,
+    super.key,
+  });
+  final String? nameItemHighlight;
 
   @override
   State<StockPage> createState() => _StockPageState();
 }
 
 class _StockPageState extends State<StockPage> {
-  late TextEditingController searchC;
+  late AutoScrollController _autoScrollController;
+  late ItemScrollController _itemScrollController;
+  late TextEditingController _searchC;
+
+  final ScrollOffsetController scrollOffsetController =
+      ScrollOffsetController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
+  final ScrollOffsetListener scrollOffsetListener =
+      ScrollOffsetListener.create();
   // late SearchCubit searchCubit;
 
   late String token;
   late List<CategoryModel> categoryModel;
   late int groupValue;
 
+  int initialScrollIndex = 0;
+
   @override
   void initState() {
     groupValue = 0;
-    searchC = TextEditingController();
+    _autoScrollController = AutoScrollController(
+      viewportBoundaryGetter: () =>
+          Rect.fromLTRB(0, 0, 0, MediaQuery.of(context).padding.bottom),
+    );
+    _itemScrollController = ItemScrollController();
+    _searchC = TextEditingController();
     token = '';
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _searchItemToHighlight();
+    });
     super.initState();
+  }
+
+  void _searchItemToHighlight() {
+    if (widget.nameItemHighlight != null) {
+      final List<ItemModel> dataItem =
+          context.read<ItemBloc>().state.itemModel ?? [];
+      // print(dataItem.length);
+      if (dataItem.isNotEmpty) {
+        int indexWhereItem = dataItem
+            .indexWhere((element) => element.name == widget.nameItemHighlight);
+        setState(() {
+          initialScrollIndex = 1;
+        });
+      }
+    }
   }
 
   @override
   void dispose() {
-    searchC.dispose();
+    _searchC.dispose();
     super.dispose();
   }
 
@@ -234,12 +275,17 @@ class _StockPageState extends State<StockPage> {
     );
   }
 
-  ListView _buildListItem(Size size, List<ItemModel> itemModel) {
+  Widget _buildListItem(Size size, List<ItemModel> itemModel) {
     itemModel.sort(
       (a, b) => a.name!.compareTo(b.name!),
     );
     const double sizeImageItem = 50;
-    return ListView.builder(
+    return ScrollablePositionedList.builder(
+      initialScrollIndex: initialScrollIndex,
+      scrollOffsetController: scrollOffsetController,
+      scrollOffsetListener: scrollOffsetListener,
+      itemPositionsListener: itemPositionsListener,
+      itemScrollController: _itemScrollController,
       padding: EdgeInsets.only(top: kDeffaultPadding, bottom: size.height * .1),
       itemCount: itemModel.length,
       itemBuilder: (context, index) {

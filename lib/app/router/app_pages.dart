@@ -80,7 +80,8 @@ final routerConfig = GoRouter(
         GoRoute(
           path: 'stock',
           name: Routes.stock,
-          builder: (_, __) => const StockPage(),
+          builder: (_, state) =>
+              StockPage(nameItemHighlight: state.extra as String),
           routes: [
             GoRoute(
               path: 'add-item',

@@ -84,7 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 }
               },
             ),
-            SizedBox(
+            const SizedBox(
               height: 16,
             ),
             _notificationsBody(),
@@ -145,12 +145,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
             return Column(
               children: [
-                IRContainerShadow(
+                const IRContainerShadow(
                   child: Text(
                     'Notifications',
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 6,
                 ),
                 Row(
@@ -170,11 +170,14 @@ class _HomeScreenState extends State<HomeScreen> {
                         label: 'Low stock',
                         labelStyle: defaultTextStyle,
                         onTap: () {
-                          context.goNamed(Routes.stock);
+                          context.goNamed(Routes.stock,
+                              extra: lowStockText != 'Stock is available'
+                                  ? lowStockText
+                                  : null);
                         },
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 8,
                     ),
                     Expanded(
@@ -193,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         onTap: () {},
                       ),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 8,
                     ),
                     Expanded(
@@ -251,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          SizedBox(
+          const SizedBox(
             height: 16,
           ),
           Expanded(
@@ -275,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     return length;
                   },
-                  markerSettings: MarkerSettings(
+                  markerSettings: const MarkerSettings(
                     isVisible: true,
                     height: 4,
                     width: 4,
@@ -370,14 +373,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   .copyWith(color: Colors.black, fontWeight: FontWeight.w500),
               // textAlign: TextAlign.center,
             ),
-            SizedBox(
+            const SizedBox(
               height: 8,
             ),
             Text(
               'Today',
               style: _textTheme.titleSmall!.copyWith(color: Colors.black54),
             ),
-            SizedBox(
+            const SizedBox(
               height: 8,
             ),
             Expanded(
@@ -418,7 +421,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            Divider(
+            const Divider(
               height: 1,
             ),
           ],
@@ -511,7 +514,7 @@ class _IRIconWithLabel extends StatelessWidget {
                 color: Colors.green,
                 size: 28,
               ),
-              SizedBox(
+              const SizedBox(
                 height: 12,
               ),
               Text(
